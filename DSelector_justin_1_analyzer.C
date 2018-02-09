@@ -31,7 +31,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //false/true below: use measured/kinfit data
     
     //PID
-    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
+    //dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
     //below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
@@ -50,6 +50,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, Proton, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "sig_postcut"));
+    
     
     //MASSES
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
@@ -172,10 +173,10 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
     //In general: Could have multiple particles with the same PID: Use a set of Int_t's
     //In general: Multiple PIDs, so multiple sets: Contain within a map
     //Multiple combos: Contain maps within a set (easier, faster to search)
-    set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
-    set<map<Particle_t, set<Int_t> > > locUsedSoFar_KsMass;
     
     //INSERT USER ANALYSIS UNIQUENESS TRACKING HERE
+    set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
+    set<map<Particle_t, set<Int_t> > > locUsedSoFar_KsMass;
     
     /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
     
