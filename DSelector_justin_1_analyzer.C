@@ -36,20 +36,26 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
     
-    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "sig_precut"));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_precut"));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiPlus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiPlus, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiPlus, SYS_TOF));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiMinus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiMinus, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiMinus, SYS_TOF));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.8, KPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, KPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.35, KPlus, SYS_TOF));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, Proton, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, Proton, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, Proton, SYS_TOF));
-    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "sig_postcut"));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 3.0, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.75, KPlus, SYS_TOF));
+    
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.5, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 3.0, Proton, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
+    
+    // apply dedx
+    //locReaction->Add_AnalysisAction(new DCustomAction_dEdxCut(locReaction, false)); //false: focus on keeping signal
     
     
     //MASSES
