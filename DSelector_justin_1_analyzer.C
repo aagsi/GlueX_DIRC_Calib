@@ -157,6 +157,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
     //In general: Multiple PIDs, so multiple sets: Contain within a map
     //Multiple combos: Contain maps within a set (easier, faster to search)
     set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
+    set<map<Particle_t, set<Int_t> > > locUsedSoFar_KsMass;
     
     //INSERT USER ANALYSIS UNIQUENESS TRACKING HERE
     
