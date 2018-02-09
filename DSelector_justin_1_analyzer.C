@@ -34,6 +34,22 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
     //below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
+    
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "sig_precut"));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiPlus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiMinus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiMinus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiMinus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.8, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.35, KPlus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, Proton, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "sig_postcut"));
     
     //MASSES
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
@@ -43,7 +59,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
     
     //CUT MISSING MASS
-    //dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.03, 0.02));
+    dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.03, 0.02));
     
     //BEAM ENERGY
     dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, false));
@@ -62,8 +78,8 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
     dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
     dHist_KinFitConLev = new TH1I("KinFitConLev", ";Kinematic Fit Confidence Level", 500, 0.0, 1.0);
-    dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 300, 0.470, 0.525);
-    dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 300, 0.470, 0.525);
+    dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
+    dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
     
     /************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
     
