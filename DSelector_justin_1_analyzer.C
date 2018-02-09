@@ -226,7 +226,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         // DO YOUR STUFF HERE
         TLorentzVector locKsP4_Measured = locPiPlusP4_Measured + locPiMinus2P4_Measured;
-        TLorentzVector locKsP4 = locPiPlusP4 + locPiMinusP4;
+        TLorentzVector locKsP4 = locPiPlusP4 + locPiMinus2P4;
         
         
         
