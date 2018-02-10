@@ -87,7 +87,6 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //EXAMPLE MANUAL HISTOGRAMS:
     dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
     dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
-    dHist_KinFitConLev = new TH1I("KinFitConLev", ";Kinematic Fit Confidence Level", 500, 0.0, 1.0);
     dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
     dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
     
@@ -299,7 +298,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //dComboWrapper->Set_IsComboCut(true);
         
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
-        /*
+        
         // Proton CDC dE/dx histogram and cut
         double locProton_dEdx_CDC = dProtonWrapper->Get_dEdx_CDC()*1e6;
         double locKPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
@@ -308,6 +307,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double locPiMinus2_dEdx_CDC = dPiMinus2Wrapper->Get_dEdx_CDC()*1e6;
         
         // remove the compo which dose not pass the dEdx cuts
+        /*
         if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4.P())) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
@@ -329,7 +329,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
-        
+        */
         // check the uniquness
         if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
         {
@@ -361,17 +361,17 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
         }
         
-        if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
-           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4.P())
-           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
-           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4.P())
-           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4.P()) )
-        {
-            
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
-        */
+//        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4.P())
+//           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4.P())
+//           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
+//           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4.P())
+//           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4.P()) )
+//        {
+//            
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+        
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
         
         /*

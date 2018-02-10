@@ -49,7 +49,6 @@ private:
     // EXAMPLES:
     TH1I* dHist_MissingMassSquared;
     TH1I* dHist_BeamEnergy;
-    TH1I* dHist_KinFitConLev;
     TH1I* dHist_KsMass_Measured;
     TH1I* dHist_KsMass_KinFit;
     // from workshop 2016
