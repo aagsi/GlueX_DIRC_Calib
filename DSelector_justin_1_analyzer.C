@@ -93,6 +93,11 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     //added from workshop 2016
     dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_KPlus_dEdx_P = new TH2I("dHist_KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiPlus_dEdx_P = new TH2I("dHist_PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus1_dEdx_P = new TH2I("dHist_PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus2_dEdx_P = new TH2I("dHist_PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    
     dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
     dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
     
