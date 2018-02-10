@@ -307,8 +307,9 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
          
          // Pi+/- CDC dE/dx histogram cut (histograms in HistComboPID action)
          double locPiPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
-         double locPiMinus_dEdx_CDC = dPiMinusWrapper->Get_dEdx_CDC()*1e6;
-         if(locPiPlus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiPlusP4.P()) || locPiMinus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiMinusP4.P())) {
+         double locPiMinus_dEdx_CDC = dPiMinus1Wrapper->Get_dEdx_CDC()*1e6; // should add 1 , 2
+        
+         if(locPiPlus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiPlusP4.P()) || locPiMinus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiMinus1P4.P())) {
          dComboWrapper->Set_IsComboCut(true);
          continue;
          }
