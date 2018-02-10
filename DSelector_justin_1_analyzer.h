@@ -56,8 +56,8 @@ private:
     TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
     TH2I* dHist_Proton_dEdx_P;
     // DEFINE CUT PARAMETERS HERE
-    TF1 *fMinProton_dEdx;
-    TF1 *fMaxPion_dEdx;
+    TF1 *fFunc_dEdxCut_SelectHeavy;
+    TF1 *fFunc_dEdxCut_SelectLight;
     double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
     
     // TOOL FOR FLAT TREE OUTPUT
