@@ -308,27 +308,27 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         // remove the compo which dose not pass the dEdx cuts
         
-        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
-        if(locKPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
-        
-        if(locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
-        if(locPiMinus1_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
-        if(locPiMinus2_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
+//        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+//        if(locKPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+//        
+//        if(locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+//        if(locPiMinus1_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+//        if(locPiMinus2_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P())) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
         
         // check the uniquness
         if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
@@ -360,17 +360,17 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
             locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
         }
-        
-        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())
-           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())
-           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())
-           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())
-           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P()) )
-        {
-            
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
+//
+//        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())
+//           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())
+//           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())
+//           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())
+//           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P()) )
+//        {
+//
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
         
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
         
