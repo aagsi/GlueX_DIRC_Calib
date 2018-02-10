@@ -392,10 +392,15 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // kinematic fit CL cut
         dHist_KinFitChiSq->Fill(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit());
         dHist_KinFitCL->Fill(dComboWrapper->Get_ConfidenceLevel_KinFit());
-        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
+//        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
+        
+                if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 10) {
+                    dComboWrapper->Set_IsComboCut(true);
+                    continue;
+                }
         
         //        // beam energy cut for SDME
         //        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
