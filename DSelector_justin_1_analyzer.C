@@ -316,6 +316,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
+        /*
         if(locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
@@ -328,7 +329,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
-        
+        */
         
         // check the uniquness
         if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
@@ -363,9 +364,9 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
            || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4.P())
-           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
+           /*|| locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4.P())
            || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4.P())
-           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4.P()) )
+           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4.P())*/ )
         {
             
             dComboWrapper->Set_IsComboCut(true);
