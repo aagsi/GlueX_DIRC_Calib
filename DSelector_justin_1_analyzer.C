@@ -34,8 +34,11 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
     //below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
-    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
     
+    
+    /*
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_precut"));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiPlus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiPlus, SYS_FCAL));
@@ -53,9 +56,9 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 3.0, Proton, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
-    
+    */
     // apply dedx
-    //locReaction->Add_AnalysisAction(new DCustomAction_dEdxCut(locReaction, false)); //false: focus on keeping signal
+
     
     
     //MASSES
@@ -87,6 +90,26 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_KinFitConLev = new TH1I("KinFitConLev", ";Kinematic Fit Confidence Level", 500, 0.0, 1.0);
     dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
     dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
+    
+    //added from workshop 2016
+    dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
+    dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
+    
+    
+    // EXAMPLE CUT PARAMETERS:
+    fMinProton_dEdx = new TF1("fMinProton_dEdx", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.);
+    fMinProton_dEdx->SetParameters(4.0, 2.5, 1.25);
+    fMaxPion_dEdx = new TF1("fMaxPion_dEdx", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.);
+    fMaxPion_dEdx->SetParameters(4.0, 2.0, 2.5);
+    dMinKinFitCL = 0.0; //5.73303e-7;
+    dMaxKinFitChiSq = 5.0;
+    dMinBeamEnergy = 8.4;
+    dMaxBeamEnergy = 9.0;
+    dMinKsMass = 0.757;
+    dMaxKsMass = 0.807;
+    
+    
     
     /************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
     
@@ -174,6 +197,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
     
     //EXAMPLE 1: Particle-specific info:
     set<Int_t> locUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles. set: easy to use, fast to search
+    set<Int_t> locUsedSoFar_Proton;
     
     //EXAMPLE 2: Combo-specific info:
     //In general: Could have multiple particles with the same PID: Use a set of Int_t's
@@ -267,6 +291,28 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
+        /**************************************** EXAMPLE: PID CUT ACTION ************************************************/
+        
+         // Proton CDC dE/dx histogram and cut
+         double locProton_dEdx_CDC = dProtonWrapper->Get_dEdx_CDC()*1e6;
+         if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
+         {
+         dHist_Proton_dEdx_P->Fill(locProtonP4.P(), locProton_dEdx_CDC);
+         locUsedSoFar_Proton.insert(locProtonTrackID);
+         }
+         if(locProton_dEdx_CDC < fMinProton_dEdx->Eval(locProtonP4.P())) {
+         dComboWrapper->Set_IsComboCut(true);
+         continue;
+         }
+         
+         // Pi+/- CDC dE/dx histogram cut (histograms in HistComboPID action)
+         double locPiPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
+         double locPiMinus_dEdx_CDC = dPiMinusWrapper->Get_dEdx_CDC()*1e6;
+         if(locPiPlus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiPlusP4.P()) || locPiMinus_dEdx_CDC > fMaxPion_dEdx->Eval(locPiMinusP4.P())) {
+         dComboWrapper->Set_IsComboCut(true);
+         continue;
+         }
+        
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
         
         /*
@@ -290,7 +336,8 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         /************************************** HIST, CUT KINFIT CONFIDENCE LEVEL ****************************************/
         
         double locKinFitConLev = dComboWrapper->Get_ConfidenceLevel_KinFit();
-        if(locKinFitConLev < 5.73303E-7)
+        //if(locKinFitConLev < 5.73303E-7)// for omega check for ks
+        if(locKinFitConLev < 0)
             continue; //could also mark combo as cut, then save cut results to a new TTree
         dHist_KinFitConLev->Fill(locKinFitConLev); //no need to track uniquness: unique for each combo (uses all particles)
         
@@ -323,6 +370,21 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //	dComboWrapper->Set_IsComboCut(true);
         //	continue;
         //}
+        
+        
+        // kinematic fit CL cut
+        dHist_KinFitChiSq->Fill(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit());
+        dHist_KinFitCL->Fill(dComboWrapper->Get_ConfidenceLevel_KinFit());
+        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        
+//        // beam energy cut for SDME
+//        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
+//            dComboWrapper->Set_IsComboCut(true);
+//            continue;
+//        }
         
         /**************************************** HISTOGRAM Ks INVARIANT MASS *****************************************/
         

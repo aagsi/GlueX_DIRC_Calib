@@ -52,6 +52,13 @@ private:
     TH1I* dHist_KinFitConLev;
     TH1I* dHist_KsMass_Measured;
     TH1I* dHist_KsMass_KinFit;
+    // from workshop 2016
+    TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
+    TH2I* dHist_Proton_dEdx_P;
+    // DEFINE CUT PARAMETERS HERE
+    TF1 *fMinProton_dEdx;
+    TF1 *fMaxPion_dEdx;
+    double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
     
     // TOOL FOR FLAT TREE OUTPUT
     DComboTreeHelper *dComboTreeHelper;
