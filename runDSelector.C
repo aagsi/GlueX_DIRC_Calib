@@ -20,7 +20,7 @@ void runDSelector(){
     
     
     // open ROOT file and TTree
-    TString sample = path;
+    string sample = path;
     sample += Form("justin_%d.root", 1);
 
 //string sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_%d.root", 1);
