@@ -37,7 +37,7 @@ void runDSelector(bool proof = 1){
     
     
     if(proof) { // add TTree to chain and use PROOFLiteManager
-        TChain *chain = new TChain(TreeName);
+        TChain *chain = new TChain("pimkpks__B3_M16_Tree");
         chain->Add(SampleName);
         string outputHistFileName = "hist_ks.root";
         string outputTreeFileName = "tree_ks.root";
