@@ -16,7 +16,7 @@ void runDSelector(){
     
     
     
-    string path ="/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/"
+    string path ="/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/";
     
     
     // open ROOT file and TTree
