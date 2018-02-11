@@ -25,7 +25,7 @@ if (!exists_test(path_sample)) cout<<"sample not found "<<endl;;
 	// Load DSelector library
 
 	int proof_Nthreads = 4;
-	DPROOFLiteManager::Process_Tree(TString::Format("s%",sample), "pimkpks__B3_M16_Tree", "/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/DSelector_justin_1_analyzer.C+", 4);
+	DPROOFLiteManager::Process_Tree(TString::Format("%s",sample), "pimkpks__B3_M16_Tree", "/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/DSelector_justin_1_analyzer.C+", 4);
 
 }
 
