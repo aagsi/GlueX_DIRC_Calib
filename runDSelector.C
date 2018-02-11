@@ -13,7 +13,7 @@
 // check file existance
 bool exists_test (const std::string& name);
 
-void runDselector(){
+void runDSelector(){
 
 
 TString sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_%d.root", 1);
