@@ -37,8 +37,8 @@ void runDSelector(bool proof = 1){
     
     
     if(proof) { // add TTree to chain and use PROOFLiteManager
-        TChain *chain = new TChain(SampleName);
-        chain->Add(TreeName);
+        TChain *chain = new TChain(TreeName);
+        chain->Add(SampleName);
         string outputHistFileName = "hist_ks.root";
         string outputTreeFileName = "tree_ks.root";
         DPROOFLiteManager::Process_Chain(chain, DSelectorName, outputHistFileName, outputTreeFileName, SampleName, proof_Nthreads);
