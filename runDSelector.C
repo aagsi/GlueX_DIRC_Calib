@@ -12,28 +12,25 @@
 // check file existance
 bool exists_test (const std::string& name);
 
-void runDSelector(){
-    
-    
-    
+void runDSelector(bool proof = 1){
     string path ="/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/";
+    string SampleName = path;
+    string DSelectorName = path;
+    string TreeName ="pimkpks__B3_M16_Tree";
     
+    SampleName += Form("justin_%d.root", 1);
+    DSelectorName += Form("DSelector_justin_%d_analyzer.C+", 1);
     
-    // open ROOT file and TTree
-    string sample = path;
-    sample += Form("justin_%d.root", 1);
-
-//string sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_%d.root", 1);
-//cout<<"sample data path= " <<sample<<endl;
-//string path_sample = sample;
-//cout<<"exist sample)" <<exists_test(sample)<<endl;
-//if (!exists_test(sample)) cout<<"sample not found "<<endl;
-
-	// Load DSelector library
-
-	int proof_Nthreads = 4;
-	DPROOFLiteManager::Process_Tree( sample, "pimkpks__B3_M16_Tree", "/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/DSelector_justin_1_analyzer.C+", 4);
-
+    cout<<"########### Sample used= " <<SampleName<<endl;
+    cout<<"########### DSelector used= " <<DSelectorName<<endl;
+    cout<<"exist Sample)" <<exists_test(SampleName)<<endl;
+    cout<<"exist DSelector)" <<exists_test(DSelectorName)<<endl;
+    if (!exists_test(SampleName)) cout<<"Sample not found "<<endl;
+    if (!exists_test(DSelectorName)) cout<<"DSelector not found "<<endl;
+    
+    int proof_Nthreads = 4;
+    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
+    
 }
 
 //////////////////////////
