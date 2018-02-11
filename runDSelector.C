@@ -1,4 +1,5 @@
 // macro to process analysis TTree with DSelector
+// root Load_DSelector.C runDSelector.C
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
@@ -28,8 +29,24 @@ void runDSelector(bool proof = 1){
     if (!exists_test(SampleName)) cout<<"Sample not found "<<endl;
     if (!exists_test(DSelectorName)) cout<<"DSelector not found "<<endl;
     
+    
+    
+    
     int proof_Nthreads = 4;
-    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
+    //DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
+    
+    
+    if(proof) { // add TTree to chain and use PROOFLiteManager
+        TChain *chain = new TChain(TreeName);
+        chain->Add(SampleName);
+        string outputHistFileName = "hist_ks.root";
+        string outputTreeFileName = "tree_ks.root";
+        DPROOFLiteManager::Process_Chain(chain, DSelectorName, outputHistFileName, outputTreeFileName, SampleName, proof_Nthreads);
+    }
+    
+    
+    
+    
     
 }
 
