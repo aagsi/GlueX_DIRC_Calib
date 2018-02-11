@@ -1,5 +1,5 @@
 // macro to process analysis TTree with DSelector
-#include <iostream> 
+#include <iostream>
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
@@ -13,12 +13,21 @@
 bool exists_test (const std::string& name);
 
 void runDSelector(){
+    
+    
+    
+    string path ="/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/"
+    
+    
+    // open ROOT file and TTree
+    TString sample = path;
+    sample += Form("justin_%d.root", 1);
 
-string sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_%d.root", 1);
-cout<<"sample data path= " <<sample<<endl;
-string path_sample = sample;
-cout<<"exist sample)" <<exists_test(sample)<<endl;
-if (!exists_test(sample)) cout<<"sample not found "<<endl;
+//string sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_%d.root", 1);
+//cout<<"sample data path= " <<sample<<endl;
+//string path_sample = sample;
+//cout<<"exist sample)" <<exists_test(sample)<<endl;
+//if (!exists_test(sample)) cout<<"sample not found "<<endl;
 
 	// Load DSelector library
 
