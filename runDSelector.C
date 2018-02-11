@@ -20,7 +20,7 @@ TString sample = Form("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib
 cout<<"sample data path= " <<sample<<endl;
 string path_sample = (string)sample;
 cout<<"exist sample)" <<exists_test(path_sample)<<endl;
-if (!exists_test(path_sample)) continue;
+if (!exists_test(path_sample)) cout<<"sample not found "<<endl;;
 
 	// Load DSelector library
 
