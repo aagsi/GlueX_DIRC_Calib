@@ -34,15 +34,18 @@ void runDSelector(bool proof = 1){
     
     int proof_Nthreads = 4;
     //DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
+    string outputHistFileName = "hist_ks.root";
+    string outputTreeFileName = "tree_ks.root";
+    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName));
     
     
-    if(proof) { // add TTree to chain and use PROOFLiteManager
-        TChain *chain = new TChain("pimkpks__B3_M16_Tree");
-        chain->Add("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_1.root");
-        string outputHistFileName = "hist_ks.root";
-        string outputTreeFileName = "tree_ks.root";
-        DPROOFLiteManager::Process_Chain(chain, DSelectorName, outputHistFileName, outputTreeFileName, SampleName, proof_Nthreads);
-    }
+    //    if(false) { // add TTree to chain and use PROOFLiteManager
+    //        TChain *chain = new TChain("pimkpks__B3_M16_Tree");
+    //        chain->Add("/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/justin_1.root");
+    //        string outputHistFileName = "hist_ks.root";
+    //        string outputTreeFileName = "tree_ks.root";
+    //        DPROOFLiteManager::Process_Chain(chain, DSelectorName, outputHistFileName, outputTreeFileName, SampleName, proof_Nthreads);
+    //    }
     
     
     
