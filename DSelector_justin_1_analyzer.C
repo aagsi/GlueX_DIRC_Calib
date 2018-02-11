@@ -239,6 +239,8 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         if(dComboWrapper->Get_IsComboCut()) // Is false when tree originally created
             continue; // Combo has been cut previously
         
+        cout<<"loc_i"<<loc_i<<endl;
+        
         /********************************************** GET PARTICLE INDICES *********************************************/
         
         //Used for tracking uniqueness when filling histograms, and for determining unused particles
