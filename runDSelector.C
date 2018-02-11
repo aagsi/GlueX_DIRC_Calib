@@ -14,7 +14,7 @@
 bool exists_test (const std::string& name);
 
 void runDSelector(bool proof = 1){
-    string path ="/data.local/dirc/halld/analysis/justin_1/GlueX_DIRC_Calib/";
+    string path ="/Users/ahmed/workspace/GlueX/analysis/GlueX_DIRC_Calib/";
     string SampleName = path;
     string DSelectorName = path;
     string TreeName ="pimkpks__B3_M16_Tree";

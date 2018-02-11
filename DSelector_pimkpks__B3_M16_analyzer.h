@@ -1,22 +1,21 @@
-#ifndef DSelector_justin_1_analyzer_h
-#define DSelector_justin_1_analyzer_h
+#ifndef DSelector_pimkpks__B3_M16_analyzer_h
+#define DSelector_pimkpks__B3_M16_analyzer_h
 
 #include <iostream>
 
 #include "DSelector/DSelector.h"
 #include "DSelector/DHistogramActions.h"
 #include "DSelector/DCutActions.h"
-#include "DSelector/DComboTreeHelper.h"
 
 #include "TH1I.h"
 #include "TH2I.h"
 
-class DSelector_justin_1_analyzer : public DSelector
+class DSelector_pimkpks__B3_M16_analyzer : public DSelector
 {
 public:
     
-    DSelector_justin_1_analyzer(TTree* locTree = NULL) : DSelector(locTree){}
-    virtual ~DSelector_justin_1_analyzer(){}
+    DSelector_pimkpks__B3_M16_analyzer(TTree* locTree = NULL) : DSelector(locTree){}
+    virtual ~DSelector_pimkpks__B3_M16_analyzer(){}
     
     void Init(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -59,13 +58,10 @@ private:
     TF1 *fFunc_dEdxCut_SelectLight;
     double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
     
-    // TOOL FOR FLAT TREE OUTPUT
-    DComboTreeHelper *dComboTreeHelper;
-    
-    ClassDef(DSelector_justin_1_analyzer, 0);
+    ClassDef(DSelector_pimkpks__B3_M16_analyzer, 0);
 };
 
-void DSelector_justin_1_analyzer::Get_ComboWrappers(void)
+void DSelector_pimkpks__B3_M16_analyzer::Get_ComboWrappers(void)
 {
     //Step 0
     dStep0Wrapper = dComboWrapper->Get_ParticleComboStep(0);
@@ -80,4 +76,4 @@ void DSelector_justin_1_analyzer::Get_ComboWrappers(void)
     dPiPlusWrapper = static_cast<DChargedTrackHypothesis*>(dStep1Wrapper->Get_FinalParticle(1));
 }
 
-#endif // DSelector_justin_1_analyzer_h
+#endif // DSelector_pimkpks__B3_M16_analyzer_h
