@@ -1,4 +1,6 @@
 #include "DSelector_justin_1_analyzer.h"
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stod
 
 void DSelector_justin_1_analyzer::Init(TTree *locTree)
 {
