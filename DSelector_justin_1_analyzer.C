@@ -1,6 +1,7 @@
 #include "DSelector_justin_1_analyzer.h"
-#include <iostream>   // std::cout
-#include <string>     // std::string, std::stod
+#include <iostream>
+#include <string>
+#include "TEnv.h"
 
 void DSelector_justin_1_analyzer::Init(TTree *locTree)
 {
@@ -17,7 +18,11 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeName = ""; //if blank, default name will be chosen
 
     
-    test_val = dOption.Atoi();
+    //test_val = dOption.Atoi();
+    
+    TEnv *env = new TEnv(dOption);
+    if (!dOption) return;
+    test_val = env->GetValue("test_val", test_val);
 
 //    std::string orbits ("-6");
 //    string::size_type sz;     // alias of size_t

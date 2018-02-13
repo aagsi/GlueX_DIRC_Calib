@@ -18,25 +18,27 @@ void runDSelector(bool proof = 1){
     string SampleName = path;
     string DSelectorName = path;
     string TreeName ="pimkpks__B3_M16_Tree";
+    string ConfigName = path;
     
     SampleName += Form("justin_%d.root", 1);
     DSelectorName += Form("DSelector_justin_%d_analyzer.C+", 1);
+    ConfigName += Form("config_%d.root", 1);
     
     cout<<"########### Sample used= " <<SampleName<<endl;
     cout<<"########### DSelector used= " <<DSelectorName<<endl;
+    cout<<"########### Config file used= " <<ConfigName<<endl;
     cout<<"exist Sample)" <<exists_test(SampleName)<<endl;
     cout<<"exist DSelector)" <<exists_test(DSelectorName)<<endl;
+    cout<<"exist ConfigName)" <<exists_test(ConfigName)<<endl;
     if (!exists_test(SampleName)) cout<<"Sample not found "<<endl;
     if (!exists_test(DSelectorName)) cout<<"DSelector not found "<<endl;
-    
-    
+    if (!exists_test(ConfigName)) cout<<"Config file not found "<<endl;
     
     
     int proof_Nthreads = 4;
-    //DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
     string outputHistFileName = "hist_ks.root";
     string outputTreeFileName = "tree_ks.root";
-    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName, "5");
+    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName, ConfigName);
     
     
     //    if(false) { // add TTree to chain and use PROOFLiteManager
@@ -47,10 +49,7 @@ void runDSelector(bool proof = 1){
     //        DPROOFLiteManager::Process_Chain(chain, DSelectorName, outputHistFileName, outputTreeFileName, SampleName, proof_Nthreads);
     //    }
     
-    
-    
-    
-    
+
 }
 
 //////////////////////////
