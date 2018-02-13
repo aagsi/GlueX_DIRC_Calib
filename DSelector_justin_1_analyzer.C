@@ -17,7 +17,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeName = ""; //if blank, default name will be chosen
 
     
-    test_val = dOption.length();
+    test_val = dOption.Length();
 
 //    std::string orbits ("-6");
 //    string::size_type sz;     // alias of size_t
