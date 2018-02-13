@@ -51,7 +51,7 @@ private:
     TH1I* dHist_BeamEnergy;
     TH1I* dHist_KsMass_Measured;
     TH1I* dHist_KsMass_KinFit;
-    TH1I* dHist_RF, *dHist_RF_cut;
+    TH1I* dHist_RF, *dHist_RF_cut, *dHist_test;
     // from workshop 2016
     TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
     TH2I* dHist_Proton_dEdx_P, *dHist_KPlus_dEdx_P, *dHist_PiPlus_dEdx_P, *dHist_PiMinus1_dEdx_P, *dHist_PiMinus2_dEdx_P;

@@ -13,6 +13,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dOutputTreeFileName = ""; //"" for none
     dFlatTreeFileName = "justin_1_analyzer_flat.root"; //output flat tree (one combo per tree entry), "" for none
     dFlatTreeName = ""; //if blank, default name will be chosen
+    test_val=-5;
     
     //Because this function gets called for each TTree in the TChain, we must be careful:
     //We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
@@ -87,8 +88,8 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //EXAMPLE MANUAL HISTOGRAMS:
     dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
     dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
-    dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
-    dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 100, 0.470, 0.525);
+    dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 50, 0.470, 0.525);
+    dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 50, 0.470, 0.525);
     
     //added from workshop 2016
     dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
@@ -102,6 +103,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     dHist_RF=new TH1I("dHist_RF", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
     dHist_RF_cut=new TH1I("dHist_RF_cut", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_test=new TH1I("dHist_test", ";dHist_test", 100, -10, 10);
     
     
     // EXAMPLE CUT PARAMETERS:
@@ -292,7 +294,8 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // Combine 4-vectors
         TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;
         locMissingP4_Measured -= locPiMinus1P4_Measured + locKPlusP4_Measured + locProtonP4_Measured + locPiMinus2P4_Measured + locPiPlusP4_Measured;
-        
+        /******************************************** Test histo *******************************************/
+        dHist_test->Fill(test_val);
         /******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/
         
         // Loop through the analysis actions, executing them in order for the active particle combo
