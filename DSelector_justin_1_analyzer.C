@@ -302,11 +302,11 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
-        double beamPhoton-RF =locBeamX4_Measured.T() - locProductionX4.T();
-        dHist_RF->Fill(beamPhoton-RF);
+        double beamPhoton_RF =locBeamX4_Measured.T() - locProductionX4.T();
+        dHist_RF->Fill(beamPhoton_RF);
         
-        if (fabs(beamPhoton-RF) > 2.0) continue;
-        dHist_RF_cut->Fill(beamPhoton-RF);
+        if (fabs(beamPhoton_RF) > 2.0) continue;
+        dHist_RF_cut->Fill(beamPhoton_RF);
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
         // Proton CDC dE/dx histogram and cut
