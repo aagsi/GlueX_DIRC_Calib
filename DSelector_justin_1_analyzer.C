@@ -17,8 +17,9 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeName = ""; //if blank, default name will be chosen
 
     //dOption="";
+    std::string orbits ("-6");
     string::size_type sz;     // alias of size_t
-    test_val = stod (dOption,&sz);
+    test_val = std::stod (orbits,&sz);
     //test_val = -3;
     
     //Because this function gets called for each TTree in the TChain, we must be careful:
