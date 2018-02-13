@@ -270,6 +270,8 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         // Get Measured P4's:
         //Step 0
+        
+        TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
         TLorentzVector locBeamP4_Measured = dComboBeamWrapper->Get_P4_Measured();
         TLorentzVector locPiMinus1P4_Measured = dPiMinus1Wrapper->Get_P4_Measured();
         TLorentzVector locKPlusP4_Measured = dKPlusWrapper->Get_P4_Measured();
@@ -300,7 +302,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //dComboWrapper->Set_IsComboCut(true);
         
        
-        dHist_RF->Fill(locBeamP4_Measured.T() - locProductionX4.T());
+        dHist_RF->Fill(locBeamX4_Measured.T() - locProductionX4.T());
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
         // Proton CDC dE/dx histogram and cut
