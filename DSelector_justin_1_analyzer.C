@@ -100,7 +100,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
     dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
     
-    dHist_RF=new TH1I("dHist_RF", ";RF time", 1000, -1000, 1000);
+    dHist_RF=new TH1I("dHist_RF", ";RF time", 1000, -10, 10);
     
     
     // EXAMPLE CUT PARAMETERS:
