@@ -36,7 +36,7 @@ void runDSelector(bool proof = 1){
     //DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads);
     string outputHistFileName = "hist_ks.root";
     string outputTreeFileName = "tree_ks.root";
-    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName);
+    DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName, "-5.0");
     
     
     //    if(false) { // add TTree to chain and use PROOFLiteManager

@@ -15,8 +15,9 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeName = ""; //if blank, default name will be chosen
 
     dOption="";
-    std::string::size_type sz;     // alias of size_t
-    double test_val = std::stod (dOption,&sz);
+    //std::string::size_type sz;     // alias of size_t
+    //double test_val = std::stod (dOption,&sz);
+    double test_val = -3;
     
     //Because this function gets called for each TTree in the TChain, we must be careful:
     //We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
