@@ -10,7 +10,8 @@
 
 #include "TH1I.h"
 #include "TH2I.h"
-
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stod
 class DSelector_justin_1_analyzer : public DSelector
 {
 public:
