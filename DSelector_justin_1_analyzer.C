@@ -300,7 +300,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //dComboWrapper->Set_IsComboCut(true);
         
        
-        dHist_RF->Fill(locProductionX4.T());
+        dHist_RF->Fill(locBeamP4_Measured.T() - locProductionX4.T());
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
         // Proton CDC dE/dx histogram and cut
