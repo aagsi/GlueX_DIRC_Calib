@@ -14,7 +14,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeFileName = "justin_1_analyzer_flat.root"; //output flat tree (one combo per tree entry), "" for none
     dFlatTreeName = ""; //if blank, default name will be chosen
 
-    dOption="";
+    //dOption="";
     //std::string::size_type sz;     // alias of size_t
     //double test_val = std::stod (dOption,&sz);
     double test_val = -3;
