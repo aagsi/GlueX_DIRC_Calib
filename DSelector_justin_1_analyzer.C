@@ -100,6 +100,8 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
     dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
     
+    dHist_RF=new TH1I("dHist_RF", ";RF time", 100, -10, 10);
+    
     
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
@@ -171,7 +173,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
     //CALL THIS FIRST
     DSelector::Process(locEntry); //Gets the data from the tree for the entry
     //cout << "RUN " << Get_RunNumber() << ", EVENT " << Get_EventNumber() << endl;
-    //TLorentzVector locProductionX4 = Get_X4_Production();
+    TLorentzVector locProductionX4 = Get_X4_Production();
     
     /******************************************** GET POLARIZATION ORIENTATION ******************************************/
     
@@ -297,6 +299,8 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
+       
+        dHist_RF->Fill(locProductionX4.T());
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
         // Proton CDC dE/dx histogram and cut
