@@ -60,7 +60,7 @@ private:
     TF1 *fFunc_dEdxCut_SelectHeavy;
     TF1 *fFunc_dEdxCut_SelectLight;
     double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
-    double test_val;
+    int test_val;
     
     // TOOL FOR FLAT TREE OUTPUT
     DComboTreeHelper *dComboTreeHelper;
