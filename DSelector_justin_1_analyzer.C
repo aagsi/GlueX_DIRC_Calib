@@ -92,15 +92,16 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     //added from workshop 2016
     dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_KPlus_dEdx_P = new TH2I("dHist_KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiPlus_dEdx_P = new TH2I("dHist_PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiMinus1_dEdx_P = new TH2I("dHist_PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiMinus2_dEdx_P = new TH2I("dHist_PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_KPlus_dEdx_P = new TH2I("KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiPlus_dEdx_P = new TH2I("PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus1_dEdx_P = new TH2I("PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus2_dEdx_P = new TH2I("PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
     
     dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
     dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
     
-    dHist_RF=new TH1I("dHist_RF", ";RF time", 1000, -10, 10);
+    dHist_RF=new TH1I("dHist_RF", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_RF_cut=new TH1I("dHist_RF_cut", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
     
     
     // EXAMPLE CUT PARAMETERS:
@@ -301,8 +302,11 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
-       
-        dHist_RF->Fill(locBeamX4_Measured.T() - locProductionX4.T());
+        double beamPhoton-RF =locBeamX4_Measured.T() - locProductionX4.T();
+        dHist_RF->Fill(beamPhoton-RF);
+        
+        if (fabs(beamPhoton-RF) > 2.0) continue;
+        dHist_RF_cut->Fill(beamPhoton-RF);
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
         // Proton CDC dE/dx histogram and cut
