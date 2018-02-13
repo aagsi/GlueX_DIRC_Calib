@@ -422,7 +422,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         /************************************ EXAMPLE: HISTOGRAM MISSING MASS SQUARED ************************************/
         
         //Missing Mass Squared
-        double locMissingMassSquared = locMissingP4.M2();
+        double locMissingMassSquared = locMissingP4_Measured.M2();
         
         //Uniqueness tracking: Build the map of particles used for the missing mass
         //For beam: Don't want to group with final-state photons. Instead use "Unknown" PID (not ideal, but it's easy).
