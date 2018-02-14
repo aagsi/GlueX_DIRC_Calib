@@ -385,10 +385,10 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         
         if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
-           || locKPlus_dEdx_CDC < 1.0)
-            || locPiPlus_dEdx_CDC < 1.0)
-            || locPiMinus1_dEdx_CDC < 1.0)
-            || locPiMinus2_dEdx_CDC <1.0) )
+           || locKPlus_dEdx_CDC < 1.0
+            || locPiPlus_dEdx_CDC < 1.0
+            || locPiMinus1_dEdx_CDC < 1.0
+            || locPiMinus2_dEdx_CDC <1.0)
         {
             
             dComboWrapper->Set_IsComboCut(true);
