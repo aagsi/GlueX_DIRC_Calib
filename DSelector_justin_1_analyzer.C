@@ -15,18 +15,18 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dOutputTreeFileName = ""; //"" for none
     dFlatTreeFileName = "justin_1_analyzer_flat.root"; //output flat tree (one combo per tree entry), "" for none
     dFlatTreeName = ""; //if blank, default name will be chosen
-
+    
     
     //test_val = dOption.Atoi();
     
     env = new TEnv(dOption);
     if (!dOption) return;
     test_val = env->GetValue("test_val", test_val);
-
-//    std::string orbits ("-6");
-//    string::size_type sz;     // alias of size_t
-//    test_val = std::stod (orbits,&sz);
-
+    
+    //    std::string orbits ("-6");
+    //    string::size_type sz;     // alias of size_t
+    //    test_val = std::stod (orbits,&sz);
+    
     
     //Because this function gets called for each TTree in the TChain, we must be careful:
     //We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
@@ -314,7 +314,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // Loop through the analysis actions, executing them in order for the active particle combo
         if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
             continue;
-        
+        cout<<"#########################test_val"<<test_val<<endl;
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
@@ -331,9 +331,9 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double locPiPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
         double locPiMinus1_dEdx_CDC = dPiMinus1Wrapper->Get_dEdx_CDC()*1e6;
         double locPiMinus2_dEdx_CDC = dPiMinus2Wrapper->Get_dEdx_CDC()*1e6;
-
+        
         // remove the compo which dose not pass the dEdx cuts
-
+        
         if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4.P())) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
@@ -343,54 +343,54 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dHist_Proton_dEdx_P->Fill(locProtonP4.P(), locProton_dEdx_CDC);
             locUsedSoFar_Proton.insert(locProtonTrackID);
         }
-//        if(locKPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())) {
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
-//        if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
-//        {
-//            dHist_KPlus_dEdx_P->Fill(locKPlusP4_Measured.P(), locKPlus_dEdx_CDC);
-//            locUsedSoFar_KPlus.insert(locKPlusTrackID);
-//        }
-//
-//        if(locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())) {
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
-//        if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
-//        {
-//            dHist_PiPlus_dEdx_P->Fill(locPiPlusP4_Measured.P(), locPiPlus_dEdx_CDC);
-//            locUsedSoFar_PiPlus.insert(locPiPlusTrackID);
-//        }
-//        if(locPiMinus1_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())) {
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
-//        if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
-//        {
-//            dHist_PiMinus1_dEdx_P->Fill(locPiMinus1P4_Measured.P(), locPiMinus1_dEdx_CDC);
-//            locUsedSoFar_PiMinus1.insert(locPiMinus1TrackID);
-//        }
-//        if(locPiMinus2_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P())) {
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
-//        if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
-//        {
-//            dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
-//            locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
-//        }
-//
-//        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())
-//           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())
-//           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())
-//           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())
-//           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P()) )
-//        {
-//
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
+        //        if(locKPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
+        //        if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
+        //        {
+        //            dHist_KPlus_dEdx_P->Fill(locKPlusP4_Measured.P(), locKPlus_dEdx_CDC);
+        //            locUsedSoFar_KPlus.insert(locKPlusTrackID);
+        //        }
+        //
+        //        if(locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
+        //        if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
+        //        {
+        //            dHist_PiPlus_dEdx_P->Fill(locPiPlusP4_Measured.P(), locPiPlus_dEdx_CDC);
+        //            locUsedSoFar_PiPlus.insert(locPiPlusTrackID);
+        //        }
+        //        if(locPiMinus1_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
+        //        if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
+        //        {
+        //            dHist_PiMinus1_dEdx_P->Fill(locPiMinus1P4_Measured.P(), locPiMinus1_dEdx_CDC);
+        //            locUsedSoFar_PiMinus1.insert(locPiMinus1TrackID);
+        //        }
+        //        if(locPiMinus2_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
+        //        if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
+        //        {
+        //            dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
+        //            locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
+        //        }
+        //
+        //        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locProtonP4_Measured.P())
+        //           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locKPlusP4_Measured.P())
+        //           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiPlusP4_Measured.P())
+        //           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus1P4_Measured.P())
+        //           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locPiMinus2P4_Measured.P()) )
+        //        {
+        //
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
         
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
         
@@ -418,15 +418,15 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // kinematic fit CL cut
         dHist_KinFitChiSq->Fill(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit());
         dHist_KinFitCL->Fill(dComboWrapper->Get_ConfidenceLevel_KinFit());
-//        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
-//            dComboWrapper->Set_IsComboCut(true);
-//            continue;
-//        }
+        //        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
         
-                if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 4) {
-                    dComboWrapper->Set_IsComboCut(true);
-                    continue;
-                }
+        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 4) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
         
         //        // beam energy cut for SDME
         //        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
