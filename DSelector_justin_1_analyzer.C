@@ -346,7 +346,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
         if(locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())) {
             dComboWrapper->Set_IsComboCut(true);
-            continue;
+            //continue;
         }
         if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
         {
@@ -356,7 +356,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())) {
             dComboWrapper->Set_IsComboCut(true);
-            continue;
+            //continue;
         }
         if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
         {
@@ -365,7 +365,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
         if(locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())) {
             dComboWrapper->Set_IsComboCut(true);
-            continue;
+            //continue;
         }
         if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
         {
@@ -374,7 +374,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
         if(locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P())) {
             dComboWrapper->Set_IsComboCut(true);
-            continue;
+            //continue;
         }
         if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
         {
@@ -382,15 +382,15 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
         }
         
-        if(locProton_dEdx_CDC > fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
-           || locKPlus_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())
-           || locPiPlus_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())
-           || locPiMinus1_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())
-           || locPiMinus2_dEdx_CDC < fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P()) )
+        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
+           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())
+           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())
+           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())
+           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P()) )
         {
             
             dComboWrapper->Set_IsComboCut(true);
-            continue;
+            //continue;
         }
         
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
