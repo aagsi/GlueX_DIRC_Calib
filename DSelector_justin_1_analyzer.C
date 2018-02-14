@@ -55,21 +55,22 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_precut"));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiPlus, SYS_TOF));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, PiMinus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1, PiMinus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiMinus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.3, PiPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, PiPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.3, PiPlus, SYS_TOF));
     
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, KPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 3.0, KPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.75, KPlus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiMinus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, PiMinus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, PiMinus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.75, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.7, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.30, KPlus, SYS_TOF));
     
     
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.5, Proton, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 3.0, Proton, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, Proton, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
     
     // apply dedx
@@ -322,7 +323,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double beamPhoton_RF =locBeamX4_Measured.T() - locProductionX4.T();
         dHist_RF->Fill(beamPhoton_RF);
         
-        if (fabs(beamPhoton_RF) > 2.0) continue;
+        if (fabs(beamPhoton_RF) > 0.2) continue;
         dHist_RF_cut->Fill(beamPhoton_RF);
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
@@ -332,17 +333,6 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double locPiPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
         double locPiMinus1_dEdx_CDC = dPiMinus1Wrapper->Get_dEdx_CDC()*1e6;
         double locPiMinus2_dEdx_CDC = dPiMinus2Wrapper->Get_dEdx_CDC()*1e6;
-        
-        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
-           || locKPlus_dEdx_CDC < 1.0
-           || locPiPlus_dEdx_CDC < 1.0
-           || locPiMinus1_dEdx_CDC < 1.0
-           || locPiMinus2_dEdx_CDC <1.0)
-        {
-            
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
         
         // remove the compo which dose not pass the dEdx cuts
         
@@ -356,44 +346,46 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_Proton.insert(locProtonTrackID);
         }
         
-        if(locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            //continue;
-        }
-        if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
-        {
-            dHist_KPlus_dEdx_P->Fill(locKPlusP4_Measured.P(), locKPlus_dEdx_CDC);
-            locUsedSoFar_KPlus.insert(locKPlusTrackID);
-        }
-        
-        if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            //continue;
-        }
-        if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
-        {
-            dHist_PiPlus_dEdx_P->Fill(locPiPlusP4_Measured.P(), locPiPlus_dEdx_CDC);
-            locUsedSoFar_PiPlus.insert(locPiPlusTrackID);
-        }
-        if(locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            //continue;
-        }
-        if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
-        {
-            dHist_PiMinus1_dEdx_P->Fill(locPiMinus1P4_Measured.P(), locPiMinus1_dEdx_CDC);
-            locUsedSoFar_PiMinus1.insert(locPiMinus1TrackID);
-        }
-        if(locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P())) {
-            dComboWrapper->Set_IsComboCut(true);
-            //continue;
-        }
-        if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
-        {
-            dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
-            locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
-        }
-        
+        //        if(locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            //continue;
+        //        }
+        //        if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
+        //        {
+        //            dHist_KPlus_dEdx_P->Fill(locKPlusP4_Measured.P(), locKPlus_dEdx_CDC);
+        //            locUsedSoFar_KPlus.insert(locKPlusTrackID);
+        //        }
+        //
+        //        if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            //continue;
+        //        }
+        //        if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
+        //        {
+        //            dHist_PiPlus_dEdx_P->Fill(locPiPlusP4_Measured.P(), locPiPlus_dEdx_CDC);
+        //            locUsedSoFar_PiPlus.insert(locPiPlusTrackID);
+        //        }
+        //        if(locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            //continue;
+        //        }
+        //        if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
+        //        {
+        //            dHist_PiMinus1_dEdx_P->Fill(locPiMinus1P4_Measured.P(), locPiMinus1_dEdx_CDC);
+        //            locUsedSoFar_PiMinus1.insert(locPiMinus1TrackID);
+        //        }
+        //        if(locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P())) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            //continue;
+        //        }
+        //        if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
+        //        {
+        //            dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
+        //            locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
+        //        }
+        //
+        //
+        //
         //        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
         //           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())
         //           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())
