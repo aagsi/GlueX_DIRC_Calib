@@ -335,7 +335,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         
         // remove the compo which dose not pass the dEdx cuts
         
-        if(locProton_dEdx_CDC < fFunc_dEdxCut_Selectlight->Eval(locProtonP4.P())) {
+        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4.P())) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
