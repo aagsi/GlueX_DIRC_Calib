@@ -10,8 +10,7 @@
 
 #include "TH1I.h"
 #include "TH2I.h"
-#include <iostream>   // std::cout
-#include <string>     // std::string, std::stod
+#include "TEnv.h"
 class DSelector_justin_1_analyzer : public DSelector
 {
 public:
@@ -61,6 +60,7 @@ private:
     TF1 *fFunc_dEdxCut_SelectLight;
     double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
     Int_t test_val;
+    TEnv *env;
     
     // TOOL FOR FLAT TREE OUTPUT
     DComboTreeHelper *dComboTreeHelper;

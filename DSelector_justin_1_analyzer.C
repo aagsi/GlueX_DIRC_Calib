@@ -1,7 +1,6 @@
 #include "DSelector_justin_1_analyzer.h"
-#include <iostream>
-#include <string>
-#include "TEnv.h"
+
+
 
 void DSelector_justin_1_analyzer::Init(TTree *locTree)
 {
@@ -20,7 +19,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     //test_val = dOption.Atoi();
     
-    TEnv *env = new TEnv(dOption);
+    env = new TEnv(dOption);
     if (!dOption) return;
     test_val = env->GetValue("test_val", test_val);
 

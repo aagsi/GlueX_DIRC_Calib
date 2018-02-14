@@ -22,7 +22,7 @@ void runDSelector(bool proof = 1){
     
     SampleName += Form("justin_%d.root", 1);
     DSelectorName += Form("DSelector_justin_%d_analyzer.C+", 1);
-    ConfigName += Form("config_%d.rootrc", 1);
+    ConfigName += Form("config_%d.in", 1);
     
     cout<<"########### Sample used= " <<SampleName<<endl;
     cout<<"########### DSelector used= " <<DSelectorName<<endl;
