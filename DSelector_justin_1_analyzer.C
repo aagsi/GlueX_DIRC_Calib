@@ -21,6 +21,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     env = new TEnv(dOption);
     if (!dOption) return;
+    test_val=9;
     test_val = env->GetValue("test_val", test_val);
     
     //    std::string orbits ("-6");
