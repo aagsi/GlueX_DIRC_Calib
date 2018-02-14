@@ -423,7 +423,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
 //            continue;
 //        }
         
-                if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 5) {
+                if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 4) {
                     dComboWrapper->Set_IsComboCut(true);
                     continue;
                 }
