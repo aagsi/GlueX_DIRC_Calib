@@ -78,6 +78,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     
     //MASSES
+    dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000,  0.470, 0.525, "Lambda"));
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
     //dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
     
@@ -85,7 +86,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
     
     //CUT MISSING MASS
-    dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.01, 0.01));
+    dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.04, 0.04));
     
     //BEAM ENERGY
     dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, false));
