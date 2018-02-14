@@ -388,7 +388,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
            || locKPlus_dEdx_CDC < 1.0)
             || locPiPlus_dEdx_CDC < 1.0)
             || locPiMinus1_dEdx_CDC < 1.0)
-            || locPiMinus2_dEdx_CDC <1.0)
+            || locPiMinus2_dEdx_CDC <1.0) )
         {
             
             dComboWrapper->Set_IsComboCut(true);
