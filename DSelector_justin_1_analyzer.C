@@ -333,6 +333,17 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double locPiMinus1_dEdx_CDC = dPiMinus1Wrapper->Get_dEdx_CDC()*1e6;
         double locPiMinus2_dEdx_CDC = dPiMinus2Wrapper->Get_dEdx_CDC()*1e6;
         
+        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
+           || locKPlus_dEdx_CDC < 1.0
+           || locPiPlus_dEdx_CDC < 1.0
+           || locPiMinus1_dEdx_CDC < 1.0
+           || locPiMinus2_dEdx_CDC <1.0)
+        {
+            
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        
         // remove the compo which dose not pass the dEdx cuts
         
         if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())) {
@@ -344,6 +355,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dHist_Proton_dEdx_P->Fill(locProtonP4_Measured.P(), locProton_dEdx_CDC);
             locUsedSoFar_Proton.insert(locProtonTrackID);
         }
+        
         if(locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())) {
             dComboWrapper->Set_IsComboCut(true);
             //continue;
@@ -382,21 +394,6 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
         }
         
-        
-        
-        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
-           || locKPlus_dEdx_CDC < 1.0
-            || locPiPlus_dEdx_CDC < 1.0
-            || locPiMinus1_dEdx_CDC < 1.0
-            || locPiMinus2_dEdx_CDC <1.0)
-        {
-            
-            dComboWrapper->Set_IsComboCut(true);
-            //continue;
-        }
-        
-        
-        
         //        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
         //           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())
         //           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())
@@ -428,6 +425,11 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_BeamEnergy.insert(locBeamID);
         }
         
+        // beam energy cut for SDME
+        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
         /************************************** HIST, CUT KINFIT CONFIDENCE LEVEL ****************************************/
         
         
@@ -443,14 +445,6 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
-        
-        //        // beam energy cut for SDME
-        //        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            continue;
-        //        }
-        
-        
         /************************************ EXAMPLE: HISTOGRAM MISSING MASS SQUARED ************************************/
         
         //Missing Mass Squared
