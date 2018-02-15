@@ -20,8 +20,8 @@ void runDSelector(bool proof = 1){
     string TreeName ="pimkpks__B3_M16_Tree";
     string ConfigName = path;
     
-    //SampleName += Form("data_%d.root", 1);
-    SampleName += Form("sim_%d.root", 1);
+    SampleName += Form("data_%d.root", 1);
+    //SampleName += Form("sim_%d.root", 1);
     DSelectorName += Form("DSelector_justin_%d_analyzer.C+", 1);
     ConfigName += Form("config_%d.in", 1);
     
