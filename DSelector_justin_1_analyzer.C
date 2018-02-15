@@ -73,12 +73,8 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
     
-    // apply dedx
-    
-    
-    
+
     //MASSES
-    dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000,  0.470, 0.525, "Lambda"));
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
     //dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
     
