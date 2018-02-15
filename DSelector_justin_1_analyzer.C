@@ -313,7 +313,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // Loop through the analysis actions, executing them in order for the active particle combo
         if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
             continue;
-        //cout<<"#########################test_val"<<test_val<<endl;
+        cout<<"######################### dOption=  "<<dOption<<endl;
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
         
