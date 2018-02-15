@@ -20,7 +20,7 @@ void runDSelector(bool proof = 1){
     string TreeName ="pimkpks__B3_M16_Tree";
     string ConfigName = path;
     
-    SampleName += Form("data_%d.root", 1);
+    SampleName += Form("sim_%d.root", 1);
     DSelectorName += Form("DSelector_justin_%d_analyzer.C+", 1);
     ConfigName += Form("config_%d.in", 1);
     
@@ -36,8 +36,8 @@ void runDSelector(bool proof = 1){
     
     
     int proof_Nthreads = 4;
-    string outputHistFileName = "hist_data_ks.root";
-    string outputTreeFileName = "tree_data_ks.root";
+    string outputHistFileName = "hist_sim_ks.root";
+    string outputTreeFileName = "tree_sim_ks.root";
     DPROOFLiteManager::Process_Tree( SampleName, TreeName, DSelectorName, proof_Nthreads, outputHistFileName,  outputTreeFileName, ConfigName);
     
     
