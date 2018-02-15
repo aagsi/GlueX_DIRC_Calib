@@ -73,7 +73,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
     
-
+    
     //MASSES
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
     //dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
@@ -105,10 +105,10 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     
     //added from workshop 2016
     dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_KPlus_dEdx_P = new TH2I("KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiPlus_dEdx_P = new TH2I("PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiMinus1_dEdx_P = new TH2I("PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
-    dHist_PiMinus2_dEdx_P = new TH2I("PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    //    dHist_KPlus_dEdx_P = new TH2I("KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    //    dHist_PiPlus_dEdx_P = new TH2I("PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    //    dHist_PiMinus1_dEdx_P = new TH2I("PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    //    dHist_PiMinus2_dEdx_P = new TH2I("PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
     
     dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
     dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
@@ -320,7 +320,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         double beamPhoton_RF =locBeamX4_Measured.T() - locProductionX4.T();
         dHist_RF->Fill(beamPhoton_RF);
         
-        if (fabs(beamPhoton_RF) > 0.2) continue;
+        if (fabs(beamPhoton_RF) > 2) continue;
         dHist_RF_cut->Fill(beamPhoton_RF);
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
         
@@ -415,10 +415,10 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
         
         // beam energy cut for SDME
-        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
-            dComboWrapper->Set_IsComboCut(true);
-            continue;
-        }
+        //        if(locBeamP4.E() < dMinBeamEnergy || locBeamP4.E() > dMaxBeamEnergy) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
         /************************************** HIST, CUT KINFIT CONFIDENCE LEVEL ****************************************/
         
         
@@ -458,13 +458,11 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
         
         //E.g. Cut
-        //if((locMissingMassSquared < -0.04) || (locMissingMassSquared > 0.04))
-        //{
-        //	dComboWrapper->Set_IsComboCut(true);
-        //	continue;
-        //}
-        
-        
+        if((locMissingMassSquared < -0.04) || (locMissingMassSquared > 0.04))
+        {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
         
         
         /**************************************** HISTOGRAM Ks INVARIANT MASS *****************************************/
