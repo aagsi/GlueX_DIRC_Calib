@@ -25,42 +25,98 @@ void DSelector_sim_1_analyzer::Init(TTree *locTree)
 	Get_ComboWrappers();
 	dPreviousRunNumber = 0;
 
-	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
-
-	//ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
-	//false/true below: use measured/kinfit data
-
-	//PID
-	dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
-	//below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
-	//dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
-
-	//MASSES
-	//dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
-	//dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
-
-	//KINFIT RESULTS
-	dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
-
-	//CUT MISSING MASS
-	//dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.03, 0.02));
-
-	//BEAM ENERGY
-	dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, false));
-	//dAnalysisActions.push_back(new DCutAction_BeamEnergy(dComboWrapper, false, 8.4, 9.05));
-
-	//KINEMATICS
-	dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, false));
-
-	//INITIALIZE ACTIONS
-	//If you create any actions that you want to run manually (i.e. don't add to dAnalysisActions), be sure to initialize them here as well
-	Initialize_Actions();
-
-	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
-
-	//EXAMPLE MANUAL HISTOGRAMS:
-	dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
-	dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
+    
+    /*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
+    
+    //ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
+    //false/true below: use measured/kinfit data
+    
+    //PID
+    //dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
+    //below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
+    
+    
+    
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_precut"));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.3, PiPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, PiPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.3, PiPlus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, PiMinus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, PiMinus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, PiMinus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.75, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.7, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.30, KPlus, SYS_TOF));
+    
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.4, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 1.5, Proton, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.2, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false, "pid_postcut"));
+    
+    
+    //MASSES
+    //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
+    //dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
+    
+    //KINFIT RESULTS
+    dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
+    
+    //CUT MISSING MASS
+    dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.04, 0.04));
+    
+    //BEAM ENERGY
+    dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, false));
+    //dAnalysisActions.push_back(new DCutAction_BeamEnergy(dComboWrapper, false, 8.4, 9.05));
+    
+    //KINEMATICS
+    dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, false));
+    
+    //INITIALIZE ACTIONS
+    //If you create any actions that you want to run manually (i.e. don't add to dAnalysisActions), be sure to initialize them here as well
+    Initialize_Actions();
+    
+    /******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
+    
+    //EXAMPLE MANUAL HISTOGRAMS:
+    dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
+    dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
+    dHist_KsMass_Measured = new TH1I("KsMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 50, 0.470, 0.525);
+    dHist_KsMass_KinFit = new TH1I("KsMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 50, 0.470, 0.525);
+    
+    //added from workshop 2016
+    dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_KPlus_dEdx_P = new TH2I("KPlus_dEdx_P", " ;p_K^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiPlus_dEdx_P = new TH2I("PiPlus_dEdx_P", " ;p_#pi^{#plus} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus1_dEdx_P = new TH2I("PiMinus1_dEdx_P", " ;p_#pi^{#minus} 1st GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    dHist_PiMinus2_dEdx_P = new TH2I("PiMinus2_dEdx_P", " ;p_#pi^{#minus} 2nd GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    
+    dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
+    dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
+    
+    dHist_RF=new TH1I("dHist_RF", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_RF_cut=new TH1I("dHist_RF_cut", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_test=new TH1I("dHist_test", ";dHist_test", 100, -10, 10);
+    
+    
+    // EXAMPLE CUT PARAMETERS:
+    fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
+    fFunc_dEdxCut_SelectHeavy->SetParameters(4.0, 2.5, 1.25);
+    fFunc_dEdxCut_SelectLight = new TF1("fFunc_dEdxCut_SelectLight", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.);// dFunc_dEdxCut_SelectLight
+    fFunc_dEdxCut_SelectLight->SetParameters(4.0, 2.0, 2.5);
+    dMinKinFitCL = 0.0; //5.73303e-7;
+    dMaxKinFitChiSq = 5.0;
+    dMinBeamEnergy = 8.4;
+    dMaxBeamEnergy = 9.0;
+    dMinKsMass = 0.757;
+    dMaxKsMass = 0.807;
+    
+    
 
 	/************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
 
