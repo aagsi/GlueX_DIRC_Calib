@@ -76,7 +76,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //void DHistogramAction_ParticleID::Create_Hists(int locStepIndex, Particle_t locPID, string locStepROOTName)
     //void DHistogramAction_ParticleComboKinematics::Create_Hists(int locStepIndex, string locStepROOTName, Particle_t locPID, bool locIsBeamFlag)
     
-    dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper,"kinmatics_histo", false, false));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper));
     
     //MASSES
     //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
