@@ -40,6 +40,9 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     Get_ComboWrappers();
     dPreviousRunNumber = 0;
     
+    double dTargetCenterZ;
+    dTargetCenterZ = dParticleComboWrapper->Get_TargetCenter().Z();
+    
     /*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
     
     //ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
