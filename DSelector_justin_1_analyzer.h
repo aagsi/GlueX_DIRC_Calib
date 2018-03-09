@@ -42,6 +42,7 @@ private:
     
     //Step 1
     DParticleComboStep* dStep1Wrapper;
+    DKinematicData* dDecayingKShortWrapper;
     DChargedTrackHypothesis* dPiMinus2Wrapper;
     DChargedTrackHypothesis* dPiPlusWrapper;
     
@@ -51,10 +52,11 @@ private:
     TH1I* dHist_BeamEnergy;
     TH1I* dHist_KsMass_Measured;
     TH1I* dHist_KsMass_KinFit;
-    TH1I* dHist_RF, *dHist_RF_cut, *dHist_test;
+    TH1I* dHist_RF, *dHist_RF_cut, *dHist_test, *dHist_StepVertexZ, *dHist_DetachedPathLengthSignificance, *dHist_DetachedLifetime, *dHist_DetachedPathLength;
     // from workshop 2016
     TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
     TH2I* dHist_Proton_dEdx_P, *dHist_KPlus_dEdx_P, *dHist_PiPlus_dEdx_P, *dHist_PiMinus1_dEdx_P, *dHist_PiMinus2_dEdx_P;
+    TH2I* dHist_StepVertexYVsX;
     // DEFINE CUT PARAMETERS HERE
     TF1 *fFunc_dEdxCut_SelectHeavy;
     TF1 *fFunc_dEdxCut_SelectLight;
@@ -79,6 +81,7 @@ void DSelector_justin_1_analyzer::Get_ComboWrappers(void)
     
     //Step 1
     dStep1Wrapper = dComboWrapper->Get_ParticleComboStep(1);
+    dDecayingKShortWrapper = static_cast<DKinematicData*>(dStep1Wrapper->Get_InitialParticle());
     dPiMinus2Wrapper = static_cast<DChargedTrackHypothesis*>(dStep1Wrapper->Get_FinalParticle(0));
     dPiPlusWrapper = static_cast<DChargedTrackHypothesis*>(dStep1Wrapper->Get_FinalParticle(1));
 }
