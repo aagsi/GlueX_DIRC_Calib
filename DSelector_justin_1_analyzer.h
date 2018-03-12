@@ -6,7 +6,7 @@
 #include "DSelector/DSelector.h"
 #include "DSelector/DHistogramActions.h"
 #include "DSelector/DCutActions.h"
-#include "DSelector/DComboTreeHelper.h"
+//#include "DSelector/DComboTreeHelper.h"
 
 #include "TH1I.h"
 #include "TH2I.h"
@@ -65,7 +65,7 @@ private:
     TEnv *env;
     
     // TOOL FOR FLAT TREE OUTPUT
-    DComboTreeHelper *dComboTreeHelper;
+    //DComboTreeHelper *dComboTreeHelper;
     
     ClassDef(DSelector_justin_1_analyzer, 0);
 };
