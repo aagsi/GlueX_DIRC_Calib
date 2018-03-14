@@ -321,7 +321,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         // Loop through the analysis actions, executing them in order for the active particle combo
         if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
             continue;
-        cout<<"######################### dOption=  "<<dOption<<endl;
+        //cout<<"######################### dOption=  "<<dOption<<endl;
         //if you manually execute any actions, and it fails a cut, be sure to call:
         //dComboWrapper->Set_IsComboCut(true);
 
@@ -354,7 +354,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         TLorentzVector KsPathLength = dPiMinus2Wrapper->Get_X4()-dProtonWrapper->Get_X4();
         double simple_PathLength= KsPathLength.Vect().Mag();
         dHist_DetachedPathLength->Fill(simple_PathLength);
-        if(simple_PathLength<1.5) {
+        if(simple_PathLength<0.5) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
@@ -477,7 +477,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //            continue;
         //        }
 
-        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 5.0) {
+        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 2.0) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
