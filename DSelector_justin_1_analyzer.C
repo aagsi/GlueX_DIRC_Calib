@@ -118,6 +118,10 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLengthSignificance=new TH1I("dHist_DetachedPathLengthSignificance", ";dHist_DetachedPathLengthSignificance", 200, 0, 200);
     dHist_DetachedLifetime =new TH1I("dHist_DetachedLifetime", ";dHist_DetachedLifetime", 100, 0, 5);
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
+    
+    cartizian_theta_phi= new TH2I("polar_angle_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 12, 100, -180, 180);
+    //polar_angle_theta_phi
+    
 
 
     // EXAMPLE CUT PARAMETERS:
@@ -368,7 +372,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         dHist_StepVertexYVsX->Fill(locBeamX4.X(), locBeamX4.Y());
 
 
-
+        cartizian_theta_phi->Fill(locPiMinus2P4.Theta(), locPiMinus2P4.Phi());
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
 
         // Proton CDC dE/dx histogram and cut

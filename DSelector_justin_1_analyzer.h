@@ -57,6 +57,9 @@ private:
     TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
     TH2I* dHist_Proton_dEdx_P, *dHist_KPlus_dEdx_P, *dHist_PiPlus_dEdx_P, *dHist_PiMinus1_dEdx_P, *dHist_PiMinus2_dEdx_P;
     TH2I* dHist_StepVertexYVsX;
+    
+    TH2I* polar_angle_theta_phi;
+    TH2I* cartizian_theta_phi;
     // DEFINE CUT PARAMETERS HERE
     TF1 *fFunc_dEdxCut_SelectHeavy;
     TF1 *fFunc_dEdxCut_SelectLight;
