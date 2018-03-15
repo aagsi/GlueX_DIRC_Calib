@@ -1,8 +1,9 @@
 #include "DSelector_justin_1_analyzer.h"
 #include "DHistogramActions.h"
+#define PI 3.14159265
 
 
-//Showing runs: 30274 - 31057. 783 runs per page. Total runs: 704 
+//Showing runs: 30274 - 31057. 783 runs per page. Total runs: 704
 void DSelector_justin_1_analyzer::Init(TTree *locTree)
 {
     // USERS: IN THIS FUNCTION, ONLY MODIFY SECTIONS WITH A "USER" OR "EXAMPLE" LABEL. LEAVE THE REST ALONE.
@@ -17,7 +18,6 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dFlatTreeFileName = "justin_1_analyzer_flat.root"; //output flat tree (one combo per tree entry), "" for none
     dFlatTreeName = ""; //if blank, default name will be chosen
 
-
     //test_val = dOption.Atoi();
 
     env = new TEnv(dOption);
@@ -28,7 +28,6 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //    std::string orbits ("-6");
     //    string::size_type sz;     // alias of size_t
     //    test_val = std::stod (orbits,&sz);
-
 
     //Because this function gets called for each TTree in the TChain, we must be careful:
     //We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
@@ -51,7 +50,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
-
+    /*
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.3, PiPlus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, PiPlus, SYS_FCAL));
@@ -65,11 +64,11 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.7, KPlus, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.30, KPlus, SYS_TOF));
 
-
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_postcut"));
+    */
 
     //void DHistogramAction_ParticleID::Create_Hists(int locStepIndex, Particle_t locPID, string locStepROOTName)
     //void DHistogramAction_ParticleComboKinematics::Create_Hists(int locStepIndex, string locStepROOTName, Particle_t locPID, bool locIsBeamFlag)
@@ -118,11 +117,9 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLengthSignificance=new TH1I("dHist_DetachedPathLengthSignificance", ";dHist_DetachedPathLengthSignificance", 200, 0, 200);
     dHist_DetachedLifetime =new TH1I("dHist_DetachedLifetime", ";dHist_DetachedLifetime", 100, 0, 5);
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
-    
-    cartizian_theta_phi= new TH2I("polar_angle_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 12, 100, -180, 180);
-    //polar_angle_theta_phi
-    
 
+    cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 5);
 
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
@@ -135,6 +132,14 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dMaxBeamEnergy = 9.0;
     dMinKsMass = 0.757;
     dMaxKsMass = 0.807;
+
+    beamPhoton_RF_cut =2.0;
+    simple_PathLength_cut =2.0;
+    beam_vertex_XYcut=1.0;
+    beam_vertex_Z1cut= 55.0;
+    beam_vertex_Z2cut =75.0;
+    ChiSq_NDF_cut= 2.0;
+    MissingMassSquared_cut = 0.01;
 
     /************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
 
@@ -331,7 +336,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
 
         double beamPhoton_RF =locBeamX4_Measured.T() - locProductionX4.T();
         dHist_RF->Fill(beamPhoton_RF);
-        if(fabs(beamPhoton_RF) > 2) {
+        if(fabs(beamPhoton_RF) > beamPhoton_RF_cut) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
@@ -358,13 +363,13 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         TLorentzVector KsPathLength = dPiMinus2Wrapper->Get_X4()-dProtonWrapper->Get_X4();
         double simple_PathLength= KsPathLength.Vect().Mag();
         dHist_DetachedPathLength->Fill(simple_PathLength);
-        if(simple_PathLength<0.5) {
+        if(simple_PathLength<simple_PathLength_cut) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
 
         // XYZ vertex Cut
-        if(fabs(locBeamX4.X())>1.0 || fabs(locBeamX4.Y())>1.0 || locBeamX4.Z()<55.0 || locBeamX4.Z()>75.0 ) {
+        if(fabs(locBeamX4.X())> beam_vertex_XYcut || fabs(locBeamX4.Y())>beam_vertex_XYcut || locBeamX4.Z()<beam_vertex_Z1cut || locBeamX4.Z()>beam_vertex_Z2cut ) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
@@ -372,78 +377,25 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         dHist_StepVertexYVsX->Fill(locBeamX4.X(), locBeamX4.Y());
 
 
-        cartizian_theta_phi->Fill(locPiMinus2P4.Theta(), locPiMinus2P4.Phi());
+        //cartizian_theta_phi->Fill(locPiMinus2P4_Measured.Theta(), locPiMinus2P4.Phi()*180/PI);
+        cartizian_theta_phi->Fill(locPiMinus2P4.Theta()*180/PI, locPiMinus2P4.Phi()*180/PI);
+        cartizian_theta_mom->Fill(locPiMinus2P4.Theta()*180/PI, locPiMinus2P4.P());
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
 
         // Proton CDC dE/dx histogram and cut
         double locProton_dEdx_CDC = dProtonWrapper->Get_dEdx_CDC()*1e6;
-        double locKPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
-        double locPiPlus_dEdx_CDC = dPiPlusWrapper->Get_dEdx_CDC()*1e6;
-        double locPiMinus1_dEdx_CDC = dPiMinus1Wrapper->Get_dEdx_CDC()*1e6;
-        double locPiMinus2_dEdx_CDC = dPiMinus2Wrapper->Get_dEdx_CDC()*1e6;
 
         // remove the compo which dose not pass the dEdx cuts
-
-        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())) {
+        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4.P())) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
         if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
         {
-            dHist_Proton_dEdx_P->Fill(locProtonP4_Measured.P(), locProton_dEdx_CDC);
+            dHist_Proton_dEdx_P->Fill(locProtonP4.P(), locProton_dEdx_CDC);
             locUsedSoFar_Proton.insert(locProtonTrackID);
         }
 
-        //        if(locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())) {
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            //continue;
-        //        }
-        //        if(locUsedSoFar_KPlus.find(locKPlusTrackID) == locUsedSoFar_KPlus.end())
-        //        {
-        //            dHist_KPlus_dEdx_P->Fill(locKPlusP4_Measured.P(), locKPlus_dEdx_CDC);
-        //            locUsedSoFar_KPlus.insert(locKPlusTrackID);
-        //        }
-        //
-        //        if(locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())) {
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            //continue;
-        //        }
-        //        if(locUsedSoFar_PiPlus.find(locPiPlusTrackID) == locUsedSoFar_PiPlus.end())
-        //        {
-        //            dHist_PiPlus_dEdx_P->Fill(locPiPlusP4_Measured.P(), locPiPlus_dEdx_CDC);
-        //            locUsedSoFar_PiPlus.insert(locPiPlusTrackID);
-        //        }
-        //        if(locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())) {
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            //continue;
-        //        }
-        //        if(locUsedSoFar_PiMinus1.find(locPiMinus1TrackID) == locUsedSoFar_PiMinus1.end())
-        //        {
-        //            dHist_PiMinus1_dEdx_P->Fill(locPiMinus1P4_Measured.P(), locPiMinus1_dEdx_CDC);
-        //            locUsedSoFar_PiMinus1.insert(locPiMinus1TrackID);
-        //        }
-        //        if(locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P())) {
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            //continue;
-        //        }
-        //        if(locUsedSoFar_PiMinus2.find(locPiMinus2TrackID) == locUsedSoFar_PiMinus2.end())
-        //        {
-        //            dHist_PiMinus2_dEdx_P->Fill(locPiMinus2P4_Measured.P(), locPiMinus2_dEdx_CDC);
-        //            locUsedSoFar_PiMinus2.insert(locPiMinus2TrackID);
-        //        }
-        //
-        //
-        //
-        //        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())
-        //           || locKPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locKPlusP4_Measured.P())
-        //           || locPiPlus_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiPlusP4_Measured.P())
-        //           || locPiMinus1_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus1P4_Measured.P())
-        //           || locPiMinus2_dEdx_CDC > fFunc_dEdxCut_SelectHeavy->Eval(locPiMinus2P4_Measured.P()) )
-        //        {
-        //
-        //            dComboWrapper->Set_IsComboCut(true);
-        //            //continue;
-        //        }
 
         /**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
 
@@ -481,7 +433,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         //            continue;
         //        }
 
-        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> 2.0) {
+        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> ChiSq_NDF_cut) {
             dComboWrapper->Set_IsComboCut(true);
             continue;
         }
@@ -509,7 +461,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         }
 
         //E.g. Cut
-        if(fabs(locMissingMassSquared)> 0.01) //0.04
+        if(fabs(locMissingMassSquared)> MissingMassSquared_cut) //0.04
         {
             dComboWrapper->Set_IsComboCut(true);
             continue;
@@ -637,5 +589,6 @@ void DSelector_justin_1_analyzer::Finalize(void)
     //CALL THIS LAST
     DSelector::Finalize(); //Saves results to the output file
 }
+
 
 

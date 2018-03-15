@@ -58,14 +58,23 @@ private:
     TH2I* dHist_Proton_dEdx_P, *dHist_KPlus_dEdx_P, *dHist_PiPlus_dEdx_P, *dHist_PiMinus1_dEdx_P, *dHist_PiMinus2_dEdx_P;
     TH2I* dHist_StepVertexYVsX;
     
-    TH2I* polar_angle_theta_phi;
     TH2I* cartizian_theta_phi;
+    TH2I* cartizian_theta_mom;
     // DEFINE CUT PARAMETERS HERE
     TF1 *fFunc_dEdxCut_SelectHeavy;
     TF1 *fFunc_dEdxCut_SelectLight;
     double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
     Int_t test_val;
     TEnv *env;
+    
+    double beamPhoton_RF_cut ;
+    double simple_PathLength_cut;
+    double beam_vertex_XYcut;
+    double beam_vertex_Z1cut;
+    double beam_vertex_Z2cut;
+    double ChiSq_NDF_cut;
+    double MissingMassSquared_cut;
+    
     
     // TOOL FOR FLAT TREE OUTPUT
     //DComboTreeHelper *dComboTreeHelper;
