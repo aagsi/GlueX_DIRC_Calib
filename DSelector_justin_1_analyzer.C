@@ -50,25 +50,25 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
-/*    
-    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.3, PiPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, PiPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.3, PiPlus, SYS_TOF));
+    /*
+        dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.3, PiPlus, SYS_BCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, PiPlus, SYS_FCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.3, PiPlus, SYS_TOF));
 
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, PiMinus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, PiMinus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, PiMinus, SYS_TOF));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, PiMinus, SYS_BCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, PiMinus, SYS_FCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, PiMinus, SYS_TOF));
 
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.7, KPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.30, KPlus, SYS_TOF));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KPlus, SYS_BCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.7, KPlus, SYS_FCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.30, KPlus, SYS_TOF));
 
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, Proton, SYS_TOF));
-    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_postcut"));
-  */ 
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));
+        dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, Proton, SYS_TOF));
+        dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_postcut"));
+      */
 
     //void DHistogramAction_ParticleID::Create_Hists(int locStepIndex, Particle_t locPID, string locStepROOTName)
     //void DHistogramAction_ParticleComboKinematics::Create_Hists(int locStepIndex, string locStepROOTName, Particle_t locPID, bool locIsBeamFlag)
@@ -377,9 +377,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         dHist_StepVertexYVsX->Fill(locBeamX4.X(), locBeamX4.Y());
 
 
-        //cartizian_theta_phi->Fill(locPiMinus2P4_Measured.Theta(), locPiMinus2P4.Phi()*180/PI);
-        cartizian_theta_phi->Fill(locPiMinus2P4.Theta()*180/PI, locPiMinus2P4.Phi()*180/PI);
-        cartizian_theta_mom->Fill(locPiMinus2P4.Theta()*180/PI, locPiMinus2P4.P());
+
         /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
 
         // Proton CDC dE/dx histogram and cut
@@ -485,6 +483,18 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
             locUsedSoFar_KsMass.insert(locUsedThisCombo_KsMass);
         }
 
+        DetectorSystem_t PiMinus2_TimingSYS = dPiMinus2Wrapper->Get_Detector_System_Timing();
+        Double_t PiMinus2_Phi = locPiMinus2P4.Phi()*180/PI;
+        Double_t PiMinus2_Theta = locPiMinus2P4.Theta()*180/PI;
+        Double_t PiMinus2_mom = locPiMinus2P4.P();
+        if ( PiMinus2_TimingSYS == SYS_TOF )
+        {
+            cartizian_theta_phi->Fill(PiMinus2_Theta, PiMinus2_Phi);
+            cartizian_theta_mom->Fill(PiMinus2_Theta,PiMinus2_mom );
+        }
+
+        
+
         /****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/
 
         /*
@@ -589,6 +599,7 @@ void DSelector_justin_1_analyzer::Finalize(void)
     //CALL THIS LAST
     DSelector::Finalize(); //Saves results to the output file
 }
+
 
 
 
