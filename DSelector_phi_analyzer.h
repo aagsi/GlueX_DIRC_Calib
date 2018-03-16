@@ -43,8 +43,8 @@ class DSelector_phi_analyzer : public DSelector
     // EXAMPLES:
     TH1I* dHist_MissingMassSquared;
     TH1I* dHist_BeamEnergy;
-    TH1I* dHist_KsMass_Measured;
-    TH1I* dHist_KsMass_KinFit;
+    TH1I* dHist_PhiMass_Measured;
+    TH1I* dHist_PhiMass_KinFit;
     TH1I* dHist_RF, *dHist_RF_cut, *dHist_test, *dHist_StepVertexZ, *dHist_DetachedPathLengthSignificance, *dHist_DetachedLifetime, *dHist_DetachedPathLength;
     // from workshop 2016
     TH1I* dHist_KinFitChiSq, *dHist_KinFitCL;
@@ -56,7 +56,7 @@ class DSelector_phi_analyzer : public DSelector
     // DEFINE CUT PARAMETERS HERE
     TF1 *fFunc_dEdxCut_SelectHeavy;
     TF1 *fFunc_dEdxCut_SelectLight;
-    double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinKsMass, dMaxKsMass;
+    double dMinKinFitCL, dMaxKinFitChiSq, dMinBeamEnergy, dMaxBeamEnergy, dMinPhiMass, dMaxPhiMass;
     Int_t test_val;
     TEnv *env;
     
