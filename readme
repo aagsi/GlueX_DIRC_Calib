@@ -1,0 +1,5 @@
+root -l                                                                                                                                                                                                                                      
+.x $ROOT_ANALYSIS_HOME/scripts/Load_DSelector.C                                                                                                                                                                                              
+DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*", "pimkpks__B3_M16_Tree","DSelector_justin_1_analyzer.C+", 8, "pimkpks_05.root")                         
+                                                                                                                                                                                                                                             
+      
