@@ -251,6 +251,7 @@ Bool_t DSelector_phi_analyzer::Process(Long64_t locEntry)
 		// Get P4's: //is kinfit if kinfit performed, else is measured
 		//dTargetP4 is target p4
 		//Step 0
+		TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
 		TLorentzVector locBeamP4 = dComboBeamWrapper->Get_P4();
 		TLorentzVector locKPlusP4 = dKPlusWrapper->Get_P4();
 		TLorentzVector locKMinusP4 = dKMinusWrapper->Get_P4();
