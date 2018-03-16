@@ -1,4 +1,5 @@
 #include "DSelector_phi_analyzer.h"
+#define PI 3.14159265
 
 void DSelector_phi_analyzer::Init(TTree *locTree)
 {
