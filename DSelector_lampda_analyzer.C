@@ -40,10 +40,7 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
     //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
     
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, PiPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, PiPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, PiPlus, SYS_TOF));
-    
+
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, PiMinus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, PiMinus, SYS_FCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, PiMinus, SYS_TOF));
@@ -316,7 +313,7 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
         
         /**************************************** Lampda VerteX Decay CUT ACTION ************************************************/
 
-        TLorentzVector LampdaPathLength = dPiMinus2Wrapper->Get_X4()-dProtonWrapper->Get_X4();
+        TLorentzVector LampdaPathLength = dProtonWrapper->Get_X4()-dKPlusWrapper->Get_X4();
         double simple_PathLength= LampdaPathLength.Vect().Mag();
         dHist_DetachedPathLength->Fill(simple_PathLength);
         if(simple_PathLength<simple_PathLength_cut) {
