@@ -93,7 +93,7 @@ void DSelector_phi_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
 
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 5);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
 
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy

@@ -1,4 +1,6 @@
 #include "DSelector_lampda_analyzer.h"
+#define PI 3.14159265
+
 
 void DSelector_lampda_analyzer::Init(TTree *locTree)
 {
@@ -25,42 +27,103 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
 	Get_ComboWrappers();
 	dPreviousRunNumber = 0;
 
-	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
-
-	//ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
-	//false/true below: use measured/kinfit data
-
-	//PID
-	dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
-	//below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
-	//dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
-
-	//MASSES
-	//dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
-	//dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
-
-	//KINFIT RESULTS
-	dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
-
-	//CUT MISSING MASS
-	//dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, false, -0.03, 0.02));
-
-	//BEAM ENERGY
-	dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, false));
-	//dAnalysisActions.push_back(new DCutAction_BeamEnergy(dComboWrapper, false, 8.4, 9.05));
-
-	//KINEMATICS
-	dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, false));
-
-	//INITIALIZE ACTIONS
-	//If you create any actions that you want to run manually (i.e. don't add to dAnalysisActions), be sure to initialize them here as well
-	Initialize_Actions();
-
-	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
-
-	//EXAMPLE MANUAL HISTOGRAMS:
-	dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
-	dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
+    /*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
+    
+    //ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
+    //false/true below: use measured/kinfit data
+    
+    //PID
+    //dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
+    //below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.5, KPlus, SYS_BCAL));
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 2.0, Unknown, SYS_NULL));
+    //dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, Unknown, SYS_NULL));
+    
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, PiPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, PiPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, PiPlus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, PiMinus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, PiMinus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, PiMinus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.25, KPlus, SYS_TOF));
+    
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_postcut"));
+    
+    
+    //void DHistogramAction_ParticleID::Create_Hists(int locStepIndex, Particle_t locPID, string locStepROOTName)
+    //void DHistogramAction_ParticleComboKinematics::Create_Hists(int locStepIndex, string locStepROOTName, Particle_t locPID, bool locIsBeamFlag)
+    
+    dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, true ,"test"));
+    
+    //MASSES
+    //dAnalysisActions.push_back(new DHistogramAction_InvariantMass(dComboWrapper, false, Lambda, 1000, 1.0, 1.2, "Lambda"));
+    //dAnalysisActions.push_back(new DHistogramAction_MissingMassSquared(dComboWrapper, false, 1000, -0.1, 0.1));
+    
+    //KINFIT RESULTS
+    dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
+    //CUT MISSING MASS
+    dAnalysisActions.push_back(new DCutAction_MissingMassSquared(dComboWrapper, true, -0.04, 0.04));
+    //BEAM ENERGY
+    dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, true));
+    //dAnalysisActions.push_back(new DCutAction_BeamEnergy(dComboWrapper,1.5 false, 8.4, 9.05));
+    //KINEMATICS
+    dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, false));
+    //INITIALIZE ACTIONS
+    //If you create any actions that you want to run manually (i.e. don't add to dAnalysisActions), be sure to initialize them here as well
+    Initialize_Actions();
+    
+    /******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
+    
+    //EXAMPLE MANUAL HISTOGRAMS:
+    dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
+    dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
+    dHist_LampdaMass_Measured = new TH1I("LampdaMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 0.36, 0.635);
+    dHist_LampdaMass_KinFit = new TH1I("LampdaMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 0.36, 0.635);
+    
+    //added from worLampdahop 2016
+    dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
+    
+    dHist_KinFitChiSq = new TH1I("KinFitChiSq", ";Kinematic Fit #chi^{2}/NDF", 250, 0., 25.);
+    dHist_KinFitCL = new TH1I("KinFitCL", ";Kinematic Fit Confidence Level", 100, 0., 1.);
+    dHist_RF=new TH1I("dHist_RF", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_RF_cut=new TH1I("dHist_RF_cut", ";#Deltat_{Beam#gamma - RF}", 1000, -10, 10);
+    dHist_test=new TH1I("dHist_test", ";dHist_test", 100, -10, 10);
+    dHist_StepVertexYVsX = new TH2I("dHist_StepVertexYVsX", " ;Vertex-X (cm); Vertex-Y (cm)", 200, -5.0, 5.0, 200, -5.0, 5);
+    dHist_StepVertexZ =new TH1I("dHist_StepVertexZ", ";dHist_StepVertexZ", 200, 0, 200);
+    dHist_DetachedPathLengthSignificance=new TH1I("dHist_DetachedPathLengthSignificance", ";dHist_DetachedPathLengthSignificance", 200, 0, 200);
+    dHist_DetachedLifetime =new TH1I("dHist_DetachedLifetime", ";dHist_DetachedLifetime", 100, 0, 5);
+    dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
+    
+    cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    
+    // EXAMPLE CUT PARAMETERS:
+    fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
+    fFunc_dEdxCut_SelectHeavy->SetParameters(4.0, 2.5, 1.25);
+    fFunc_dEdxCut_SelectLight = new TF1("fFunc_dEdxCut_SelectLight", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.);// dFunc_dEdxCut_SelectLight
+    fFunc_dEdxCut_SelectLight->SetParameters(4.0, 2.0, 2.5);
+    dMinKinFitCL = 0.0; //5.73303e-7;
+    dMaxKinFitChiSq = 5.0;
+    dMinBeamEnergy = 8.4;
+    dMaxBeamEnergy = 9.0;
+    dMinLampdaMass = 0.757;
+    dMaxLampdaMass = 0.807;
+    
+    beamPhoton_RF_cut =2.0;
+    simple_PathLength_cut =2.0;
+    beam_vertex_XYcut=1.0;
+    beam_vertex_Z1cut= 55.0;
+    beam_vertex_Z2cut =75.0;
+    ChiSq_NDF_cut= 2.0;
+    MissingMassSquared_cut = 0.01;
 
 	/************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
 
@@ -117,7 +180,7 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 	//CALL THIS FIRST
 	DSelector::Process(locEntry); //Gets the data from the tree for the entry
 	//cout << "RUN " << Get_RunNumber() << ", EVENT " << Get_EventNumber() << endl;
-	//TLorentzVector locProductionX4 = Get_X4_Production();
+	TLorentzVector locProductionX4 = Get_X4_Production();
 
 	/******************************************** GET POLARIZATION ORIENTATION ******************************************/
 
@@ -144,13 +207,17 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 		//Then for each combo, just compare to what you used before, and make sure it's unique
 
 	//EXAMPLE 1: Particle-specific info:
-	set<Int_t> locUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles. set: easy to use, fast to search
+    set<Int_t> locUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles. set: easy to use, fast to search
+    set<Int_t> locUsedSoFar_Proton;
+    set<Int_t> locUsedSoFar_KPlus;
+    set<Int_t> locUsedSoFar_PiMinus;
 
 	//EXAMPLE 2: Combo-specific info:
 		//In general: Could have multiple particles with the same PID: Use a set of Int_t's
 		//In general: Multiple PIDs, so multiple sets: Contain within a map
 		//Multiple combos: Contain maps within a set (easier, faster to search)
-	set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
+    set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
+    set<map<Particle_t, set<Int_t> > > locUsedSoFar_LampdaMass;
 
 	//INSERT USER ANALYSIS UNIQUENESS TRACKING HERE
 
@@ -204,6 +271,7 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 
 		// Get Measured P4's:
 		//Step 0
+        TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
 		TLorentzVector locBeamP4_Measured = dComboBeamWrapper->Get_P4_Measured();
 		TLorentzVector locKPlusP4_Measured = dKPlusWrapper->Get_P4_Measured();
 		//Step 1
@@ -213,10 +281,22 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 		/********************************************* COMBINE FOUR-MOMENTUM ********************************************/
 
 		// DO YOUR STUFF HERE
+        
+        TLorentzVector locLampdaP4_Measured = locProtonP4_Measured + locPiMinusP4_Measured;
+        TLorentzVector locLampdaP4 = locProtonP4 + locPiMinusP4;
+        // X4
+        TLorentzVector locBeamX4 = dComboBeamWrapper->Get_X4();
+        
+        TLorentzVector locProtonX4 = dProtonWrapper->Get_X4();
+        TLorentzVector locPiMinusX4 = dPiMinusWrapper->Get_X4();
+        
+        TLorentzVector locProtonX4_Measured = dProtonWrapper->Get_X4_Measured();
+        TLorentzVector locPiMinusX4_Measured = dPiMinusWrapper->Get_X4_Measured();
 
 		// Combine 4-vectors
 		TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;
 		locMissingP4_Measured -= locKPlusP4_Measured + locPiMinusP4_Measured + locProtonP4_Measured;
+        
 
 		/******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/
 
@@ -226,6 +306,49 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 
 		//if you manually execute any actions, and it fails a cut, be sure to call:
 			//dComboWrapper->Set_IsComboCut(true);
+        double beamPhoton_RF =locBeamX4_Measured.T() - locProductionX4.T();
+        dHist_RF->Fill(beamPhoton_RF);
+        if(fabs(beamPhoton_RF) > beamPhoton_RF_cut) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        dHist_RF_cut->Fill(beamPhoton_RF);
+        
+        /**************************************** Lampda VerteX Decay CUT ACTION ************************************************/
+
+        TLorentzVector LampdaPathLength = dPiMinus2Wrapper->Get_X4()-dProtonWrapper->Get_X4();
+        double simple_PathLength= LampdaPathLength.Vect().Mag();
+        dHist_DetachedPathLength->Fill(simple_PathLength);
+        if(simple_PathLength<simple_PathLength_cut) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        
+        // XYZ vertex Cut
+        if(fabs(locBeamX4.X())> beam_vertex_XYcut || fabs(locBeamX4.Y())>beam_vertex_XYcut || locBeamX4.Z()<beam_vertex_Z1cut || locBeamX4.Z()>beam_vertex_Z2cut ) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        dHist_StepVertexZ->Fill(locBeamX4.Z());
+        dHist_StepVertexYVsX->Fill(locBeamX4.X(), locBeamX4.Y());
+        
+        
+        
+        /**************************************** EXAMPLE: PID dEdx CUT ACTION ************************************************/
+        
+        // Proton CDC dE/dx histogram and cut
+        double locProton_dEdx_CDC = dProtonWrapper->Get_dEdx_CDC()*1e6;
+        
+        // remove the compo which dose not pass the dEdx cuts
+        if(locProton_dEdx_CDC < fFunc_dEdxCut_SelectLight->Eval(locProtonP4_Measured.P())) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        if(locUsedSoFar_Proton.find(locProtonTrackID) == locUsedSoFar_Proton.end())
+        {
+            dHist_Proton_dEdx_P->Fill(locProtonP4_Measured.P(), locProton_dEdx_CDC);
+            locUsedSoFar_Proton.insert(locProtonTrackID);
+        }
 
 		/**************************************** EXAMPLE: FILL CUSTOM OUTPUT BRANCHES **************************************/
 
@@ -246,6 +369,21 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 			dHist_BeamEnergy->Fill(locBeamP4.E());
 			locUsedSoFar_BeamEnergy.insert(locBeamID);
 		}
+        /************************************** HIST, CUT KINFIT CONFIDENCE LEVEL ****************************************/
+        
+        
+        // kinematic fit CL cut
+        dHist_KinFitChiSq->Fill(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit());
+        dHist_KinFitCL->Fill(dComboWrapper->Get_ConfidenceLevel_KinFit());
+        //        if(dComboWrapper->Get_ConfidenceLevel_KinFit() < dMinKinFitCL) {
+        //            dComboWrapper->Set_IsComboCut(true);
+        //            continue;
+        //        }
+        
+        if(dComboWrapper->Get_ChiSq_KinFit()/dComboWrapper->Get_NDF_KinFit()> ChiSq_NDF_cut) {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
 
 		/************************************ EXAMPLE: HISTOGRAM MISSING MASS SQUARED ************************************/
 
@@ -267,13 +405,41 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
 			dHist_MissingMassSquared->Fill(locMissingMassSquared);
 			locUsedSoFar_MissingMass.insert(locUsedThisCombo_MissingMass);
 		}
-
-		//E.g. Cut
-		//if((locMissingMassSquared < -0.04) || (locMissingMassSquared > 0.04))
-		//{
-		//	dComboWrapper->Set_IsComboCut(true);
-		//	continue;
-		//}
+        
+        //E.g. Cut
+        if(fabs(locMissingMassSquared)> MissingMassSquared_cut) //0.04
+        {
+            dComboWrapper->Set_IsComboCut(true);
+            continue;
+        }
+        /**************************************** HISTOGRAM Lampda INVARIANT MASS *****************************************/
+        
+        double locLampdaMass_Measured = locLampdaP4_Measured.M();
+        double locLampdaMass_KinFit = locLampdaP4.M();
+        //Uniqueness tracking:
+        map<Particle_t, set<Int_t> > locUsedThisCombo_LampdaMass;
+        locUsedThisCombo_LampdaMass[PiMinus].insert(locPiMinusTrackID);
+        locUsedThisCombo_LampdaMass[Proton].insert(locProtonTrackID);
+        
+        
+        //compare to what's been used so far
+        if(locUsedSoFar_LampdaMass.find(locUsedThisCombo_LampdaMass) == locUsedSoFar_LampdaMass.end())
+        {
+            //unique missing mass combo: histogram it, and register this combo of particles
+            dHist_LampdaMass_Measured->Fill(locLampdaMass_Measured);
+            dHist_LampdaMass_KinFit->Fill(locLampdaMass_KinFit);
+            locUsedSoFar_LampdaMass.insert(locUsedThisCombo_LampdaMass);
+        }
+        
+        DetectorSystem_t Proton_TimingSYS = dProtonWrapper->Get_Detector_System_Timing();
+        Double_t Proton_Phi = locProtonP4.Phi()*180/PI;
+        Double_t Proton_Theta = locProtonP4.Theta()*180/PI;
+        Double_t Proton_mom = locProtonP4.P();
+        if ( Proton_TimingSYS == SYS_TOF )
+        {
+            cartizian_theta_phi->Fill(Proton_Theta, Proton_Phi);
+            cartizian_theta_mom->Fill(Proton_Theta,Proton_mom );
+        }
 
 		/****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/
 
