@@ -82,8 +82,8 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
     //EXAMPLE MANUAL HISTOGRAMS:
     dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 600, -0.06, 0.06);
     dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
-    dHist_LampdaMass_Measured = new TH1I("LampdaMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 0.36, 0.635);
-    dHist_LampdaMass_KinFit = new TH1I("LampdaMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 0.36, 0.635);
+    dHist_LampdaMass_Measured = new TH1I("LampdaMass_Measured", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 1.050, 1.180);
+    dHist_LampdaMass_KinFit = new TH1I("LampdaMass_KinFit", ";#pi^{#plus}#pi^{#minus} Invariant Mass", 250, 1.050, 1.180);
     
     //added from worLampdahop 2016
     dHist_Proton_dEdx_P = new TH2I("Proton_dEdx_P", " ;p_{proton} GeV/c; dE/dx (keV/cm)", 250, 0.0, 5.0, 250, 0.0, 25.);
