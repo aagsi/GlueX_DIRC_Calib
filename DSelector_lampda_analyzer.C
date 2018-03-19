@@ -439,8 +439,8 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
             cartizian_theta_phi->Fill(Proton_Theta, Proton_Phi);
             cartizian_theta_mom->Fill(Proton_Theta,Proton_mom );
         }
-        cartizian_theta_phi_vertex->Fill(PiMinus2_Theta, PiMinus2_Phi);
-        cartizian_theta_mom_vertex->Fill(PiMinus2_Theta,PiMinus2_mom );
+        cartizian_theta_phi_vertex->Fill(Proton_Theta, Proton_Phi);
+        cartizian_theta_mom_vertex->Fill(Proton_Theta,Proton_mom );
 
 		/****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/
 

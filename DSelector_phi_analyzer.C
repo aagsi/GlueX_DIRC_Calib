@@ -425,8 +425,8 @@ Bool_t DSelector_phi_analyzer::Process(Long64_t locEntry)
             cartizian_theta_phi->Fill(KMinus_Theta, KMinus_Phi);
             cartizian_theta_mom->Fill(KMinus_Theta,KMinus_mom );
         }
-        cartizian_theta_phi_vertex->Fill(PiMinus2_Theta, PiMinus2_Phi);
-        cartizian_theta_mom_vertex->Fill(PiMinus2_Theta,PiMinus2_mom );
+        cartizian_theta_phi_vertex->Fill(KMinus_Theta, KMinus_Phi);
+        cartizian_theta_mom_vertex->Fill(KMinus_Theta,KMinus_mom );
         
 		/****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/
 
