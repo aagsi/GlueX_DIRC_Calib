@@ -130,7 +130,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     fFunc_dEdxCut_SelectLight = new TF1("fFunc_dEdxCut_SelectLight", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.);// dFunc_dEdxCut_SelectLight
     fFunc_dEdxCut_SelectLight->SetParameters(4.0, 2.0, 2.5);
     dMinKinFitCL = 0.0; //5.73303e-7;
-    dMaxKinFitChiSq = 5.0;
+    dMaxKinFitChiSq = 2.0;
     dMinBeamEnergy = 8.4;
     dMaxBeamEnergy = 9.0;
     dMinKsMass = 0.757;
