@@ -94,6 +94,8 @@ void DSelector_phi_analyzer::Init(TTree *locTree)
 
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
     cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_phi_vertex= new TH2I("cartizian_theta_phi_vertex", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
+    cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
 
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
@@ -423,6 +425,8 @@ Bool_t DSelector_phi_analyzer::Process(Long64_t locEntry)
             cartizian_theta_phi->Fill(KMinus_Theta, KMinus_Phi);
             cartizian_theta_mom->Fill(KMinus_Theta,KMinus_mom );
         }
+        cartizian_theta_phi_vertex->Fill(PiMinus2_Theta, PiMinus2_Phi);
+        cartizian_theta_mom_vertex->Fill(PiMinus2_Theta,PiMinus2_mom );
         
 		/****************************************** FILL FLAT TREE (IF DESIRED) ******************************************/
 
