@@ -39,11 +39,11 @@ void DSelector_phi_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));    
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KMinus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, KMinus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.25, KMinus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, KMinus, SYS_TOF));
 
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KPlus, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, KPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.25, KPlus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, KPlus, SYS_TOF));
 
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));

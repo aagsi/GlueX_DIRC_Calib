@@ -42,16 +42,16 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_precut"));
 
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, PiMinus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, PiMinus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.25, PiMinus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.5, PiMinus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, PiMinus, SYS_TOF));
     
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.75, KPlus, SYS_BCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.0, KPlus, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false, 0.25, KPlus, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.0, KPlus, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 2.25, KPlus, SYS_FCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, KPlus, SYS_TOF));
     
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.4, Proton, SYS_BCAL));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.6, Proton, SYS_BCAL));
     dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 1.5, Proton, SYS_FCAL));
-    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.2, Proton, SYS_TOF));
+    dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, true, 0.5, Proton, SYS_TOF));
     dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, true, "pid_postcut"));
     
     
@@ -116,13 +116,13 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
     dMinLampdaMass = 0.757;
     dMaxLampdaMass = 0.807;
     
-    beamPhoton_RF_cut =2.0;
-    simple_PathLength_cut =2.0;
+    beamPhoton_RF_cut =6.0;
+    simple_PathLength_cut =0.5;
     beam_vertex_XYcut=1.0;
     beam_vertex_Z1cut= 55.0;
     beam_vertex_Z2cut =75.0;
-    ChiSq_NDF_cut= 2.0;
-    MissingMassSquared_cut = 0.01;
+    ChiSq_NDF_cut= 5.0;
+    MissingMassSquared_cut = 0.04;
 
 	/************************** EXAMPLE USER INITIALIZATION: CUSTOM OUTPUT BRANCHES - MAIN TREE *************************/
 
