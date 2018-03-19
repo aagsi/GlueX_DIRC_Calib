@@ -1,3 +1,15 @@
+# Chache
+#Ks
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*.root
+#Lampda
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver09/tree_kplamb__M18/merged/*.root
+#Phi
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_kpkm__B4_U1/merged/*.root
+
+
+jcache status ID
+
+
 # ks
 ll /cache/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/
 root -l                                                                                                                                                                                                                                      
@@ -21,14 +33,3 @@ DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver08/t
 
 
 
-
-# Chache
-#Ks
-jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*.root
-#Lampda
-jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver09/tree_kplamb__M18/merged/*.root
-#Phi
-jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_kpkm__B4_U1/merged/*.root
-
-
-jcache status 13330780
