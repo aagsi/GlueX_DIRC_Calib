@@ -1,5 +1,34 @@
+# ks
+ll /cache/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/
 root -l                                                                                                                                                                                                                                      
 .x $ROOT_ANALYSIS_HOME/scripts/Load_DSelector.C                                                                                                                                                                                              
-DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*", "pimkpks__B3_M16_Tree","DSelector_justin_1_analyzer.C+", 8, "pimkpks_05.root")                         
-                                                                                                                                                                                                                                             
-      
+DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*.root", "pimkpks__B3_M16_Tree","DSelector_justin_1_analyzer.C+", 8, "pimkpks_05.root")                         
+
+
+# Lampda
+ll /cache/halld/RunPeriod-2017-01/analysis/ver09/tree_kplamb__M18/merged/
+root -l
+.x $ROOT_ANALYSIS_HOME/scripts/Load_DSelector.C
+DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver09/tree_kplamb__M18/merged/*.root", "kplamb__M18_Tree","DSelector_lampda_analyzer.C+", 8, "lampda_2length_2xi.root")
+
+                                                                                                                                                                                                                                            
+# phi
+
+ll /cache/halld/RunPeriod-2017-01/analysis/ver08/tree_kpkm__B4_U1/merged/
+root -l
+.x $ROOT_ANALYSIS_HOME/scripts/Load_DSelector.C
+DPROOFLiteManager::Process_Tree("/cache/halld/RunPeriod-2017-01/analysis/ver08/tree_kpkm__B4_U1/merged/*.root", "kpkm__B4_U1_Tree","DSelector_phi_analyzer.C+", 8, "kpkm_test.root")
+
+
+
+
+# Chache
+#Ks
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_pimkpks__B3_M16/merged/tree_pimkpks__B3_M16_03*.root
+#Lampda
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver09/tree_kplamb__M18/merged/*.root
+#Phi
+jcache get -e ahmedali@jlab.org /mss/halld/RunPeriod-2017-01/analysis/ver08/tree_kpkm__B4_U1/merged/*.root
+
+
+jcache status 13330780
