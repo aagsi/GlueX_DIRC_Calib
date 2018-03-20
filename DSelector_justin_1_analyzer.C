@@ -119,7 +119,7 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
 
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta X charge (deg); #p [GeV/c]", 100, -12, 12, 200, 0, 10);
     
     cartizian_theta_phi_vertex= new TH2I("cartizian_theta_phi_vertex", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
     cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
@@ -489,11 +489,16 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         DetectorSystem_t PiMinus2_TimingSYS = dPiMinus2Wrapper->Get_Detector_System_Timing();
         Double_t PiMinus2_Phi = locPiMinus2P4.Phi()*180/PI;
         Double_t PiMinus2_Theta = locPiMinus2P4.Theta()*180/PI;
+        
+        Double_t PiPlus_Phi = locPiPlusP4.Phi()*180/PI;
+        Double_t PiPlus_Theta = locPiPlusP4.Theta()*180/PI;
+        
         Double_t PiMinus2_mom = locPiMinus2P4.P();
         if ( PiMinus2_TimingSYS == SYS_TOF )
         {
             cartizian_theta_phi->Fill(PiMinus2_Theta, PiMinus2_Phi);
-            cartizian_theta_mom->Fill(PiMinus2_Theta,PiMinus2_mom );
+            cartizian_theta_mom->Fill(-1* PiMinus2_Theta,PiMinus2_mom );
+            cartizian_theta_mom->Fill(PiPlus_Theta      ,PiPlus_mom );
         }
         cartizian_theta_phi_vertex->Fill(PiMinus2_Theta, PiMinus2_Phi);
         cartizian_theta_mom_vertex->Fill(PiMinus2_Theta,PiMinus2_mom );
