@@ -494,6 +494,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         Double_t PiPlus_Theta = locPiPlusP4.Theta()*180/PI;
         
         Double_t PiMinus2_mom = locPiMinus2P4.P();
+        Double_t PiPlus_mom = locPiPlusP4.P();
         if ( PiMinus2_TimingSYS == SYS_TOF )
         {
             cartizian_theta_phi->Fill(PiMinus2_Theta, PiMinus2_Phi);
