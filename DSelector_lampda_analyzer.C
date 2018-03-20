@@ -100,9 +100,9 @@ void DSelector_lampda_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
     
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 10);
     cartizian_theta_phi_vertex= new TH2I("cartizian_theta_phi_vertex", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 500, 0, 180, 100, 0, 10);
     
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
@@ -433,11 +433,15 @@ Bool_t DSelector_lampda_analyzer::Process(Long64_t locEntry)
         DetectorSystem_t Proton_TimingSYS = dProtonWrapper->Get_Detector_System_Timing();
         Double_t Proton_Phi = locProtonP4.Phi()*180/PI;
         Double_t Proton_Theta = locProtonP4.Theta()*180/PI;
+        Double_t PiMinus_Theta = locPiMinusP4.Theta()*180/PI;
+        
         Double_t Proton_mom = locProtonP4.P();
+        Double_t PiMinus_mom = locPiMinusP4.P();
         if ( Proton_TimingSYS == SYS_TOF )
         {
             cartizian_theta_phi->Fill(Proton_Theta, Proton_Phi);
             cartizian_theta_mom->Fill(Proton_Theta,Proton_mom );
+            cartizian_theta_mom->Fill(-1.0 * PiMinus_Theta,PiMinus_mom );
         }
         cartizian_theta_phi_vertex->Fill(Proton_Theta, Proton_Phi);
         cartizian_theta_mom_vertex->Fill(Proton_Theta,Proton_mom );

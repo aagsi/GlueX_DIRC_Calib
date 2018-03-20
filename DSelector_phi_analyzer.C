@@ -93,7 +93,7 @@ void DSelector_phi_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
 
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 10);
     cartizian_theta_phi_vertex= new TH2I("cartizian_theta_phi_vertex", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
     cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
 
@@ -419,11 +419,14 @@ Bool_t DSelector_phi_analyzer::Process(Long64_t locEntry)
         DetectorSystem_t KMinus_TimingSYS = dKMinusWrapper->Get_Detector_System_Timing();
         Double_t KMinus_Phi = locKMinusP4.Phi()*180/PI;
         Double_t KMinus_Theta = locKMinusP4.Theta()*180/PI;
+        Double_t KPlus_Theta = locKPlusP4.Theta()*180/PI;
         Double_t KMinus_mom = locKMinusP4.P();
+        Double_t KPlus_mom = locKPlusP4.P();
         if ( KMinus_TimingSYS == SYS_TOF )
         {
             cartizian_theta_phi->Fill(KMinus_Theta, KMinus_Phi);
-            cartizian_theta_mom->Fill(KMinus_Theta,KMinus_mom );
+            cartizian_theta_mom->Fill(-1.0 * KMinus_Theta,KMinus_mom );
+            cartizian_theta_mom->Fill(KPlus_Theta,KPlus_mom );
         }
         cartizian_theta_phi_vertex->Fill(KMinus_Theta, KMinus_Phi);
         cartizian_theta_mom_vertex->Fill(KMinus_Theta,KMinus_mom );

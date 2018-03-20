@@ -119,10 +119,10 @@ void DSelector_justin_1_analyzer::Init(TTree *locTree)
     dHist_DetachedPathLength =new TH1I("dHist_DetachedPathLength", ";dHist_DetachedPathLength", 200, 0, 15);
 
     cartizian_theta_phi= new TH2I("cartizian_theta_phi", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta X charge (deg); #p [GeV/c]", 100, -12, 12, 200, 0, 10);
+    cartizian_theta_mom= new TH2I("cartizian_theta_mom", " ;#theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 10);
     
     cartizian_theta_phi_vertex= new TH2I("cartizian_theta_phi_vertex", " ;#theta (deg); #phi (deg)", 100, 0, 180, 100, -180, 180);
-    cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 100, 0, 12, 100, 0, 10);
+    cartizian_theta_mom_vertex= new TH2I("cartizian_theta_mom_vertex", " ;#theta (deg); #p [GeV/c]", 500, 0, 180, 100, 0, 10);
 
     // EXAMPLE CUT PARAMETERS:
     fFunc_dEdxCut_SelectHeavy = new TF1("fFunc_dEdxCut_SelectHeavy", "exp(-1.*[0]*x + [1]) + [2]", 0., 10.); // dFunc_dEdxCut_SelectHeavy
@@ -498,7 +498,7 @@ Bool_t DSelector_justin_1_analyzer::Process(Long64_t locEntry)
         if ( PiMinus2_TimingSYS == SYS_TOF )
         {
             cartizian_theta_phi->Fill(PiMinus2_Theta, PiMinus2_Phi);
-            cartizian_theta_mom->Fill(-1* PiMinus2_Theta,PiMinus2_mom );
+            cartizian_theta_mom->Fill(-1.0* PiMinus2_Theta,PiMinus2_mom );
             cartizian_theta_mom->Fill(PiPlus_Theta      ,PiPlus_mom );
         }
         cartizian_theta_phi_vertex->Fill(PiMinus2_Theta, PiMinus2_Phi);
