@@ -6,7 +6,7 @@
 #include "glxtools.C"
 #define PI 3.14159265
 
-void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root",int xbar=-1, int ybar=-1, double moms=3.75){
+void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF=0, int xbar=-1, int ybar=-1, double moms=3.75){
     
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
     const int nodes = glx_maxch;
@@ -150,7 +150,41 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F *hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
     //std::cout<<"######### No Problem 1 "<<std::endl;
     
-    TFile file("outFile.root","recreate");
+    
+    int max_pix=glx_nch; // 7000
+    TH1F*  fHistCh_k[max_pix], *fHistCh_pi[max_pix], *fHistCh_read_k[max_pix], *fHistCh_read_pi[max_pix];
+    TFile *ffile_cherenkov_pdf;
+    TString cherenkov_pdf_path;
+    
+    for(Int_t i=0; i<max_pix; i++) {
+        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1);
+        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1);
+    }
+    
+    // read pdf
+    if (gPDF==2) {
+        //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
+        cherenkov_pdf_path ="/lustre/nyx/panda/pdf_k.root"
+        cout<<"cherenkov_pdf_path= " <<cherenkov_pdf_path<<endl;
+        ffile_cherenkov_pdf  = new TFile(cherenkov_pdf_path, "READ");
+        for(Int_t pix=0; pix<max_pix; pix++) {
+            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistChـk_%d",pix));
+            fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_pi_%d",pix));
+        }
+    }
+    
+    
+    
+    
+    TString outFile;
+    if(gPDF==1){
+        outFile= "created_cherenkovPDF.root";
+    } else if(gPDF==2){ outFile= "outFile_separation_PDF.root";
+    } else {
+        outFile= "outFile.root";
+    }
+    
+    TFile file(outFile,"recreate");
     
     int pion_counter =0;
     DrcHit hit;
@@ -288,6 +322,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                 double dlenz = lenz;
                 if(reflected) lenz = 2*radiatorL - lenz;
                 
+                
                 bool isGood(false);
                 
                 double p1,p2;
@@ -340,18 +375,31 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             if(r && fabs(totalTime-hitTime) >cut_tdiffr) continue;
                             
                             hAngle[pdgId]->Fill(tangle);
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue; //cut_cangle  0.2
-                            isGood=true;
                             
-                            hTime->Fill(hitTime);
-                            hCalc->Fill(totalTime);
+                            if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle ,weight); // good after time cut
+                            if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle ,weight); // good after time cut
                             
-                            //	      std::cout<<pdgId<<" TMath::Log(fAngle[2]->Eval(tangle)+0.001) "<<TMath::Log(fAngle[2]->Eval(tangle)+noise)<<"    "<< TMath::Log(fAngle[3]->Eval(tangle)+noise)<< " "<< tangle<<std::endl;
+                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle && gPDF ==0){ //continue; //cut_cangle  0.2
+                                isGood=true;
+                                hTime->Fill(hitTime);
+                                hCalc->Fill(totalTime);
+                                //	      std::cout<<pdgId<<" TMath::Log(fAngle[2]->Eval(tangle)+0.001) "<<TMath::Log(fAngle[2]->Eval(tangle)+noise)<<"    "<< TMath::Log(fAngle[3]->Eval(tangle)+noise)<< " "<< tangle<<std::endl;
+                                sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
+                                sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
+                            }
                             
                             
-                            
-                            sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
-                            sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
+                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle && gPDF ==2){
+                                isGood=true;
+                                hTime->Fill(hitTime);
+                                hCalc->Fill(totalTime);
+                                // use histograms
+                                Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
+                                Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
+                                sum1 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
+                                sum2 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
+                                //std::cout<<"No Problem  separation  " <<kp<<" "<<kp<<std::endl;
+                            }
                             
                             
                             if(0){
@@ -731,7 +779,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      */
     lnph->Draw();
     
-    std::cout<<"separation = "<< sep << "  nph = "<<nph <<std::endl;
+    std::cout<<" ###### separation = "<< sep << "  nph = "<<nph <<std::endl;
     std::cout<<"maxTD "<<maxTD<<"  maxTR "<<maxTR<<std::endl;
     
     //TFile fc(infile+"_res"+nid+".root","recreate");
@@ -799,8 +847,6 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      glx_canvasAdd("18",800,400);
      hmom_rho->Draw();
      
-     */
-    /*
      glx_canvasAdd("19",800,400);
      mom_theta_phi->Draw("colz");
      
@@ -813,9 +859,15 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      glx_canvasAdd("22",800,400);
      mom_theta_rho_cut->Draw("colz");
      */
-    //glx_canvasSave(0);
+    glx_canvasSave(0);
     
     
+    if(gPDF ==1) {
+        for(Int_t i=0; i<max_pix; i++) {
+            fHistCh_k[i]->Write();
+            fHistCh_pi[i]->Write();
+        }
+    }
     
     mom_theta_phi->Write();
     file.Write();
