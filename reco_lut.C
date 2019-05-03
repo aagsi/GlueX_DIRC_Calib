@@ -164,7 +164,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     // read pdf
     if (gPDF==2) {
         //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
-        cherenkov_pdf_path ="/lustre/nyx/panda/pdf_k.root"
+        cherenkov_pdf_path ="/lustre/nyx/panda/pdf_k.root";
         cout<<"cherenkov_pdf_path= " <<cherenkov_pdf_path<<endl;
         ffile_cherenkov_pdf  = new TFile(cherenkov_pdf_path, "READ");
         for(Int_t pix=0; pix<max_pix; pix++) {
@@ -376,8 +376,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             
                             hAngle[pdgId]->Fill(tangle);
                             
-                            if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle ,weight); // good after time cut
-                            if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle ,weight); // good after time cut
+                            if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
+                            if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
                             
                             if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle && gPDF ==0){ //continue; //cut_cangle  0.2
                                 isGood=true;
