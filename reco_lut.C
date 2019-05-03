@@ -250,22 +250,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             }
             
             
-            if (pdgId == 2){
-                hist_ev_rho_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
-                hist_ev_chi_rho_cut->Fill(chi_square);
-                
-                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());}
-            
-            if (pdgId == 3){
-                hist_ev_phi_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
-                hist_ev_chi_phi_cut->Fill(chi_square);
-                
-                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
+
             
             
             hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
@@ -286,6 +271,27 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
             hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
+            
+            if (pdgId == 2){
+                hist_ev_rho_mass_cut->Fill(inv_mass);
+                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
+                hist_ev_chi_rho_cut->Fill(chi_square);
+                
+                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());}
+            
+            if (pdgId == 3){
+                hist_ev_phi_mass_cut->Fill(inv_mass);
+                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
+                hist_ev_chi_phi_cut->Fill(chi_square);
+                
+                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+            }
+            
+            
+            
+            
             
             if(glx_event->GetParent()>0) continue;
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
