@@ -79,7 +79,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         fAngle[i]->SetParameter(2,sigma[i]);    // sigma
         hAngle[i]->SetMarkerStyle(20);
         hAngle[i]->SetMarkerSize(0.8);
-        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",120,-60,60);
+        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",120,-120,120); // 120,-60,60
     }
     
     hAngle[2]->SetLineColor(4);
@@ -139,9 +139,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     TH2F * mom_theta_phi= new TH2F("mom_theta_phi", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     TH2F * mom_theta_rho= new TH2F("mom_theta_rho", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
-    
-    
-    
+        
     TH2F * mom_theta_phi_cut= new TH2F("mom_theta_phi_cut", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     TH2F * mom_theta_rho_cut= new TH2F("mom_theta_rho_cut", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     
@@ -164,11 +162,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     // read pdf
     if (gPDF==2) {
         //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
-        cherenkov_pdf_path ="/lustre/nyx/panda/pdf_k.root";
+        cherenkov_pdf_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF.root";
         cout<<"cherenkov_pdf_path= " <<cherenkov_pdf_path<<endl;
         ffile_cherenkov_pdf  = new TFile(cherenkov_pdf_path, "READ");
         for(Int_t pix=0; pix<max_pix; pix++) {
-            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistChـk_%d",pix));
+            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_k_%d",pix));
             fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_pi_%d",pix));
         }
     }
@@ -219,26 +217,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             
             // pion =2  ,kaon=3
-            
-            if (pdgId == 2){
-                hist_ev_rho_mass->Fill(inv_mass);
-                hist_ev_missing_mass_rho->Fill(missing_mass);
-                hist_ev_chi_rho->Fill(chi_square);
-                hmom_rho->Fill(momInBar.Mag());
-                
-                if (glx_event->GetPdg() > 0 ) mom_theta_phi->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_phi->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
-            
-            if (pdgId == 3){
-                hist_ev_phi_mass->Fill(inv_mass);
-                hist_ev_missing_mass_phi->Fill(missing_mass);
-                hist_ev_chi_phi->Fill(chi_square);
-                hmom_phi->Fill(momInBar.Mag());
-                
-                if (glx_event->GetPdg() > 0 ) mom_theta_rho->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_rho->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
+
+
             if(true){
                 if (pdgId == 2 && chi_square> 20) continue;
                 if (pdgId == 3 && chi_square> 20)continue;
@@ -295,7 +275,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             if(glx_event->GetParent()>0) continue;
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
-            //std::cout<<"######### No Problem 2 "<<std::endl;
+            std::cout<<"######### glx_event->GetHitSize()  "<< glx_event->GetHitSize()<<std::endl;
             for(int p=0; p<5; p++){
                 mAngle[p] = acos(sqrt(momentum * momentum + glx_mass[p]*glx_mass[p])/momentum/1.473);  //1.4738
                 fAngle[p]->SetParameter(1,mAngle[p]);// mean
@@ -385,26 +365,28 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
                             if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
                             
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle && gPDF ==0){ //continue; //cut_cangle  0.2
+			    if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue; 
                                 isGood=true;
                                 hTime->Fill(hitTime);
                                 hCalc->Fill(totalTime);
+
+
+                            if(gPDF ==0 || gPDF ==1 ){ //continue; //cut_cangle  0.2
                                 //	      std::cout<<pdgId<<" TMath::Log(fAngle[2]->Eval(tangle)+0.001) "<<TMath::Log(fAngle[2]->Eval(tangle)+noise)<<"    "<< TMath::Log(fAngle[3]->Eval(tangle)+noise)<< " "<< tangle<<std::endl;
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
-                            
-                            
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle && gPDF ==2){
-                                isGood=true;
-                                hTime->Fill(hitTime);
-                                hCalc->Fill(totalTime);
+                                                        
+                            if(gPDF ==2){
                                 // use histograms
                                 Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
                                 Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
-                                sum1 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
-                                sum2 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
-                                //std::cout<<"No Problem  separation  " <<kp<<" "<<kp<<std::endl;
+                                if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum1 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
+                                if (fHistCh_read_pi[ch]->GetBinContent(kpi) > 0 )sum2 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
+                                
+				//if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
+				//std::cout<<"No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kpi) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
+
                             }
                             
                             
@@ -551,7 +533,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     gStyle->SetOptTitle(0);
     gStyle->SetOptStat(0);
     gStyle->SetOptFit(0);
-    
+   
+
+
+ 
     TF1 *ff;
     double sep=0,esep=0, m1=0,m2=0,s1=0,s2=0;
     if(hLnDiff[3]->GetEntries()>100){
@@ -725,11 +710,14 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         hNph[3]->SetLineColor(kRed);
         hNph[3]->Draw("same");
     }
+
+
+
     
     //////
     
+/*    
     
-    /*
      glx_canvasAdd("hNph_p"+nid,800,400);
      
      double nph_p = 0;
@@ -760,8 +748,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      hNph_n[3]->SetLineColor(kRed);
      hNph_n[3]->Draw("same");
      }
-     */
-    
+     
+  */  
     
     // hNphC->SetLineColor(kBlack);
     // hNphC->Draw("same");
@@ -776,17 +764,21 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     lnph->AddEntry(hNph[2],"pions","lp");
     lnph->AddEntry(hNph[3],"kaons","lp");
     
-    /*
-     lnph->AddEntry(hNph_p[2],"pions","lp");
-     lnph->AddEntry(hNph_p[3],"kaons","lp");
+    
+     //lnph->AddEntry(hNph_p[2],"pions","lp");
+     //lnph->AddEntry(hNph_p[3],"kaons","lp");
      
-     lnph->AddEntry(hNph_n[2],"pions","lp");
-     lnph->AddEntry(hNph_n[3],"kaons","lp");
-     */
+     //lnph->AddEntry(hNph_n[2],"pions","lp");
+     //lnph->AddEntry(hNph_n[3],"kaons","lp");
+     
     lnph->Draw();
     
     std::cout<<" ###### separation = "<< sep << "  nph = "<<nph <<std::endl;
     std::cout<<"maxTD "<<maxTD<<"  maxTR "<<maxTR<<std::endl;
+
+
+
+
     
     //TFile fc(infile+"_res"+nid+".root","recreate");
     // TFile fc("data/reco_lut_res/res"+nid+".root","recreate");
