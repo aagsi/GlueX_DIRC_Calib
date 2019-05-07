@@ -198,9 +198,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         fHistMCP_pi[i] = new TH1F(Form("fHistMCP_pi_%d",i),Form("fHistMCP_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
     }
     
-    // read Cherenkov
+    // Read Cherenkov per PMT
+    TF1 *fit_mcp_pi = new TF1("fit_mcp_pi","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
+    fit_mcp_pi->SetLineColor(kMagenta);
+    
+    
+    TCanvas *c2 = new TCanvas("c2","c2",800,500);
     if (gCherenkov_Correction==2) {
-        //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
         cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";
         cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
@@ -208,9 +212,23 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fHistMCP_read_k[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",mcp));
             fHistMCP_read_pi[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",mcp));
             
+            fit_mcp_pi->SetParameters(100,0.82,0.010,10);
+            fit_mcp_pi->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+            fit_mcp_pi->SetParLimits(0,0.1,1E6);
+            fit_mcp_pi->SetParLimits(1,0.82-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
+            fit_mcp_pi->SetParLimits(2,0.005,0.030); // width
             
-            array_correction_k[mcp]= 0.04;
-            array_correction_pi[mcp]= 0.04;
+            fHistMCP_read_pi[mcp]->Fit("fit_mcp_pi","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
+            
+            
+            c2->cd();
+            fHistMCP_read_pi[mcp]->Draw();
+            c2->Update();
+            c2->WaitPrimitive();
+            
+            
+            array_correction_pi[mcp]= -0.004;
+            //array_correction_pi[mcp]= fit_mcp_pi->GetParameter(1);
         }
     }
     
@@ -441,8 +459,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             
                             // fill cherenkove histo
                             if(gCherenkov_Correction != 2) hAngle[pdgId]->Fill(tangle);
-                            if(gCherenkov_Correction == 2 && pdgId == 3) hAngle[pdgId]->Fill(tangle + array_correction_k[pmt]);
-                            if(gCherenkov_Correction == 2 && pdgId == 2) hAngle[pdgId]->Fill(tangle + array_correction_pi[pmt]);
+                            if(gCherenkov_Correction == 2) hAngle[pdgId]->Fill(tangle + array_correction_pi[pmt]);
                             
                             if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
                             isGood=true;
@@ -947,7 +964,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      */
     
     
-
+    
     
     glx_canvasSave(0);
     
