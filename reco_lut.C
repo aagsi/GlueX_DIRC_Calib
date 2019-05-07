@@ -43,7 +43,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     double criticalAngle = asin(1.00028/1.47125); // n_quarzt = 1.47125; //(1.47125 <==> 390nm)
     double evtime,luttheta,tangle,lenz;
     int64_t pathid;
-    TVector3 posInBar,momInBar,dir,dird;
+    TVector3 posInBar,momInBar,momInBar_unit,dir,dird;
     double cherenkovreco[5],spr[5];
     
     TF1 *fit = new TF1("fgaus","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
@@ -148,6 +148,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F *hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
     //std::cout<<"######### No Problem 1 "<<std::endl;
     
+TH1F*  hdir_x = new TH1F("hdir_x",";dir x component ;entries [#]", 100,-1.0,1.0);
+TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
+TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
+
+
     
     int max_pix=glx_nch; // 7000
     TH1F*  fHistCh_k[max_pix], *fHistCh_pi[max_pix], *fHistCh_read_k[max_pix], *fHistCh_read_pi[max_pix];
@@ -155,8 +160,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TString cherenkov_pdf_path;
     
     for(Int_t i=0; i<max_pix; i++) {
-        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1);
-        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1);
+        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
+        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
     }
     
     // read pdf
@@ -230,9 +235,22 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             }
             
             
+momInBar_unit=momInBar.Unit();
 
-            
-            
+
+double dir_x =momInBar_unit.X();
+double dir_y =momInBar_unit.Y();
+double dir_z =momInBar_unit.Z();
+
+
+//hdir_x->Fill(dir_x);
+//hdir_y->Fill(dir_y);
+//hdir_z->Fill(dir_z);
+
+
+
+//cout<<"=========>" << dir_x << "  "<< dir_y<< endl;
+
             hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
@@ -250,7 +268,21 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
+//if (bar != 6 )continue ;
+
+
+//if(fabs(dir_x)>0.01 )continue;
+//if(dir_y<-0.05)continue;
+
+hdir_x->Fill(dir_x);
+hdir_y->Fill(dir_y);
+hdir_z->Fill(dir_z);
+
+
+
             hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
+
+
             
             if (pdgId == 2){
                 hist_ev_rho_mass_cut->Fill(inv_mass);
@@ -275,7 +307,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             if(glx_event->GetParent()>0) continue;
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
-            std::cout<<"######### glx_event->GetHitSize()  "<< glx_event->GetHitSize()<<std::endl;
+            //std::cout<<"######### glx_event->GetHitSize()  "<< glx_event->GetHitSize()<<std::endl;
             for(int p=0; p<5; p++){
                 mAngle[p] = acos(sqrt(momentum * momentum + glx_mass[p]*glx_mass[p])/momentum/1.473);  //1.4738
                 fAngle[p]->SetParameter(1,mAngle[p]);// mean
@@ -381,11 +413,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                                 // use histograms
                                 Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
                                 Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
-                                if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum1 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
-                                if (fHistCh_read_pi[ch]->GetBinContent(kpi) > 0 )sum2 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
+				if (fHistCh_read_pi[ch]->GetBinContent(kpi) > 0 )sum1 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
+                                if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum2 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
                                 
 				//if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
-				//std::cout<<"No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kpi) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
+				std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
 
                             }
                             
@@ -437,6 +469,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             hNphC->Fill(nphc);
             
             double sum = sum1-sum2;
+	//cout<<"########### sum  "<<sum <<"  sum1  "<<sum1<<"  sum2  "<<sum2<<endl;
             hLnDiff[pdgId]->Fill(sum);
             
             count[pdgId]++;
@@ -857,6 +890,23 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      glx_canvasAdd("22",800,400);
      mom_theta_rho_cut->Draw("colz");
      */
+
+     glx_canvasAdd("14",800,400);
+     hExtrapolatedBarHitXY_cut->Draw("colz");
+
+glx_canvasAdd("23",800,400);
+
+hdir_x->Draw();
+glx_canvasAdd("24",800,400);
+
+hdir_y->Draw();
+glx_canvasAdd("25",800,400);
+
+hdir_z->Draw();
+
+
+
+
     glx_canvasSave(0);
     
     
