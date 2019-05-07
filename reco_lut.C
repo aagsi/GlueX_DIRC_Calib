@@ -190,8 +190,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
     
-    double array_correction_k[mcp_num];
-    double array_correction_k[mcp_num];
+    double array_correction_pi[mcp_num];
     
     for(Int_t i=0; i<mcp_num; i++) {
         fHistMCP_k[i] = new TH1F(Form("fHistMCP_k_%d",i),Form("fHistMCP_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
@@ -215,7 +214,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fit_mcp_pi->SetParameters(100,0.82,0.010,10);
             fit_mcp_pi->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_mcp_pi->SetParLimits(0,0.1,1E6);
-            fit_mcp_pi->SetParLimits(1,0.82-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
+            fit_mcp_pi->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
             fit_mcp_pi->SetParLimits(2,0.005,0.030); // width
             
             fHistMCP_read_pi[mcp]->Fit("fit_mcp_pi","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
