@@ -184,56 +184,146 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     ////////////////////////////
     /// cherenkove correction///
     ////////////////////////////
-    int mcp_num=110;
-    
+    int mcp_num=108; //108
+
     TH1F*  fHistMCP_k[mcp_num], *fHistMCP_pi[mcp_num], *fHistMCP_read_k[mcp_num], *fHistMCP_read_pi[mcp_num];
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
-    
+
     double array_correction_pi[mcp_num];
-    
+
     for(Int_t i=0; i<mcp_num; i++) {
         fHistMCP_k[i] = new TH1F(Form("fHistMCP_k_%d",i),Form("fHistMCP_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
         fHistMCP_pi[i] = new TH1F(Form("fHistMCP_pi_%d",i),Form("fHistMCP_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
     }
-    
+
     // Read Cherenkov per PMT
     TF1 *fit_mcp_pi = new TF1("fit_mcp_pi","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
     fit_mcp_pi->SetLineColor(kMagenta);
-    
-    
-    TCanvas *c2 = new TCanvas("c2","c2",800,500);
+
+
+  TH1F*  hdiff_test = new TH1F("hdiff_test",";mean diff ;entries [#]", 100,0,0.1);
+  TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
+  TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
+
+
+//    TCanvas *c2 = new TCanvas("c2","c2",800,500);
+
+
+//gStyle->SetPalette(kLightTemperature);
+gStyle->SetPalette(kThermometer);
+
+glx_canvasAdd("r_pmt_correction",800,400);
+    TLine *line_cor = new TLine(0,0,0,1000);
+    line_cor->SetLineStyle(1);
+    line_cor->SetX1(mAngle[2]);
+    line_cor->SetX2(mAngle[2]);
+    line_cor->SetY1(gPad->GetUymin());
+    line_cor->SetY2(gPad->GetUymax());
+    line_cor->SetLineColor(1);
+
+
+
     if (gCherenkov_Correction==2) {
         cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";
         cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
         for(Int_t mcp=0; mcp<mcp_num; mcp++) {
+        if(mcp<=10 || (mcp>=90 && mcp<=96)) continue; // dummy pmts
             fHistMCP_read_k[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",mcp));
             fHistMCP_read_pi[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",mcp));
-            
             fit_mcp_pi->SetParameters(100,0.82,0.010,10);
-            fit_mcp_pi->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+             fit_mcp_pi->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_mcp_pi->SetParLimits(0,0.1,1E6);
             fit_mcp_pi->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
             fit_mcp_pi->SetParLimits(2,0.005,0.030); // width
-            
+
             fHistMCP_read_pi[mcp]->Fit("fit_mcp_pi","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
-            
-            
-            c2->cd();
-            fHistMCP_read_pi[mcp]->Draw();
-            c2->Update();
-            c2->WaitPrimitive();
-            
-            
-            array_correction_pi[mcp]= -0.004;
-            //array_correction_pi[mcp]= fit_mcp_pi->GetParameter(1);
+
+
+	    double mean_cherenkov_cor=  fit_mcp_pi->GetParameter(1);
+            double sigma_cherenkov_cor= fit_mcp_pi->GetParameter(2);
+	    double delta_cherenkov_cor= mAngle[2] - mean_cherenkov_cor;
+	    double histo_cor_entries = fHistMCP_read_pi[mcp]->GetEntries();
+
+
+ 	    double val_1 = (delta_cherenkov_cor)*1000.0 ;
+
+
+
+//cout<<"##########"<< fabs(mean_cherenkov_cor - mAngle[2]) << "  "<<sigma_cherenkov_cor*1000<<endl;
+
+hsigma_test->Fill(sigma_cherenkov_cor*1000);
+hdiff_test->Fill(fabs(mean_cherenkov_cor-mAngle[2]));
+hmean_test->Fill(mean_cherenkov_cor);
+
+
+
+	    if ( fabs(delta_cherenkov_cor) <0.01 && (sigma_cherenkov_cor*1000<12 && sigma_cherenkov_cor*1000> 7) && histo_cor_entries>0 ) {
+            array_correction_pi[mcp]= fit_mcp_pi->GetParameter(1);
+
+
+cout<<"##########"<< "shift "<<val_1<<endl;
+                for(Int_t m=0; m<64; m++)
+                    for(Int_t n=0; n<64; n++){
+                        //glx_hdigi[mcp]->Fill(m,n, val_1);
+
+                        glx_hdigi[mcp]->SetBinContent(m, n,val_1);
+		}
+	    	//array_correction_pi[mcp]= -0.004;
+           // c2->cd();
+
+ 
+fHistMCP_read_pi[mcp]->Draw();
+glx_canvasGet("r_pmt_correction")->Update();
+//line_cor->Draw();
+                TLine *lin_ch_pi_v = new TLine(0,0,0,1000);
+                lin_ch_pi_v->SetX1(mAngle[2]);
+                lin_ch_pi_v->SetX2(mAngle[2]);
+                lin_ch_pi_v->SetY1(gPad->GetUymin());
+                lin_ch_pi_v->SetY2(gPad->GetUymax());
+                lin_ch_pi_v->SetLineColor(kBlue);
+
+
+                lin_ch_pi_v->Draw();
+glx_canvasGet("r_pmt_correction")->Update();
+glx_waitPrimitive("r_pmt_correction");
+
+//hsigma_test->Fill(sigma_cherenkov_cor*1000);
+//hdiff_test->Fill(fabs(delta_cherenkov_cor));
+}
+
         }
     }
+/*
+TCanvas *c3 = new TCanvas("c3","c3",800,500);
+hdiff_test->Draw();
+TCanvas *c4 = new TCanvas("c4","c4",800,500);
+hsigma_test->Draw();
+TCanvas *c5 = new TCanvas("c5","c5",800,500);
+hmean_test->Draw();
+*/
+
+       
+  
     
-    
-    
-    
+   // glx_drawDigi("m,p,v\n",0);
+    //glx_cdigi->SetName("hp");
+    //glx_canvasAdd(glx_cdigi);
+   
+
+double max_digi(10);//30
+double min_digi(-10);//-30
+	glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
+
+
+
+   glx_canvasSave(0);
+
+
+
+return;
+
     TString outFile;
     if(gPDF==1){
         outFile= "created_cherenkovPDF.root";
@@ -427,7 +517,16 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             
                             luttheta = dir.Angle(TVector3(-1,0,0));
                             if(luttheta > TMath::PiOver2()) luttheta = TMath::Pi()-luttheta;
-                            tangle = momInBar.Angle(dir);//-0.004; //correction
+                            //tangle = momInBar.Angle(dir);//-0.004; //correction
+
+			    ////////////////////			
+			    // PMT Correction //
+			    ////////////////////
+                            if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
+                            if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction_pi[pmt] ;
+
+
+
                             
                             //double bartime = lenz/cos(luttheta)/20.4; //198 //203.767 for 1.47125
                             double bartime = lenz/cos(luttheta)/19.6; //203.767 for 1.47125
@@ -457,9 +556,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             if(gCherenkov_Correction ==1 && pdgId == 2) fHistMCP_pi[pmt]->Fill(tangle);
                             
                             // fill cherenkove histo
-                            if(gCherenkov_Correction != 2) hAngle[pdgId]->Fill(tangle);
-                            if(gCherenkov_Correction == 2) hAngle[pdgId]->Fill(tangle + array_correction_pi[pmt]);
-                            
+                            hAngle[pdgId]->Fill(tangle);
                             if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
                             isGood=true;
                             hTime->Fill(hitTime);
@@ -595,10 +692,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     //TString nid=Form("_%2.2f_%2.2f",theta,phi);
     TString nid=Form("_%d_%d",xbar,ybar);
+    /*
     glx_drawDigi("m,p,v\n",0);
     glx_cdigi->SetName("hp"+nid);
     glx_canvasAdd(glx_cdigi);
-    
+    */
     glx_canvasAdd("hAngle"+nid,800,400);
     
     if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
@@ -966,7 +1064,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     
     glx_canvasSave(0);
-    
+   
     
     if(gPDF ==1) {
         for(Int_t i=0; i<glx_nch; i++) {
