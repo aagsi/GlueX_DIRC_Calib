@@ -6,25 +6,25 @@
 #include "glxtools.C"
 #define PI 3.14159265
 
+
+// gPDF = 1 Creat PDF per pix
+// gPDF = 2 Calculate Sepration from PDF
+
+// gCherenkov_Correction = 1 Creat histo per PMT
+// gCherenkov_Correction = 2 Apply per PMT correction
+
 void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
-    
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
     const int nodes = glx_maxch;
     const int luts = 24;
-    //std::cout<<"######### No Problem 1 "<<std::endl;
     TFile *fLut = new TFile(inlut);
     TTree *tLut=(TTree *) fLut->Get("lut_dirc") ;
     TClonesArray* cLut[luts];
-    //std::cout<<"######### No Problem 2 "<<std::endl;
     for(int l=0; l<luts; l++){
-        //std::cout<<"######### No Problem 3 "<<std::endl;
         cLut[l] = new TClonesArray("DrcLutNode");
-        //std::cout<<"######### No Problem 4 "<<std::endl;
         tLut->SetBranchAddress(Form("LUT_%d",l),&cLut[l]);
-        //std::cout<<"######### No Problem 5 "<<std::endl;
     }
     tLut->GetEntry(0);
-    //std::cout<<"######### No Problem 6 "<<std::endl;
     DrcLutNode *lutNode[luts][nodes];
     for(int l=0; l<luts; l++){
         for(int i=0; i<nodes; i++) lutNode[l][i] = (DrcLutNode*) cLut[l]->At(i);
@@ -59,19 +59,14 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F *hCalc = new TH1F("hCalc",";calculated time [ns];entries [#]",   1000,0,200);
     TH1F *hNphC = new TH1F("hNphC",";detected photons [#];entries [#]", 150,0,150);
     hDiff->SetMinimum(0);
-    
-    
     TGaxis::SetMaxDigits(3);
-    
     double sigma[]={0.01,0.01,0.01,0.010,0.01,0.01};
     for(int i=0; i<5; i++){
         double momentum=3.75;
         hAngle[i]= new TH1F(Form("hAngle_%d",i),  "cherenkov angle;#theta_{C} [rad];entries/N_{max} [#]", 250,0.6,1);
         hNph[i] = new TH1F(Form("hNph_%d",i),";detected photons [#];entries [#]", 150,0,150);
-        
         //hNph_p[i] = new TH1F(Form("hNph_p_%d",i),";detected photons (+) [#];entries [#]", 150,0,150);
         //hNph_n[i] = new TH1F(Form("hNph_n_%d",i),";detected photons (-) [#];entries [#]", 150,0,150);
-        
         mAngle[i] = acos(sqrt(momentum * momentum + glx_mass[i]*glx_mass[i])/momentum/1.473);  //1.4738
         fAngle[i] = new TF1(Form("fAngle_%d",i),"[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0.7,0.9);
         fAngle[i]->SetParameter(0,1);        // const
@@ -81,14 +76,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         hAngle[i]->SetMarkerSize(0.8);
         hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",120,-120,120); // 120,-60,60
     }
-    
     hAngle[2]->SetLineColor(4);
     hAngle[3]->SetLineColor(2);
     hAngle[2]->SetMarkerColor(kBlue+1);
     hAngle[3]->SetMarkerColor(kRed+1);
     fAngle[2]->SetLineColor(4);
     fAngle[3]->SetLineColor(2);
-    
     hLnDiff[2]->SetLineColor(4);
     hLnDiff[3]->SetLineColor(2);
     int evtcount=0,count[5]={0};
@@ -96,27 +89,17 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TLine *gLine = new TLine();
     // cuts
     double cut_cangle=0.04;
-    
     double cut_tdiffd=3;//3;
     double cut_tdiffr=4;//3.5;
-    
-    //double cut_tdiffd=3;
-    //double cut_tdiffr=3.5;
-    
-    
     const int nbins=20;
-    
-    
     //TFile file("outFile.root","recreate");
-    
     double inv_mass, missing_mass, chi_square, TofTrackDist;
-    
     TH1F *hist_ev_rho_mass = new TH1F("hist_ev_rho_mass","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
     TH1F *hist_ev_phi_mass = new TH1F("hist_ev_phi_mass","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
     TH1F *hist_ev_missing_mass_phi = new TH1F("hist_ev_missing_mass_phi",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
     TH1F *hist_ev_missing_mass_rho = new TH1F("hist_ev_missing_mass_rho",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
-    TH1F *hist_ev_chi_phi = new TH1F("hist_ev_chi_phi","; #phi Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
-    TH1F *hist_ev_chi_rho = new TH1F("hist_ev_chi_rho","; #rho Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
+    TH1F *hist_ev_chi_phi = new TH1F("hist_ev_chi_phi","; #phi Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
+    TH1F *hist_ev_chi_rho = new TH1F("hist_ev_chi_rho","; #rho Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
     
     TH1F *hist_ev_rho_mass_cut = new TH1F("hist_ev_rho_mass_cut","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
     TH1F *hist_ev_phi_mass_cut = new TH1F("hist_ev_phi_mass_cut","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
@@ -136,28 +119,23 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //TH2F * mom_theta = new TH2F( "mom_theta" , "; Momentum [Gev/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
     //TH2F * mom_theta_cut = new TH2F( "mom_theta_cut" , "; Momentum [GeV/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
     
-    
     TH2F * mom_theta_phi= new TH2F("mom_theta_phi", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     TH2F * mom_theta_rho= new TH2F("mom_theta_rho", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     
     TH2F * mom_theta_phi_cut= new TH2F("mom_theta_phi_cut", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     TH2F * mom_theta_rho_cut= new TH2F("mom_theta_rho_cut", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
     
-    
-    TH1F *hmom_phi = new TH1F("hmom_phi",";kaon Momentum [GeV/c];entries [#]", 100,0,12);
-    TH1F *hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
-    //std::cout<<"######### No Problem 1 "<<std::endl;
+    TH1F * hmom_phi = new TH1F("hmom_phi",";kaon Momentum [GeV/c];entries [#]", 100,0,12);
+    TH1F * hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
     
     TH1F*  hdir_x = new TH1F("hdir_x",";dir x component ;entries [#]", 100,-1.0,1.0);
     TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
     
-    
     ///////////////////////
     /// cherenkove PDF  ///
     ///////////////////////
-    
     TH1F*  fHistCh_k[glx_nch], *fHistCh_pi[glx_nch], *fHistCh_read_k[glx_nch], *fHistCh_read_pi[glx_nch];
     TFile *ffile_cherenkov_pdf;
     TString cherenkov_pdf_path;
@@ -166,7 +144,6 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
         fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
     }
-    
     // read pdf
     if (gPDF==2) {
         //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
@@ -178,152 +155,105 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_pi_%d",pix));
         }
     }
-    
-    
-    
     ////////////////////////////
     /// cherenkove correction///
     ////////////////////////////
-    int mcp_num=108; //108
-
-    TH1F*  fHistMCP_k[mcp_num], *fHistMCP_pi[mcp_num], *fHistMCP_read_k[mcp_num], *fHistMCP_read_pi[mcp_num];
+    int PMT_num=108; //108
+    double referance_angle = mAngle[2]; // pi
+    //double referance_angle = mAngle[3]; // k
+    
+    double referance_angle_pi = mAngle[2];
+    double referance_angle_k = mAngle[3];
+    
+    
+    TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
-
-    double array_correction_pi[mcp_num];
-
-    for(Int_t i=0; i<mcp_num; i++) {
-        fHistMCP_k[i] = new TH1F(Form("fHistMCP_k_%d",i),Form("fHistMCP_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-        fHistMCP_pi[i] = new TH1F(Form("fHistMCP_pi_%d",i),Form("fHistMCP_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+    // correction array
+    double array_correction[PMT_num];
+    // creat histograms Cherenkov per PMT
+    for(Int_t i=0; i<PMT_num; i++) {
+        fHistPMT_k[i] = new TH1F(Form("fHistPMT_k_%d",i),Form("fHistPMT_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistPMT_pi[i] = new TH1F(Form("fHistPMT_pi_%d",i),Form("fHistPMT_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
     }
-
     // Read Cherenkov per PMT
-    TF1 *fit_mcp_pi = new TF1("fit_mcp_pi","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
-    fit_mcp_pi->SetLineColor(kMagenta);
-
-
-  TH1F*  hdiff_test = new TH1F("hdiff_test",";mean diff ;entries [#]", 100,0,0.1);
-  TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
-  TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
-
-
-//    TCanvas *c2 = new TCanvas("c2","c2",800,500);
-
-
-//gStyle->SetPalette(kLightTemperature);
-gStyle->SetPalette(kThermometer);
-
-glx_canvasAdd("r_pmt_correction",800,400);
-    TLine *line_cor = new TLine(0,0,0,1000);
-    line_cor->SetLineStyle(1);
-    line_cor->SetX1(mAngle[2]);
-    line_cor->SetX2(mAngle[2]);
-    line_cor->SetY1(gPad->GetUymin());
-    line_cor->SetY2(gPad->GetUymax());
-    line_cor->SetLineColor(1);
-
-
-
+    TF1 *fit_PMT = new TF1("fit_PMT","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
+    fit_PMT->SetLineColor(kMagenta);
+    TH1F*  hdiff_test = new TH1F("hdiff_test",";mean diff ;entries [#]", 100,0,0.1);
+    TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
+    TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
+    //gStyle->SetPalette(kLightTemperature);
+    gStyle->SetPalette(kThermometer);
+    glx_canvasAdd("r_pmt_correction",800,400);
     if (gCherenkov_Correction==2) {
         cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";
         cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
-        for(Int_t mcp=0; mcp<mcp_num; mcp++) {
-        if(mcp<=10 || (mcp>=90 && mcp<=96)) continue; // dummy pmts
-            fHistMCP_read_k[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",mcp));
-            fHistMCP_read_pi[mcp] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",mcp));
-            fit_mcp_pi->SetParameters(100,0.82,0.010,10);
-             fit_mcp_pi->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
-            fit_mcp_pi->SetParLimits(0,0.1,1E6);
-            fit_mcp_pi->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
-            fit_mcp_pi->SetParLimits(2,0.005,0.030); // width
-
-            fHistMCP_read_pi[mcp]->Fit("fit_mcp_pi","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
-
-
-	    double mean_cherenkov_cor=  fit_mcp_pi->GetParameter(1);
-            double sigma_cherenkov_cor= fit_mcp_pi->GetParameter(2);
-	    double delta_cherenkov_cor= mAngle[2] - mean_cherenkov_cor;
-	    double histo_cor_entries = fHistMCP_read_pi[mcp]->GetEntries();
-
-
- 	    double val_1 = (delta_cherenkov_cor)*1000.0 ;
-
-
-
-//cout<<"##########"<< fabs(mean_cherenkov_cor - mAngle[2]) << "  "<<sigma_cherenkov_cor*1000<<endl;
-
-hsigma_test->Fill(sigma_cherenkov_cor*1000);
-hdiff_test->Fill(fabs(mean_cherenkov_cor-mAngle[2]));
-hmean_test->Fill(mean_cherenkov_cor);
-
-
-
-	    if ( fabs(delta_cherenkov_cor) <0.01 && (sigma_cherenkov_cor*1000<12 && sigma_cherenkov_cor*1000> 7) && histo_cor_entries>0 ) {
-            array_correction_pi[mcp]= fit_mcp_pi->GetParameter(1);
-
-
-cout<<"##########"<< "shift "<<val_1<<endl;
+        for(Int_t PMT=0; PMT<PMT_num; PMT++) {
+            if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
+            fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
+            fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
+            fit_PMT->SetParameters(100,0.82,0.010,10);
+            fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+            fit_PMT->SetParLimits(0,0.1,1E6);
+            fit_PMT->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
+            fit_PMT->SetParLimits(2,0.005,0.030); // width
+            fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
+            double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
+            double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
+            double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
+            double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
+            double val_1 = (delta_cherenkov_cor)*1000.0 ;
+            // cout<<"##########"<< fabs(mean_cherenkov_cor - referance_angle) << "  "<<sigma_cherenkov_cor*1000<<endl;
+            hsigma_test->Fill(sigma_cherenkov_cor*1000);
+            hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+            hmean_test->Fill(mean_cherenkov_cor);
+            // correction condition
+            if ( fabs(delta_cherenkov_cor) <0.01 && (sigma_cherenkov_cor*1000<12 && sigma_cherenkov_cor*1000> 7) && histo_cor_entries>0 ) {
+                array_correction[PMT]= fit_PMT->GetParameter(1);
+                cout<<"##########"<< "shift "<<val_1<<endl;
+                // Fill PMT
                 for(Int_t m=0; m<64; m++)
                     for(Int_t n=0; n<64; n++){
-                        //glx_hdigi[mcp]->Fill(m,n, val_1);
-
-                        glx_hdigi[mcp]->SetBinContent(m, n,val_1);
-		}
-	    	//array_correction_pi[mcp]= -0.004;
-           // c2->cd();
-
- 
-fHistMCP_read_pi[mcp]->Draw();
-glx_canvasGet("r_pmt_correction")->Update();
-//line_cor->Draw();
-                TLine *lin_ch_pi_v = new TLine(0,0,0,1000);
-                lin_ch_pi_v->SetX1(mAngle[2]);
-                lin_ch_pi_v->SetX2(mAngle[2]);
-                lin_ch_pi_v->SetY1(gPad->GetUymin());
-                lin_ch_pi_v->SetY2(gPad->GetUymax());
-                lin_ch_pi_v->SetLineColor(kBlue);
-
-
-                lin_ch_pi_v->Draw();
-glx_canvasGet("r_pmt_correction")->Update();
-glx_waitPrimitive("r_pmt_correction");
-
-//hsigma_test->Fill(sigma_cherenkov_cor*1000);
-//hdiff_test->Fill(fabs(delta_cherenkov_cor));
-}
-
+                        glx_hdigi[PMT]->SetBinContent(m, n,val_1);
+                    }
+                // default correction
+                //array_correction[PMT]= -0.004;
+                fHistPMT_read_pi[PMT]->Draw();
+                glx_canvasGet("r_pmt_correction")->Update();
+                TLine *lin_ref = new TLine(0,0,0,1000);
+                lin_ref->SetX1(referance_angle);
+                lin_ref->SetX2(referance_angle);
+                lin_ref->SetY1(gPad->GetUymin());
+                lin_ref->SetY2(gPad->GetUymax());
+                lin_ref->SetLineColor(kBlue);
+                lin_ref->Draw();
+                glx_canvasGet("r_pmt_correction")->Update();
+                glx_waitPrimitive("r_pmt_correction");
+                //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+                //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+                //hmean_test->Fill(mean_cherenkov_cor);
+            }
         }
     }
-/*
-TCanvas *c3 = new TCanvas("c3","c3",800,500);
-hdiff_test->Draw();
-TCanvas *c4 = new TCanvas("c4","c4",800,500);
-hsigma_test->Draw();
-TCanvas *c5 = new TCanvas("c5","c5",800,500);
-hmean_test->Draw();
-*/
-
-       
-  
     
-   // glx_drawDigi("m,p,v\n",0);
-    //glx_cdigi->SetName("hp");
-    //glx_canvasAdd(glx_cdigi);
-   
-
-double max_digi(10);//30
-double min_digi(-10);//-30
-	glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
-
-
-
-   glx_canvasSave(0);
-
-
-
-return;
-
+    glx_canvasAdd("r_diff_test",800,400);
+    hdiff_test->Draw();
+    glx_canvasAdd("r_hsigma_test",800,400);
+    hsigma_test->Draw();
+    glx_canvasAdd("r_hmean_test",800,400);
+    hmean_test->Draw();
+    
+    double max_digi(10);//30
+    double min_digi(-10);//-30
+    glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
+    glx_canvasSave(0);
+    return;
+    
+    
+    //////////////////
+    /// Reco Method //
+    //////////////////
     TString outFile;
     if(gPDF==1){
         outFile= "created_cherenkovPDF.root";
@@ -332,9 +262,7 @@ return;
     } else {
         outFile= "outFile.root";
     }
-    
     TFile file(outFile,"recreate");
-    
     int pion_counter =0;
     DrcHit hit;
     for (int e = 0; e < glx_ch->GetEntries(); e++){
@@ -351,6 +279,11 @@ return;
             int bar = glx_event->GetId();
             //if(count[pdgId]>1000) continue;
             
+            //std::cout<<"######### No Problem "<<pdgId<<std::endl;
+            inv_mass=  glx_event->GetInvMass();
+            missing_mass=  glx_event->GetMissMass();
+            chi_square=  glx_event->GetChiSq();
+            TofTrackDist=  glx_event->GetTofTrackDist();
             
             ////////////////////////
             //////// selection//////
@@ -358,77 +291,44 @@ return;
             
             if (pdgId == 2) pion_counter++ ;
             if (pdgId == 2 && pion_counter%20 !=0) continue;
-            
-            
-            //std::cout<<"######### No Problem "<<pdgId<<std::endl;
-            inv_mass=  glx_event->GetInvMass();
-            missing_mass=  glx_event->GetMissMass();
-            chi_square=  glx_event->GetChiSq();
-            TofTrackDist=  glx_event->GetTofTrackDist();
-            
-            
             // pion =2  ,kaon=3
-            
-            
             if(true){
                 if (pdgId == 2 && chi_square> 20) continue;
                 if (pdgId == 3 && chi_square> 20)continue;
-                
                 if (pdgId == 2 && (inv_mass< 0.66  || inv_mass> 0.82 )  ) continue;
                 if (pdgId == 3 && (inv_mass< 1.015 || inv_mass> 1.025) ) continue;
-                
                 if(missing_mass< -0.01 || missing_mass> 0.01 )continue;
             }
             
-            
             momInBar_unit=momInBar.Unit();
-            
-            
             double dir_x =momInBar_unit.X();
             double dir_y =momInBar_unit.Y();
             double dir_z =momInBar_unit.Z();
-            
-            
             //hdir_x->Fill(dir_x);
             //hdir_y->Fill(dir_y);
             //hdir_z->Fill(dir_z);
-            
-            
-            
             //cout<<"=========>" << dir_x << "  "<< dir_y<< endl;
-            
             hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
-            
             int bin = (100+posInBar.X())/200.*nbins;
             // not used
             // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
             // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
-            
             // commented
             if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
-            
             //if (bar != 6 )continue ;
-            
-            
+            hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
             //if(fabs(dir_x)>0.01 )continue;
             //if(dir_y<-0.05)continue;
-            
             hdir_x->Fill(dir_x);
             hdir_y->Fill(dir_y);
             hdir_z->Fill(dir_z);
-            
-            
-            
-            hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
-            
-            
             
             if (pdgId == 2){
                 hist_ev_rho_mass_cut->Fill(inv_mass);
@@ -436,7 +336,8 @@ return;
                 hist_ev_chi_rho_cut->Fill(chi_square);
                 
                 if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());}
+                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+            }
             
             if (pdgId == 3){
                 hist_ev_phi_mass_cut->Fill(inv_mass);
@@ -448,12 +349,9 @@ return;
             }
             
             
-            
-            
-            
             if(glx_event->GetParent()>0) continue;
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
-            //std::cout<<"######### glx_event->GetHitSize()  "<< glx_event->GetHitSize()<<std::endl;
+            
             for(int p=0; p<5; p++){
                 mAngle[p] = acos(sqrt(momentum * momentum + glx_mass[p]*glx_mass[p])/momentum/1.473);  //1.4738
                 fAngle[p]->SetParameter(1,mAngle[p]);// mean
@@ -480,7 +378,13 @@ return;
                 //if(hitTime>40) continue;
                 nphc++;
                 
+                
+                /////////////////////////////////////
+                // Reflection condition may change //
+                /////////////////////////////////////
                 bool reflected = hitTime>40;
+                
+                
                 lenz = fabs(barend-posInBar.X());
                 double rlenz = 2*radiatorL - lenz;
                 double dlenz = lenz;
@@ -518,15 +422,13 @@ return;
                             luttheta = dir.Angle(TVector3(-1,0,0));
                             if(luttheta > TMath::PiOver2()) luttheta = TMath::Pi()-luttheta;
                             //tangle = momInBar.Angle(dir);//-0.004; //correction
-
-			    ////////////////////			
-			    // PMT Correction //
-			    ////////////////////
+                            
+                            ////////////////////
+                            // PMT Correction //
+                            ////////////////////
+                            
                             if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
-                            if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction_pi[pmt] ;
-
-
-
+                            if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction[pmt];
                             
                             //double bartime = lenz/cos(luttheta)/20.4; //198 //203.767 for 1.47125
                             double bartime = lenz/cos(luttheta)/19.6; //203.767 for 1.47125
@@ -544,27 +446,35 @@ return;
                                 }
                             }
                             
+                            ///////////////
+                            // Time Cut  //
+                            ///////////////
                             if(!r && fabs(totalTime-hitTime)>cut_tdiffd) continue;
                             if(r && fabs(totalTime-hitTime) >cut_tdiffr) continue;
-                            
                             
                             // cherenkove PDF per PIX
                             if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
                             if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
                             // cherenkove correction per PMT
-                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistMCP_k[pmt]->Fill(tangle);
-                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistMCP_pi[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistPMT_k[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistPMT_pi[pmt]->Fill(tangle);
                             
                             // fill cherenkove histo
                             hAngle[pdgId]->Fill(tangle);
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
+                            
+                            ////////////////////
+                            // Cherenkov Cut  //
+                            ////////////////////
+                            //if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
+                            
+                            if(fabs(tangle-0.5*(referance_angle_k+referance_angle_pi))>cut_cangle) continue;
+                            
                             isGood=true;
                             hTime->Fill(hitTime);
                             hCalc->Fill(totalTime);
                             
                             
                             if(gPDF ==0 || gPDF ==1 ){ //continue; //cut_cangle  0.2
-                                //	      std::cout<<pdgId<<" TMath::Log(fAngle[2]->Eval(tangle)+0.001) "<<TMath::Log(fAngle[2]->Eval(tangle)+noise)<<"    "<< TMath::Log(fAngle[3]->Eval(tangle)+noise)<< " "<< tangle<<std::endl;
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
@@ -577,8 +487,7 @@ return;
                                 if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum2 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
                                 
                                 //if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
-                                std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
-                                
+                                //std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
                             }
                             
                             
@@ -601,26 +510,23 @@ return;
                                 cc->WaitPrimitive();
                             }
                             
-                        }
-                    }
-                }
+                        } // bar ambiguities
+                    } // reflection loop
+                } // LUT loop
                 
                 if(isGood){
                     nph++;
                     //if (glx_event->GetPdg() > 0 ) nph_p++;
                     //if (glx_event->GetPdg() < 0 ) nph_n++;
                     if(pmt<108) {
-                        //glx_hdigi[pmt]->Fill(pix%8, pix/8);
+                        glx_hdigi[pmt]->Fill(pix%8, pix/8);
                         goodevt=1;
                     }
                 }
-            }
+            } // hit loop
             
             if(goodevt) evtcount++;
-            
             if(nph<5) continue;
-            //if(nph > 60) continue;
-            
             hNph[pdgId]->Fill(nph);
             
             //hNph_p[pdgId]->Fill(nph_p);
@@ -637,7 +543,7 @@ return;
             if(0 && pdgId==3){
                 //	if(!cc)
                 TString x=(sum1>sum2)? " <====== Pion" : "";
-                // std::cout<<Form("f %1.6f s %1.6f mcp %d pix %d   pid %d",aminf,amins,mcp,pix  ,prt_particle)<<"  "<<x <<std::endl;
+                // std::cout<<Form("f %1.6f s %1.6f PMT %d pix %d   pid %d",aminf,amins,PMT,pix  ,prt_particle)<<"  "<<x <<std::endl;
                 
                 std::cout<<"PID "<< glx_event->GetPdg() <<" sum1 "<<sum1<<" sum2 "<<sum2<<" sum "<<sum<<" "<<x<<std::endl;
                 
@@ -679,26 +585,27 @@ return;
             // hAngle[3]->Reset();
             
         }
-    }
+    } // Event Loop
     
     if(evtcount>0){
         for(int i=0; i<glx_nch; i++){
             int pmt=i/64;
             int pix=i%64;
             double rel = glx_hdigi[pmt]->GetBinContent(pix%8+1,pix/8+1)/(double)evtcount;
-            //glx_hdigi[pmt]->SetBinContent(pix%8+1, pix/8+1,rel);
+            glx_hdigi[pmt]->SetBinContent(pix%8+1, pix/8+1,rel);
         }
     }
     
     //TString nid=Form("_%2.2f_%2.2f",theta,phi);
     TString nid=Form("_%d_%d",xbar,ybar);
-    /*
+    
     glx_drawDigi("m,p,v\n",0);
     glx_cdigi->SetName("hp"+nid);
     glx_canvasAdd(glx_cdigi);
-    */
+    
     glx_canvasAdd("hAngle"+nid,800,400);
     
+    //scal
     if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
     if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
     
@@ -717,8 +624,8 @@ return;
         fit->SetParLimits(0,0.1,1E6);
         fit->SetParLimits(1,cherenkovreco[i]-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
         fit->SetParLimits(2,0.005,0.030); // width
-        hAngle[i]->Fit("fgaus","I","",cherenkovreco[i]-2*cut_cangle/2,cherenkovreco[i]+2*cut_cangle/2);
-        hAngle[i]->Fit("fgaus","M","",cherenkovreco[i]-2*cut_cangle/2,cherenkovreco[i]+2*cut_cangle/2);
+        hAngle[i]->Fit("fgaus","I","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
+        hAngle[i]->Fit("fgaus","M","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
         
         cherenkovreco[i] = fit->GetParameter(1);
         spr[i] = fit->GetParameter(2);
@@ -758,16 +665,20 @@ return;
     
     
     TLine *line = new TLine(0,0,0,1000);
-    line->SetX1(mAngle[3]);
-    line->SetX2(mAngle[3]);
+    //line->SetX1(mAngle[3]);
+    //line->SetX2(mAngle[3]);
+    line->SetX1(referance_angle_k);
+    line->SetX2(referance_angle_k);
     line->SetY1(0);
     line->SetY2(1.2);
     line->SetLineColor(kRed);
     line->Draw();
     
     TLine *line2 = new TLine(0,0,0,1000);
-    line2->SetX1(mAngle[2]);
-    line2->SetX2(mAngle[2]);
+    //line2->SetX1(mAngle[2]);
+    //line2->SetX2(mAngle[2]);
+    line2->SetX1(referance_angle_pi);
+    line2->SetX2(referance_angle_pi);
     line2->SetY1(0);
     line2->SetY2(1.2);
     line2->SetLineColor(kBlue);
@@ -775,8 +686,10 @@ return;
     
     TLine *line3 = new TLine(0,0,0,1000);
     line3->SetLineStyle(2);
-    line3->SetX1(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
-    line3->SetX2(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+    //line3->SetX1(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+    //line3->SetX2(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+    line3->SetX1(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
+    line3->SetX2(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
     line3->SetY1(0);
     line3->SetY2(1.2);
     line3->SetLineColor(1);
@@ -784,8 +697,10 @@ return;
     
     TLine *line4 = new TLine(0,0,0,1000);
     line4->SetLineStyle(2);
-    line4->SetX1(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
-    line4->SetX2(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+    //line4->SetX1(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+    //line4->SetX2(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+    line4->SetX1(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
+    line4->SetX2(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
     line4->SetY1(0);
     line4->SetY2(1.2);
     line4->SetLineColor(1);
@@ -1064,7 +979,7 @@ return;
     
     
     glx_canvasSave(0);
-   
+    
     
     if(gPDF ==1) {
         for(Int_t i=0; i<glx_nch; i++) {
@@ -1073,9 +988,9 @@ return;
         }
     }
     if(gCherenkov_Correction==1) {
-        for(Int_t i=0; i<mcp_num; i++) {
-            fHistMCP_k[i]->Write();
-            fHistMCP_pi[i]->Write();
+        for(Int_t i=0; i<PMT_num; i++) {
+            fHistPMT_k[i]->Write();
+            fHistPMT_pi[i]->Write();
         }
     }
     
