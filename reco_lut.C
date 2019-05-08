@@ -166,15 +166,15 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     double referance_angle_k = mAngle[3];
     
     
-    TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
+    TH1F*  fHistMCP_k[PMT_num], *fHistMCP_pi[PMT_num], *fHistMCP_read_k[PMT_num], *fHistMCP_read_pi[PMT_num];
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
     // correction array
     double array_correction[PMT_num];
     // creat histograms Cherenkov per PMT
     for(Int_t i=0; i<PMT_num; i++) {
-        fHistPMT_k[i] = new TH1F(Form("fHistPMT_k_%d",i),Form("fHistPMT_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-        fHistPMT_pi[i] = new TH1F(Form("fHistPMT_pi_%d",i),Form("fHistPMT_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistMCP_k[i] = new TH1F(Form("fHistMCP_k_%d",i),Form("fHistMCP_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistMCP_pi[i] = new TH1F(Form("fHistMCP_pi_%d",i),Form("fHistMCP_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
     }
     // Read Cherenkov per PMT
     TF1 *fit_PMT = new TF1("fit_PMT","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
@@ -191,15 +191,15 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
         for(Int_t PMT=0; PMT<PMT_num; PMT++) {
             if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
-            fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
-            fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
+            fHistMCP_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",PMT));
+            fHistMCP_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
             fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_PMT->SetParLimits(0,0.1,1E6);
             fit_PMT->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
             fit_PMT->SetParLimits(2,0.005,0.030); // width
-            fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",0.82-2*cut_cangle/2,0.82+2*cut_cangle/2);
-            double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
+            fHistMCP_read_pi[PMT]->Fit("fit_PMT","M","",0.82-cut_cangle,0.82+ cut_cangle);
+            double histo_cor_entries = fHistMCP_read_pi[PMT]->GetEntries();
             double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
             double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
             double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
@@ -210,7 +210,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             hmean_test->Fill(mean_cherenkov_cor);
             // correction condition
             if ( fabs(delta_cherenkov_cor) <0.01 && (sigma_cherenkov_cor*1000<12 && sigma_cherenkov_cor*1000> 7) && histo_cor_entries>0 ) {
-                array_correction[PMT]= fit_PMT->GetParameter(1);
+                array_correction[PMT]= delta_cherenkov_cor;
                 cout<<"##########"<< "shift "<<val_1<<endl;
                 // Fill PMT
                 for(Int_t m=0; m<64; m++)
@@ -219,7 +219,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                     }
                 // default correction
                 //array_correction[PMT]= -0.004;
-                fHistPMT_read_pi[PMT]->Draw();
+
+                fHistMCP_read_pi[PMT]->Draw();
                 glx_canvasGet("r_pmt_correction")->Update();
                 TLine *lin_ref = new TLine(0,0,0,1000);
                 lin_ref->SetX1(referance_angle);
@@ -236,7 +237,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             }
         }
     }
-    
+/*
     glx_canvasAdd("r_diff_test",800,400);
     hdiff_test->Draw();
     glx_canvasAdd("r_hsigma_test",800,400);
@@ -249,7 +250,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
     glx_canvasSave(0);
     return;
-    
+  */  
     
     //////////////////
     /// Reco Method //
@@ -456,8 +457,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
                             if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
                             // cherenkove correction per PMT
-                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistPMT_k[pmt]->Fill(tangle);
-                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistPMT_pi[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistMCP_k[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistMCP_pi[pmt]->Fill(tangle);
                             
                             // fill cherenkove histo
                             hAngle[pdgId]->Fill(tangle);
@@ -989,8 +990,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     }
     if(gCherenkov_Correction==1) {
         for(Int_t i=0; i<PMT_num; i++) {
-            fHistPMT_k[i]->Write();
-            fHistPMT_pi[i]->Write();
+            fHistMCP_k[i]->Write();
+            fHistMCP_pi[i]->Write();
         }
     }
     
