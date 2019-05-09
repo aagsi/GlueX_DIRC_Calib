@@ -517,7 +517,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             hCalc->Fill(totalTime);
                             
                             
-                            if(gPDF_pix ==0 || gPDF_pix ==1 ){ //continue; //cut_cangle  0.2
+                            if(gPDF_pix !=2 || gPDF_pmt !=2 ){ 
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
@@ -531,6 +531,16 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                                 
                                 //if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
                                 //std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
+                            }
+                            
+                            if(gPDF_pmt ==2){
+                                // use histograms
+                                Int_t k_bin = fHistPMT_PDF_read_k[pmt]->GetXaxis()->FindBin(tangle);
+                                Int_t pi_bin = fHistPMT_PDF_read_pi[pmt]->GetXaxis()->FindBin(tangle);
+                                if (fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin) > 0 )sum1 += TMath::Log(fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin));
+                                if (fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin) > 0 )sum2 += TMath::Log(fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin));
+                                
+
                             }
                             
                             
