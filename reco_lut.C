@@ -7,13 +7,16 @@
 #define PI 3.14159265
 
 
-// gPDF = 1 Creat PDF per pix
-// gPDF = 2 Calculate Sepration from PDF
+// gPDF_pix = 1 Creat PDF per pix
+// gPDF_pix = 2 Calculate Sepration from PDF
+
+// gPDF_pmt = 1 Creat PDF per pmt
+// gPDF_pmt = 2 Calculate Sepration from pmt
 
 // gCherenkov_Correction = 1 Creat histo per PMT
 // gCherenkov_Correction = 2 Apply per PMT correction
 
-void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
+void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
     const int nodes = glx_maxch;
     const int luts = 24;
@@ -133,32 +136,58 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
     
-    ///////////////////////
-    /// cherenkove PDF  ///
-    ///////////////////////
+    //////////////////////////////
+    /// cherenkove PDF per pix ///
+    //////////////////////////////
     TH1F*  fHistCh_k[glx_nch], *fHistCh_pi[glx_nch], *fHistCh_read_k[glx_nch], *fHistCh_read_pi[glx_nch];
-    TFile *ffile_cherenkov_pdf;
-    TString cherenkov_pdf_path;
+    TFile *ffile_cherenkov_pdf_pix;
+    TString cherenkov_pdf_path_pix;
     
     for(Int_t i=0; i<glx_nch; i++) {
         fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
         fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
     }
-    // read pdf
-    if (gPDF==2) {
+    // read pdf per pix
+    if (gPDF_pix==2) {
         //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
-        cherenkov_pdf_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF.root";
-        cout<<"cherenkov_pdf_path= " <<cherenkov_pdf_path<<endl;
-        ffile_cherenkov_pdf  = new TFile(cherenkov_pdf_path, "READ");
+        cherenkov_pdf_path_pix ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pix.root";
+        cout<<"cherenkov_pdf_path_pix= " <<cherenkov_pdf_path_pix<<endl;
+        ffile_cherenkov_pdf_pix  = new TFile(cherenkov_pdf_path_pix, "READ");
         for(Int_t pix=0; pix<glx_nch; pix++) {
-            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_k_%d",pix));
-            fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf->Get(Form("fHistCh_pi_%d",pix));
+            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_k_%d",pix));
+            fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_pi_%d",pix));
         }
     }
+    
+    //////////////////////////////
+    /// cherenkove PDF per pmt ///
+    //////////////////////////////
+    int PMT_num=108; //108
+    
+    TH1F*  fHistPMT_PDF_k[PMT_num], *fHistPMT_PDF_pi[PMT_num], *fHistPMT_PDF_read_k[PMT_num], *fHistPMT_PDF_read_pi[PMT_num];
+    TFile *ffile_cherenkov_pdf_pmt;
+    TString cherenkov_pdf_path_pmt;
+    
+    for(Int_t i=0; i<PMT_num; i++) {
+        fHistPMT_PDF_k[i] = new TH1F(Form("fHistPMT_PDF_k_%d",i),Form("fHistPMT_PDF_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistPMT_PDF_pi[i] = new TH1F(Form("fHistPMT_PDF_pi_%d",i),Form("fHistPMT_PDF_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+    }
+    // read pdf per pmt
+    if (gPDF_pmt==2) {
+        cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pmt.root";
+        cout<<"cherenkov_pdf_path_pmt= " <<cherenkov_pdf_path_pmt<<endl;
+        ffile_cherenkov_pdf_pmt  = new TFile(cherenkov_pdf_path_pmt, "READ");
+        for(Int_t pix=0; pix<PMT_num; pix++) {
+            fHistPMT_PDF_read_k[pix] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_k_%d",pix));
+            fHistPMT_PDF_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_pi_%d",pix));
+        }
+    }
+
+    
     ////////////////////////////
     /// cherenkove correction///
     ////////////////////////////
-    int PMT_num=108; //108
+    
     double referance_angle = mAngle[2]; // pi
     //double referance_angle = mAngle[3]; // k
     
@@ -256,9 +285,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     /// Reco Method //
     //////////////////
     TString outFile;
-    if(gPDF==1){
-        outFile= "created_cherenkovPDF.root";
-    } else if(gPDF==2){ outFile= "outFile_separation_PDF.root";
+    if(gPDF_pix==1){
+        outFile= "created_cherenkovPDF_pix.root";
+    } else if(gPDF_pix==2){ outFile= "outFile_separation_PDF_pix.root";
+    } else if(gPDF_pmt==2){ outFile= "outFile_separation_PDF_pmt.root";
+    } else if(gPDF_pmt==1){ outFile= "created_cherenkovPDF_pmt.root";
     } else if(gCherenkov_Correction==1){ outFile= "cherenkov_correction.root";
     } else {
         outFile= "outFile.root";
@@ -453,9 +484,20 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             if(!r && fabs(totalTime-hitTime)>cut_tdiffd) continue;
                             if(r && fabs(totalTime-hitTime) >cut_tdiffr) continue;
                             
+                            ////////////////
+                            // Fill PDF   //
+                            ////////////////
                             // cherenkove PDF per PIX
-                            if(gPDF ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
-                            if(gPDF ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
+                            if(gPDF_pix ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
+                            if(gPDF_pix ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
+                            
+                            // cherenkove PDF per PIX
+                            if(gPDF_pmt ==1 && pdgId == 3) fHistPMT_PDF_k[pmt]->Fill(tangle); // good after time cut
+                            if(gPDF_pmt ==1 && pdgId == 2) fHistPMT_PDF_pi[pmt]->Fill(tangle); // good after time cut
+                            
+                            ////////////////////////////
+                            // Fill PMT coorrection   //
+                            ////////////////////////////
                             // cherenkove correction per PMT
                             if(gCherenkov_Correction ==1 && pdgId == 3) fHistMCP_k[pmt]->Fill(tangle);
                             if(gCherenkov_Correction ==1 && pdgId == 2) fHistMCP_pi[pmt]->Fill(tangle);
@@ -475,12 +517,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             hCalc->Fill(totalTime);
                             
                             
-                            if(gPDF ==0 || gPDF ==1 ){ //continue; //cut_cangle  0.2
+                            if(gPDF_pix ==0 || gPDF_pix ==1 ){ //continue; //cut_cangle  0.2
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
                             
-                            if(gPDF ==2){
+                            if(gPDF_pix ==2){
                                 // use histograms
                                 Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
                                 Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
@@ -982,7 +1024,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     glx_canvasSave(0);
     
     
-    if(gPDF ==1) {
+    if(gPDF_pix ==1) {
         for(Int_t i=0; i<glx_nch; i++) {
             fHistCh_k[i]->Write();
             fHistCh_pi[i]->Write();
@@ -994,6 +1036,19 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fHistMCP_pi[i]->Write();
         }
     }
+    
+    
+    if(gPDF_pmt==1) {
+        for(Int_t i=0; i<PMT_num; i++) {
+            fHistPMT_PDF_k[i]->Write();
+            fHistPMT_PDF_pi[i]->Write();
+        }
+    }
+    
+    
+    
+    
+    
     
     mom_theta_phi->Write();
     file.Write();
