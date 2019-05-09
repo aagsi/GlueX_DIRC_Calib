@@ -77,7 +77,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         fAngle[i]->SetParameter(2,sigma[i]);    // sigma
         hAngle[i]->SetMarkerStyle(20);
         hAngle[i]->SetMarkerSize(0.8);
-        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",120,-120,120); // 120,-60,60
+        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",150,-200,200);// ,120,-120,120 // 120,-60,60
     }
     hAngle[2]->SetLineColor(4);
     hAngle[3]->SetLineColor(2);
@@ -517,7 +517,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             hCalc->Fill(totalTime);
                             
                             
-                            if(gPDF_pix !=2 || gPDF_pmt !=2 ){ 
+                            if(gPDF_pix !=2 || gPDF_pmt !=2 ){
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
