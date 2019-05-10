@@ -135,6 +135,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
+    Int_t nf= 41;
+    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_map_k =  new TH2F("histo_theta_phi_mom_map_k",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    
     
     //////////////////////////////
     /// cherenkove PDF per pix ///
@@ -181,17 +185,17 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         for(Int_t PMT=0; PMT<PMT_num; PMT++) {
             fHistPMT_PDF_read_k[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_k_%d",PMT));
             fHistPMT_PDF_read_pi[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_pi_%d",PMT));
-
-// No success
-/*
-double scale_k = norm/(fHistPMT_PDF_read_k[PMT]->Integral());
-fHistPMT_PDF_read_k[PMT]->Scale(scale_k);
-double scale_pi = norm/(fHistPMT_PDF_read_pi[PMT]->Integral());
-fHistPMT_PDF_read_k[PMT]->Scale(scale_pi);
-*/
+            
+            // No success
+            /*
+             double scale_k = norm/(fHistPMT_PDF_read_k[PMT]->Integral());
+             fHistPMT_PDF_read_k[PMT]->Scale(scale_k);
+             double scale_pi = norm/(fHistPMT_PDF_read_pi[PMT]->Integral());
+             fHistPMT_PDF_read_k[PMT]->Scale(scale_pi);
+             */
         }
     }
-
+    
     
     ////////////////////////////
     /// cherenkove correction///
@@ -225,26 +229,26 @@ fHistPMT_PDF_read_k[PMT]->Scale(scale_pi);
         cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";
         cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
-
-int pmtCounter =0;
+        
+        int pmtCounter =0;
         for(Int_t PMT=0; PMT<PMT_num; PMT++) {
-TString pmt_counter=Form("_%d",pmtCounter);
+            TString pmt_counter=Form("_%d",pmtCounter);
             if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
-
-	   if( (PMT ==13 || PMT==14 || PMT==17 || PMT==31 || PMT==32 || PMT==33 || PMT==11 || PMT==12  || PMT==15 || PMT==16 || PMT==34  || PMT==35  || PMT==34  || PMT==35  || PMT==41  || PMT==80  || PMT==99  || PMT==102) ) continue;
-//glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
+            
+            if( (PMT ==13 || PMT==14 || PMT==17 || PMT==31 || PMT==32 || PMT==33 || PMT==11 || PMT==12  || PMT==15 || PMT==16 || PMT==34  || PMT==35  || PMT==34  || PMT==35  || PMT==41  || PMT==80  || PMT==99  || PMT==102) ) continue;
+            //glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
             fHistMCP_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",PMT));
             fHistMCP_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
             fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_PMT->SetParLimits(0,0.1,1E6);
             //fit_PMT->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
-	    fit_PMT->SetParLimits(1,0.809,0.835);
+            fit_PMT->SetParLimits(1,0.809,0.835);
             fit_PMT->SetParLimits(2,0.005,0.030); // width
-
-double  rang_min= 0.82-cut_cangle;
-double  rang_max= 0.82+cut_cangle;
-if (PMT==42) rang_min=0.81;
+            
+            double  rang_min= 0.82-cut_cangle;
+            double  rang_max= 0.82+cut_cangle;
+            if (PMT==42) rang_min=0.81;
             fHistMCP_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
             double histo_cor_entries = fHistMCP_read_pi[PMT]->GetEntries();
             double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
@@ -256,57 +260,57 @@ if (PMT==42) rang_min=0.81;
             hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
             hmean_test->Fill(mean_cherenkov_cor);
             // correction condition
-           // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
-                array_correction[PMT]= delta_cherenkov_cor;
-                cout<<"##########"<< "shift "<<val_1<<endl;
-                // Fill PMT
-                for(Int_t m=0; m<64; m++)
-                    for(Int_t n=0; n<64; n++){
-                        glx_hdigi[PMT]->SetBinContent(m, n,val_1);
-                    }
-                // default correction
-                //array_correction[PMT]= -0.004;
-                fHistMCP_read_pi[PMT]->Draw();
-//glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-                //glx_canvasGet("r_pmt_correction")->Update();
-                TLine *lin_ref = new TLine(0,0,0,1000);
-                lin_ref->SetX1(referance_angle);
-                lin_ref->SetX2(referance_angle);
-                lin_ref->SetY1(gPad->GetUymin());
-                lin_ref->SetY2(gPad->GetUymax());
-                lin_ref->SetLineColor(kBlue);
-                lin_ref->Draw();
-//glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-                //glx_canvasGet("r_pmt_correction")->Update();
-                //glx_waitPrimitive("r_pmt_correction");
-                //hsigma_test->Fill(sigma_cherenkov_cor*1000);
-                //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
-                //hmean_test->Fill(mean_cherenkov_cor);
-           // }
-++pmtCounter;
+            // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
+            array_correction[PMT]= delta_cherenkov_cor;
+            cout<<"##########"<< "shift "<<val_1<<endl;
+            // Fill PMT
+            for(Int_t m=0; m<64; m++)
+                for(Int_t n=0; n<64; n++){
+                    glx_hdigi[PMT]->SetBinContent(m, n,val_1);
+                }
+            // default correction
+            //array_correction[PMT]= -0.004;
+            fHistMCP_read_pi[PMT]->Draw();
+            //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+            //glx_canvasGet("r_pmt_correction")->Update();
+            TLine *lin_ref = new TLine(0,0,0,1000);
+            lin_ref->SetX1(referance_angle);
+            lin_ref->SetX2(referance_angle);
+            lin_ref->SetY1(gPad->GetUymin());
+            lin_ref->SetY2(gPad->GetUymax());
+            lin_ref->SetLineColor(kBlue);
+            lin_ref->Draw();
+            //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+            //glx_canvasGet("r_pmt_correction")->Update();
+            //glx_waitPrimitive("r_pmt_correction");
+            //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+            //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+            //hmean_test->Fill(mean_cherenkov_cor);
+            // }
+            ++pmtCounter;
         }
     }
-
+    
     //////////////////////////////////////
     /// Print Correction array per PMT ///
     //////////////////////////////////////
-
-/*   
-    glx_canvasAdd("r_diff_test",800,400);
-    hdiff_test->Draw();
-    glx_canvasAdd("r_hsigma_test",800,400);
-    hsigma_test->Draw();
-    glx_canvasAdd("r_hmean_test",800,400);
-    hmean_test->Draw();
-    //gStyle->SetPalette(kLightTemperature);
-    gStyle->SetPalette(kThermometer);
-    double max_digi(10);//30
-    double min_digi(-10);//-30
-    glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
-    glx_canvasSave(0);
-
-  return;
-*/
+    
+    /*
+     glx_canvasAdd("r_diff_test",800,400);
+     hdiff_test->Draw();
+     glx_canvasAdd("r_hsigma_test",800,400);
+     hsigma_test->Draw();
+     glx_canvasAdd("r_hmean_test",800,400);
+     hmean_test->Draw();
+     //gStyle->SetPalette(kLightTemperature);
+     gStyle->SetPalette(kThermometer);
+     double max_digi(10);//30
+     double min_digi(-10);//-30
+     glx_drawDigi("m,p,v\n",0, max_digi,min_digi);
+     glx_canvasSave(0);
+     
+     return;
+     */
     
     //////////////////
     /// Reco Method //
@@ -349,7 +353,7 @@ if (PMT==42) rang_min=0.81;
             //////// selection//////
             ////////////////////////
             
-
+            
             // pion =2  ,kaon=3
             if(true){
                 if (pdgId == 2 && chi_square> 10) continue;
@@ -370,12 +374,15 @@ if (PMT==42) rang_min=0.81;
             hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
-
-
-                double theta_mom =  momInBar_unit.Theta();
-                double ph_mom =  momInBar_unit.Phi();
-
-
+            
+            
+            double theta_mom =  momInBar_unit.Theta();
+            double ph_mom =  momInBar_unit.Phi();
+            
+            if (pdgId == 2) histo_theta_phi_mom_map_pi->Fill(theta_mom,ph_mom,momentum);
+            if (pdgId == 3) histo_theta_phi_mom_map_k->Fill(theta_mom,ph_mom,momentum);
+            
+            
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
             int bin = (100+posInBar.X())/200.*nbins;
@@ -387,18 +394,18 @@ if (PMT==42) rang_min=0.81;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
-
+            
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
-
+            
             double percentage = kaon_counter/pion_counter*100.0;
-		if (percentage <100 && pdgId == 2 )continue;
+            if (percentage <100 && pdgId == 2 )continue;
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
-//cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
-		
-
+            //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
+            
+            
             //if (bar != 6 )continue ;
             hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
             //if(fabs(dir_x)>0.01 )continue;
@@ -585,7 +592,7 @@ if (PMT==42) rang_min=0.81;
                                 if (fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin) > 0 )sum1 += TMath::Log(fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin));
                                 if (fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin) > 0 )sum2 += TMath::Log(fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin));
                                 
-
+                                
                             }
                             
                             
@@ -1073,8 +1080,10 @@ if (PMT==42) rang_min=0.81;
      
      */
     
-    
-    
+    glx_canvasAdd("26",800,400);
+    histo_theta_phi_mom_map_pi->Draw("colz");
+    glx_canvasAdd("27",800,400);
+    histo_theta_phi_mom_map_k->Draw("colz");
     
     glx_canvasSave(0);
     
