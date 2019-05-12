@@ -427,19 +427,19 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             if (pdgId == 2){
                 histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar_unit.Mag());
+                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
                 
                 theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
                 phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
                 content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
                 content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
                 average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                
+               //cout<< "###### average_bin= "<<average_bin<<"	"<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<"	"<<momInBar_unit.Mag()<<endl; 
                 histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
             }
             if (pdgId == 3){
                 histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar_unit.Mag());
+                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
                 
                 theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
                 phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
