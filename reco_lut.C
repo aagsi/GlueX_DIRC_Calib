@@ -3,17 +3,19 @@
 #include "/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/classes/DrcEvent.h"
 #include "/lustre/nyx/panda/aali/gluex/gluex_top/halld_recon/halld_recon-4.2.0/src/plugins/Analysis/lut_dirc/DrcLutNode.h"
 
+#include "TMultiGraph.h"
+
 #include "glxtools.C"
 #define PI 3.14159265
 
 
-// gPDF_pix = 1 Creat PDF per pix
+// gPDF_pix = 1 Create PDF per pix
 // gPDF_pix = 2 Calculate Sepration from PDF
 
-// gPDF_pmt = 1 Creat PDF per pmt
+// gPDF_pmt = 1 Create PDF per pmt
 // gPDF_pmt = 2 Calculate Sepration from pmt PDF
 
-// gCherenkov_Correction = 1 Creat histo per PMT
+// gCherenkov_Correction = 1 Create histo per PMT
 // gCherenkov_Correction = 2 Apply per PMT correction
 
 void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
@@ -211,6 +213,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     double referance_angle = mAngle[2]; // pi
     //double referance_angle = mAngle[3]; // k
+    TGraph *shifted_pi = new TGraph();
     
     double referance_angle_pi = mAngle[2];
     double referance_angle_k = mAngle[3];
@@ -263,6 +266,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
             double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
             double val_1 = (delta_cherenkov_cor)*1000.0 ;
+            
+            shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
+            
             // cout<<"##########"<< fabs(mean_cherenkov_cor - referance_angle) << "  "<<sigma_cherenkov_cor*1000<<endl;
             hsigma_test->Fill(sigma_cherenkov_cor*1000);
             hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
@@ -301,9 +307,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         }
     }
     
-    //////////////////////////////////////
-    /// Print Correction array per PMT ///
-    //////////////////////////////////////
+    
     
     /*
      glx_canvasAdd("r_diff_test",800,400);
@@ -383,13 +387,18 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //cout<<"=========>" << dir_x << "  "<< dir_y<< endl;
             hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
+            
+            //////////////////////////////
+            //////// Momentum Cut //////
+            /////////////////////////////
+            
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
             
             
             double theta_mom =  momInBar_unit.Theta()* 180/PI;
             double ph_mom =  momInBar_unit.Phi()* 180/PI;
             
-            //////////////////////////////
+            /////////////////////////////
             //////// DIRC Wall Cut //////
             /////////////////////////////
             
@@ -434,7 +443,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                 content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
                 content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
                 average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-               //cout<< "###### average_bin= "<<average_bin<<"	"<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<"	"<<momInBar_unit.Mag()<<endl; 
+                //cout<< "###### average_bin= "<<average_bin<<"	"<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<"	"<<momInBar_unit.Mag()<<endl;
                 histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
             }
             if (pdgId == 3){
@@ -1136,6 +1145,41 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     glx_canvasAdd("29",800,400);
     histo_theta_phi_mom_map_k->Draw("colz");
     
+    
+    
+    
+    
+    
+    glx_canvasAdd("r_pmt_shift",800,400);
+    TMultiGraph *mg = new TMultiGraph();
+    mg->Add(shifted_pi);
+    mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
+    mg->Draw("APL");
+    //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
+    
+    glx_canvasGet("r_pmt_shift")->Update();
+    
+    TLine *lin_ref_pi = new TLine(0,0,0,1000);
+    lin_ref_pi->SetX1(referance_angle_pi);
+    lin_ref_pi->SetX2(referance_angle_pi);
+    lin_ref_pi->SetY1(gPad->GetUymin());
+    lin_ref_pi->SetY2(gPad->GetUymax());
+    lin_ref_pi->SetLineColor(kBlue);
+    lin_ref_pi->Draw();
+    
+    glx_canvasGet("r_pmt_shift")->Update();
+    TLine *lin_ref_k = new TLine(0,0,0,1000);
+    lin_ref_k->SetX1(referance_angle_k);
+    lin_ref_k->SetX2(referance_angle_k);
+    lin_ref_k->SetY1(gPad->GetUymin());
+    lin_ref_k->SetY2(gPad->GetUymax());
+    lin_ref_k->SetLineColor(kBlue);
+    lin_ref_k->Draw();
+    
+    
+    
+    
+    
     glx_canvasSave(0);
     
     
@@ -1160,11 +1204,17 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         }
     }
     
+
     
+    //mom_theta_phi->Write();
     
+
+    TTree *tc = new TTree("reco","reco");
+    tc->Branch("pion_counter",&pion_counter,"pion_counter/D");
+    tc->Branch("kaon_counter",&kaon_counter,"kaon_counter/D");
+    tc->Fill();
+    tc->Write();
     
-    
-    
-    mom_theta_phi->Write();
     file.Write();
+    file.Close();
 }
