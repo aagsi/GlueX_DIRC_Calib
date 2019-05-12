@@ -9,7 +9,6 @@
 #include "glxtools.C"
 #define PI 3.14159265
 
-
 // gPDF_pix = 1 Create PDF per pix
 // gPDF_pix = 2 Calculate Sepration from PDF
 
@@ -214,11 +213,16 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     double referance_angle = mAngle[2]; // pi
     //double referance_angle = mAngle[3]; // k
-    TGraph *shifted_pi = new TGraph();
     
     double referance_angle_pi = mAngle[2];
     double referance_angle_k = mAngle[3];
-    
+   TGraph *shifted_pi = new TGraph();
+
+    shifted_pi->SetMarkerColor(kBlue);
+    shifted_pi->SetMarkerStyle(20);
+    shifted_pi->SetLineColor(kBlue);
+    shifted_pi->SetLineWidth(1);
+ 
     TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
@@ -269,6 +273,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             double val_1 = (delta_cherenkov_cor)*1000.0 ;
             
             shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
+
             
             // cout<<"##########"<< fabs(mean_cherenkov_cor - referance_angle) << "  "<<sigma_cherenkov_cor*1000<<endl;
             hsigma_test->Fill(sigma_cherenkov_cor*1000);
@@ -306,6 +311,33 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // }
             ++pmtCounter;
         }
+
+    glx_canvasAdd("r_pmt_shift",800,400);
+    TMultiGraph *mg = new TMultiGraph();
+    mg->Add(shifted_pi);
+    mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
+    mg->Draw("AP");
+    //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
+
+    glx_canvasGet("r_pmt_shift")->Update();
+    
+    TLine *lin_ref_pi = new TLine(0,0,0,1000);
+    lin_ref_pi->SetX1(referance_angle_pi);
+    lin_ref_pi->SetX2(referance_angle_pi);
+    lin_ref_pi->SetY1(gPad->GetUymin());
+    lin_ref_pi->SetY2(gPad->GetUymax());
+    lin_ref_pi->SetLineColor(kBlue);
+    lin_ref_pi->Draw();
+    
+    glx_canvasGet("r_pmt_shift")->Update();
+    TLine *lin_ref_k = new TLine(0,0,0,1000);
+    lin_ref_k->SetX1(referance_angle_k);
+    lin_ref_k->SetX2(referance_angle_k);
+    lin_ref_k->SetY1(gPad->GetUymin());
+    lin_ref_k->SetY2(gPad->GetUymax());
+    lin_ref_k->SetLineColor(kRed);
+    lin_ref_k->Draw();
+  
     }
     
     
@@ -326,7 +358,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      
      return;
      */
-    
+
+
     //////////////////
     /// Reco Method //
     //////////////////
@@ -1136,6 +1169,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      
      */
     
+    
     glx_canvasAdd("26",800,400);
     histo_theta_phi_map_pi->Draw("colz");
     glx_canvasAdd("27",800,400);
@@ -1144,40 +1178,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     glx_canvasAdd("28",800,400);
     histo_theta_phi_mom_map_pi->Draw("colz");
     glx_canvasAdd("29",800,400);
-    histo_theta_phi_mom_map_k->Draw("colz");
-    
-    
-    
-    
-    
-    
-    glx_canvasAdd("r_pmt_shift",800,400);
-    //TMultiGraph *mg = new TMultiGraph();
-    //mg->Add(shifted_pi);
-    //mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
-    //mg->Draw("APL");
-    //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
-    shifted_pi->Draw("APL");
-    glx_canvasGet("r_pmt_shift")->Update();
-    
-    TLine *lin_ref_pi = new TLine(0,0,0,1000);
-    lin_ref_pi->SetX1(referance_angle_pi);
-    lin_ref_pi->SetX2(referance_angle_pi);
-    lin_ref_pi->SetY1(gPad->GetUymin());
-    lin_ref_pi->SetY2(gPad->GetUymax());
-    lin_ref_pi->SetLineColor(kBlue);
-    lin_ref_pi->Draw();
-    
-    glx_canvasGet("r_pmt_shift")->Update();
-    TLine *lin_ref_k = new TLine(0,0,0,1000);
-    lin_ref_k->SetX1(referance_angle_k);
-    lin_ref_k->SetX2(referance_angle_k);
-    lin_ref_k->SetY1(gPad->GetUymin());
-    lin_ref_k->SetY2(gPad->GetUymax());
-    lin_ref_k->SetLineColor(kRed);
-    lin_ref_k->Draw();
-    
-    
+    histo_theta_phi_mom_map_k->Draw("colz");    
     
     
     
