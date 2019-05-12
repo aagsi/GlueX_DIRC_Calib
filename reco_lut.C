@@ -135,7 +135,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
-    Int_t nf= 41;
+    Int_t nf= 81;
     TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
     TH2F * histo_theta_phi_mom_map_k =  new TH2F("histo_theta_phi_mom_map_k",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
     
@@ -376,13 +376,14 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
             
             
-            double theta_mom =  momInBar_unit.Theta();
-            double ph_mom =  momInBar_unit.Phi();
-            
-            if (pdgId == 2) histo_theta_phi_mom_map_pi->Fill(theta_mom,ph_mom,momentum);
-            if (pdgId == 3) histo_theta_phi_mom_map_k->Fill(theta_mom,ph_mom,momentum);
-            
-            
+            double theta_mom =  momInBar_unit.Theta()* 180/PI;
+            double ph_mom =  momInBar_unit.Phi()* 180/PI;
+
+            //////////////////////////////
+            //////// DIRC Wall Cut //////
+            /////////////////////////////
+
+
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
             int bin = (100+posInBar.X())/200.*nbins;
@@ -395,6 +396,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
+
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
@@ -404,8 +406,17 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
-            
-            
+
+
+            /////////////////////////////////
+            //////// theta phi mom map //////
+            /////////////////////////////////
+
+	    if (pdgId == 2) histo_theta_phi_mom_map_pi->Fill(theta_mom,ph_mom);
+            if (pdgId == 3) histo_theta_phi_mom_map_k->Fill(theta_mom,ph_mom);
+            //cout<< "ID= "<<pdgId<<" theta_mom= "<<theta_mom<<"ph_mom,momentum= "<<ph_mom<<endl;
+
+
             //if (bar != 6 )continue ;
             hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
             //if(fabs(dir_x)>0.01 )continue;
