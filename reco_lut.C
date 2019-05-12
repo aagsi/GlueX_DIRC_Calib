@@ -1152,12 +1152,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     
     glx_canvasAdd("r_pmt_shift",800,400);
-    TMultiGraph *mg = new TMultiGraph();
-    mg->Add(shifted_pi);
-    mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
-    mg->Draw("APL");
+    //TMultiGraph *mg = new TMultiGraph();
+    //mg->Add(shifted_pi);
+    //mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
+    //mg->Draw("APL");
     //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
-    
+    shifted_pi->Draw("APL");
     glx_canvasGet("r_pmt_shift")->Update();
     
     TLine *lin_ref_pi = new TLine(0,0,0,1000);
@@ -1174,7 +1174,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     lin_ref_k->SetX2(referance_angle_k);
     lin_ref_k->SetY1(gPad->GetUymin());
     lin_ref_k->SetY2(gPad->GetUymax());
-    lin_ref_k->SetLineColor(kBlue);
+    lin_ref_k->SetLineColor(kRed);
     lin_ref_k->Draw();
     
     
