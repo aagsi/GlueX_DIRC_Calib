@@ -4,6 +4,7 @@
 #include "/lustre/nyx/panda/aali/gluex/gluex_top/halld_recon/halld_recon-4.2.0/src/plugins/Analysis/lut_dirc/DrcLutNode.h"
 
 #include "TMultiGraph.h"
+#include "TGraph.h"
 
 #include "glxtools.C"
 #define PI 3.14159265
