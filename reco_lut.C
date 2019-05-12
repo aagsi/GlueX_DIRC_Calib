@@ -136,8 +136,16 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
     Int_t nf= 81;
-    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_mom_map_k =  new TH2F("histo_theta_phi_mom_map_k",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_map_pi =  new TH2F("histo_theta_phi_map_pi",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_map_k =  new TH2F("histo_theta_phi_map_k",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    
+    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_map_k  =  new TH2F("histo_theta_phi_mom_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    
+    
+    TH2F * histo_theta_phi_mom_tmp_map_pi =  new TH2F("histo_theta_phi_mom_tmp_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    
     
     
     //////////////////////////////
@@ -207,15 +215,15 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     double referance_angle_pi = mAngle[2];
     double referance_angle_k = mAngle[3];
     
-    TH1F*  fHistMCP_k[PMT_num], *fHistMCP_pi[PMT_num], *fHistMCP_read_k[PMT_num], *fHistMCP_read_pi[PMT_num];
+    TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
     TFile *ffile_cherenkov_correction;
     TString cherenkov_correction_path;
     // correction array
     double array_correction[108]={0};
     // creat histograms Cherenkov per PMT
     for(Int_t i=0; i<PMT_num; i++) {
-        fHistMCP_k[i] = new TH1F(Form("fHistMCP_k_%d",i),Form("fHistMCP_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-        fHistMCP_pi[i] = new TH1F(Form("fHistMCP_pi_%d",i),Form("fHistMCP_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistPMT_k[i] = new TH1F(Form("fHistPMT_k_%d",i),Form("fHistPMT_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistPMT_pi[i] = new TH1F(Form("fHistPMT_pi_%d",i),Form("fHistPMT_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
     }
     // Read Cherenkov per PMT
     TF1 *fit_PMT = new TF1("fit_PMT","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
@@ -237,8 +245,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             if( (PMT ==13 || PMT==14 || PMT==17 || PMT==31 || PMT==32 || PMT==33 || PMT==11 || PMT==12  || PMT==15 || PMT==16 || PMT==34  || PMT==35  || PMT==34  || PMT==35  || PMT==41  || PMT==80  || PMT==99  || PMT==102) ) continue;
             //glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
-            fHistMCP_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_k_%d",PMT));
-            fHistMCP_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistMCP_pi_%d",PMT));
+            fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
+            fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
             fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_PMT->SetParLimits(0,0.1,1E6);
@@ -249,8 +257,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             double  rang_min= 0.82-cut_cangle;
             double  rang_max= 0.82+cut_cangle;
             if (PMT==42) rang_min=0.81;
-            fHistMCP_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
-            double histo_cor_entries = fHistMCP_read_pi[PMT]->GetEntries();
+            fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
+            double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
             double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
             double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
             double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
@@ -264,22 +272,24 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             array_correction[PMT]= delta_cherenkov_cor;
             cout<<"##########"<< "shift "<<val_1<<endl;
             // Fill PMT
-            for(Int_t m=0; m<64; m++)
-                for(Int_t n=0; n<64; n++){
-                    glx_hdigi[PMT]->SetBinContent(m, n,val_1);
-                }
+            /*
+             for(Int_t m=0; m<64; m++)
+             for(Int_t n=0; n<64; n++){
+             glx_hdigi[PMT]->SetBinContent(m, n,val_1);
+             }
+             */
             // default correction
             //array_correction[PMT]= -0.004;
-            fHistMCP_read_pi[PMT]->Draw();
+            //fHistPMT_read_pi[PMT]->Draw();
             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
             //glx_canvasGet("r_pmt_correction")->Update();
-            TLine *lin_ref = new TLine(0,0,0,1000);
-            lin_ref->SetX1(referance_angle);
-            lin_ref->SetX2(referance_angle);
-            lin_ref->SetY1(gPad->GetUymin());
-            lin_ref->SetY2(gPad->GetUymax());
-            lin_ref->SetLineColor(kBlue);
-            lin_ref->Draw();
+            //TLine *lin_ref = new TLine(0,0,0,1000);
+            //lin_ref->SetX1(referance_angle);
+            //lin_ref->SetX2(referance_angle);
+            //lin_ref->SetY1(gPad->GetUymin());
+            //lin_ref->SetY2(gPad->GetUymax());
+            //lin_ref->SetLineColor(kBlue);
+            //lin_ref->Draw();
             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
             //glx_canvasGet("r_pmt_correction")->Update();
             //glx_waitPrimitive("r_pmt_correction");
@@ -378,12 +388,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             double theta_mom =  momInBar_unit.Theta()* 180/PI;
             double ph_mom =  momInBar_unit.Phi()* 180/PI;
-
+            
             //////////////////////////////
             //////// DIRC Wall Cut //////
             /////////////////////////////
-
-
+            
+            
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
             int bin = (100+posInBar.X())/200.*nbins;
@@ -396,7 +406,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
-
+            
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
@@ -406,17 +416,42 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
-
-
-            /////////////////////////////////
-            //////// theta phi mom map //////
-            /////////////////////////////////
-
-	    if (pdgId == 2) histo_theta_phi_mom_map_pi->Fill(theta_mom,ph_mom);
-            if (pdgId == 3) histo_theta_phi_mom_map_k->Fill(theta_mom,ph_mom);
+            
+            
+            /////////////////////////////
+            //////// theta phi map //////
+            /////////////////////////////
+            
+            int theta_bin(-1), phi_bin(-1);
+            double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
+            
+            if (pdgId == 2){
+                histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
+                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar_unit.Mag());
+                
+                theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
+                phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
+                content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
+                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
+                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+                
+                histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
+            }
+            if (pdgId == 3){
+                histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
+                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar_unit.Mag());
+                
+                theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
+                phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
+                content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
+                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
+                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+                
+                histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
+            }
             //cout<< "ID= "<<pdgId<<" theta_mom= "<<theta_mom<<"ph_mom,momentum= "<<ph_mom<<endl;
-
-
+            
+            
             //if (bar != 6 )continue ;
             hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
             //if(fabs(dir_x)>0.01 )continue;
@@ -562,8 +597,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             // Fill PMT coorrection   //
                             ////////////////////////////
                             // cherenkove correction per PMT
-                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistMCP_k[pmt]->Fill(tangle);
-                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistMCP_pi[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistPMT_k[pmt]->Fill(tangle);
+                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistPMT_pi[pmt]->Fill(tangle);
                             
                             // fill cherenkove histo
                             hAngle[pdgId]->Fill(tangle);
@@ -1092,8 +1127,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      */
     
     glx_canvasAdd("26",800,400);
-    histo_theta_phi_mom_map_pi->Draw("colz");
+    histo_theta_phi_map_pi->Draw("colz");
     glx_canvasAdd("27",800,400);
+    histo_theta_phi_map_k->Draw("colz");
+    
+    glx_canvasAdd("28",800,400);
+    histo_theta_phi_mom_map_pi->Draw("colz");
+    glx_canvasAdd("29",800,400);
     histo_theta_phi_mom_map_k->Draw("colz");
     
     glx_canvasSave(0);
@@ -1107,8 +1147,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     }
     if(gCherenkov_Correction==1) {
         for(Int_t i=0; i<PMT_num; i++) {
-            fHistMCP_k[i]->Write();
-            fHistMCP_pi[i]->Write();
+            fHistPMT_k[i]->Write();
+            fHistPMT_pi[i]->Write();
         }
     }
     
