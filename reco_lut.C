@@ -401,6 +401,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         outFile= "outFile.root";
     }
     TFile file(outFile,"recreate");
+TTree *newtree = glx_ch->CloneTree(0);
     double pion_counter =0;
     double kaon_counter =0;
     DrcHit hit;
@@ -462,7 +463,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             /////////////////////////////
             //////// DIRC Wall Cut //////
             /////////////////////////////
-            
+/*            
             
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
@@ -475,7 +476,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
-            
+*/            
             
             ///////////////////////////////////
             //////// reduce pions number //////
@@ -486,7 +487,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
-            
+  
+if (true){
+      newtree->Fill();
+      glx_event->Clear();
+          }
             
             /////////////////////////////
             //////// theta phi map //////
@@ -1238,7 +1243,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     //mom_theta_phi->Write();
     
-
+/*
     TTree *tc = new TTree("reco","reco");
     tc->Branch("pion_counter",&pion_counter,"pion_counter/D");
     tc->Branch("kaon_counter",&kaon_counter,"kaon_counter/D");
@@ -1247,4 +1252,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     file.Write();
     file.Close();
+*/
+  newtree->Print();
+  newtree->AutoSave();
+
 }
