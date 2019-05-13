@@ -9,6 +9,7 @@
 #include "glxtools.C"
 #define PI 3.14159265
 
+
 // gPDF_pix = 1 Create PDF per pix
 // gPDF_pix = 2 Calculate Sepration from PDF
 
@@ -20,6 +21,7 @@
 
 void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
+
     const int nodes = glx_maxch;
     const int luts = 24;
     TFile *fLut = new TFile(inlut);
@@ -247,10 +249,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         for(Int_t PMT=0; PMT<PMT_num; PMT++) {
             TString pmt_counter=Form("_%d",pmtCounter);
             if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
-            //if( (PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11) ) continue;
-            if(! (PMT==102)) continue; // custmization 
+            if((PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11 || PMT==102)) continue;
+            //if(! (PMT==102)) continue; // custmization 
 
-            glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
+            //glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
             fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
             fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
@@ -268,7 +270,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     	    //////////////////////////////////
 
             if(PMT==42) rang_min=0.81;
-	    if((PMT==24 || PMT==26 ||PMT==18 ||PMT==11)){
+	    if(PMT==24 || PMT==26 ||PMT==18 ||PMT==11){
               rang_min= 0.82-cut_cangle/2;
               rang_max= 0.82+cut_cangle/2;
 	    }
@@ -277,15 +279,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
               rang_max= 0.82+cut_cangle;
 
             }
-            if((PMT==40 || PMT==41  )){
+            if(PMT==40 || PMT==41){
               rang_min= 0.814;
               rang_max= 0.84;
             }
-
-           // if(PMT==102){
-           //   rang_min= 0.815;
-           //   rang_max= 0.834;
-           // }
 
             fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
             double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
@@ -304,12 +301,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             array_correction[PMT]= delta_cherenkov_cor;
             cout<<"##########"<< "shift "<<val_1<<endl;
             // Fill PMT
-            
+
              for(Int_t m=0; m<64; m++)
              for(Int_t n=0; n<64; n++){
              glx_hdigi[PMT]->SetBinContent(m, n,val_1);
              }
-             
+	    /*
             // default correction
             //array_correction[PMT]= -0.004;
             fHistPMT_read_pi[PMT]->Draw();
@@ -322,16 +319,26 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             lin_ref->SetY2(gPad->GetUymax());
             lin_ref->SetLineColor(kBlue);
             lin_ref->Draw();
+
+    	    TLine *lin_ref_k = new TLine(0,0,0,1000);
+    	    lin_ref_k->SetX1(referance_angle_k);
+    	    lin_ref_k->SetX2(referance_angle_k);
+     	    lin_ref_k->SetY1(gPad->GetUymin());
+            lin_ref_k->SetY2(gPad->GetUymax());
+            lin_ref_k->SetLineColor(kRed);
+            lin_ref_k->Draw();
+
             glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
             //glx_canvasGet("r_pmt_correction")->Update();
             //glx_waitPrimitive("r_pmt_correction");
             //hsigma_test->Fill(sigma_cherenkov_cor*1000);
             //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
             //hmean_test->Fill(mean_cherenkov_cor);
+	    */
             // }
             ++pmtCounter;
         }
-
+    /*
     glx_canvasAdd("r_pmt_shift",800,400);
     TMultiGraph *mg = new TMultiGraph();
     mg->Add(shifted_pi);
@@ -357,7 +364,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     lin_ref_k->SetY2(gPad->GetUymax());
     lin_ref_k->SetLineColor(kRed);
     lin_ref_k->Draw();
-  
+    */
     }
     
     
@@ -369,7 +376,6 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      hsigma_test->Draw();
      glx_canvasAdd("r_hmean_test",800,400);
      hmean_test->Draw();
-*/
      //gStyle->SetPalette(kLightTemperature);
      gStyle->SetPalette(kThermometer);
      double max_digi(10);//30
@@ -378,7 +384,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      glx_canvasSave(0);
      
      return;
-     
+     */
 //return;
 
     //////////////////
