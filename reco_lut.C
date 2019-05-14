@@ -81,7 +81,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         fAngle[i]->SetParameter(2,sigma[i]);    // sigma
         hAngle[i]->SetMarkerStyle(20);
         hAngle[i]->SetMarkerSize(0.8);
-        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",80,-150,150);// ,120,-120,120 // 120,-60,60
+        hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",110,-120,120); //,80,-150,150);// 
     }
     hAngle[2]->SetLineColor(4);
     hAngle[3]->SetLineColor(2);
@@ -186,12 +186,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TString cherenkov_pdf_path_pmt;
     
     for(Int_t i=0; i<PMT_num; i++) {
-        fHistPMT_PDF_k[i] = new TH1F(Form("fHistPMT_PDF_k_%d",i),Form("fHistPMT_PDF_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-        fHistPMT_PDF_pi[i] = new TH1F(Form("fHistPMT_PDF_pi_%d",i),Form("fHistPMT_PDF_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+        fHistPMT_PDF_k[i] = new TH1F(Form("fHistPMT_PDF_k_%d",i),Form("fHistPMT_PDF_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1);    // 250
+        fHistPMT_PDF_pi[i] = new TH1F(Form("fHistPMT_PDF_pi_%d",i),Form("fHistPMT_PDF_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); // 250
     }
     // read pdf per pmt
     if (gPDF_pmt==2) {
-        cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_pdf_pmt_Notcorrected.root";
+        //cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_pdf_pmt_corrected.root";
+        cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pmt_NotCorrected.root";
         cout<<"cherenkov_pdf_path_pmt= " <<cherenkov_pdf_path_pmt<<endl;
         ffile_cherenkov_pdf_pmt  = new TFile(cherenkov_pdf_path_pmt, "READ");
         for(Int_t PMT=0; PMT<PMT_num; PMT++) {
@@ -252,7 +253,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if((PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11 || PMT==102)) continue;
             //if(! (PMT==102)) continue; // custmization 
 
-            //glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
+            glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
             fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
             fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
@@ -300,8 +301,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
             array_correction[PMT]= delta_cherenkov_cor;
             cout<<"##########"<< "shift "<<val_1<<endl;
+
             // Fill PMT
-/*
              for(Int_t m=0; m<64; m++)
              for(Int_t n=0; n<64; n++){
              glx_hdigi[PMT]->SetBinContent(m, n,val_1);
@@ -334,7 +335,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //hsigma_test->Fill(sigma_cherenkov_cor*1000);
             //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
             //hmean_test->Fill(mean_cherenkov_cor);
-*/	    
+	    
             // }
             ++pmtCounter;
         }
@@ -385,14 +386,14 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      
      return;
      */
-//return;
+return;
 
     //////////////////
     /// Reco Method //
     //////////////////
     TString outFile;
     if(gPDF_pix==1){outFile= "created_cherenkovPDF_pix.root";
-    } else if(gPDF_pmt==1 && gCherenkov_Correction==2){ outFile= "cherenkov_pdf_pmt_corrected.root";
+    } else if(gPDF_pmt==1 && gCherenkov_Correction==2){ outFile= "created_pdf_pmt_corrected.root";
     } else if(gPDF_pix==2){ outFile= "outFile_separation_PDF_pix.root";
     } else if(gPDF_pmt==2){ outFile= "outFile_separation_PDF_pmt.root";
     } else if(gPDF_pmt==1){ outFile= "created_cherenkovPDF_pmt_NotCorrected.root";
@@ -631,8 +632,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             // PMT Correction //
                             ////////////////////
                             
-                            //if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir)+ referance_angle - 0.8257;
-			    if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir)+ referance_angle;
+                           // if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir)+ referance_angle - 0.8257;
+			    if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
                             if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction[pmt];
                             
                             //double bartime = lenz/cos(luttheta)/20.4; //198 //203.767 for 1.47125
