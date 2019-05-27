@@ -82,6 +82,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
         hAngle[i]->SetMarkerStyle(20);
         hAngle[i]->SetMarkerSize(0.8);
         hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",110,-120,120); //,80,-150,150);// 
+	//hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",80,-150,150);// 
+
     }
     hAngle[2]->SetLineColor(4);
     hAngle[3]->SetLineColor(2);
@@ -97,8 +99,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     // cuts
     double cut_cangle=0.04;
     double cut_tdiffd=3;//3;
-    double cut_tdiffr=4;//3.5;
+    double cut_tdiffr=3.5;//3.5;
     const int nbins=20;
+
+double xmin(0), xmax(0), ymin(0), ymax(0) ;
+
     //TFile file("outFile.root","recreate");
     double inv_mass, missing_mass, chi_square, TofTrackDist;
     TH1F *hist_ev_rho_mass = new TH1F("hist_ev_rho_mass","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
@@ -119,9 +124,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     hist_ev_phi_mass->SetTitle("#phi Invariant Mass");
     hist_ev_rho_mass_cut->SetTitle("#rho Invariant Mass cut");
     hist_ev_phi_mass_cut->SetTitle("#phi Invariant Mass cut");
+
+
     
-    TH2F * hExtrapolatedBarHitXY = new TH2F( "hExtrapolatedBarHitXY" , "; Bar Hit X (cm); Bar Hit Y (cm)", 200, -100, 100, 200, -100, 100);
-    TH2F * hExtrapolatedBarHitXY_cut = new TH2F( "hExtrapolatedBarHitXY_cut" , "; Bar Hit X (cm); Bar Hit Y (cm)", 200, -100, 100, 200, -100, 100);
     
     //TH2F * mom_theta = new TH2F( "mom_theta" , "; Momentum [Gev/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
     //TH2F * mom_theta_cut = new TH2F( "mom_theta_cut" , "; Momentum [GeV/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
@@ -139,16 +144,25 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
     TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
     
-    Int_t nf= 81;
-    TH2F * histo_theta_phi_map_pi =  new TH2F("histo_theta_phi_map_pi",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_map_k =  new TH2F("histo_theta_phi_map_k",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+
+
+
+    TH2F * hExtrapolatedBarHitXY_k = new TH2F( "hExtrapolatedBarHitXY_k" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+    TH2F * hExtrapolatedBarHitXY_pi = new TH2F( "hExtrapolatedBarHitXY_pi" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+
+
+    TH2F * hExtrapolatedBarHitXY_cut = new TH2F( "hExtrapolatedBarHitXY_cut" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+
+    Int_t nf= 121;
+    TH2F * histo_theta_phi_map_pi =  new TH2F("histo_theta_phi_map_pi",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_map_k =  new TH2F("histo_theta_phi_map_k",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
     
-    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_mom_map_k  =  new TH2F("histo_theta_phi_mom_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_map_k  =  new TH2F("histo_theta_phi_mom_map_k ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
     
     
-    TH2F * histo_theta_phi_mom_tmp_map_pi =  new TH2F("histo_theta_phi_mom_tmp_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, 0, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_tmp_map_pi =  new TH2F("histo_theta_phi_mom_tmp_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
     
     
     
@@ -160,8 +174,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TString cherenkov_pdf_path_pix;
     
     for(Int_t i=0; i<glx_nch; i++) {
-        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
-        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 2000,0.6,1); //2000
+        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
+        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
     }
     // read pdf per pix
     if (gPDF_pix==2) {
@@ -241,9 +255,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
     TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
     //gStyle->SetPalette(kLightTemperature);
-    //glx_canvasAdd("r_pmt_correction",800,400);
+//////////////////////////////////////////////////
+//    glx_canvasAdd("r_pmt_correction",800,400);//
+/////////////////////////////////////////////////
     if (gCherenkov_Correction==2) {
-        cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";
+        cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";//outFile_separation_PDF_pmt.root //cherenkov_correction.root
         cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
         ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
         int pmtCounter =0;
@@ -252,8 +268,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
             if((PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11 || PMT==102)) continue;
             //if(! (PMT==102)) continue; // custmization 
-
-            glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);
+////////////////////////////////////////////////////////////////////////
+//            //glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);//
+////////////////////////////////////////////////////////////////////////
             fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
             fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
             fit_PMT->SetParameters(100,0.82,0.010,10);
@@ -293,7 +310,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             double val_1 = (delta_cherenkov_cor)*1000.0 ;
             shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
 
-            // cout<<"##########"<< fabs(mean_cherenkov_cor - referance_angle) << "  "<<sigma_cherenkov_cor*1000<<endl;
+            cout<<"##########"<<"PMT= "<<PMT<< "	delta_cherenkov_cor= " << delta_cherenkov_cor<<endl;
             hsigma_test->Fill(sigma_cherenkov_cor*1000);
             hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
             hmean_test->Fill(mean_cherenkov_cor);
@@ -301,18 +318,18 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
             array_correction[PMT]= delta_cherenkov_cor;
             cout<<"##########"<< "shift "<<val_1<<endl;
-
+/*            
             // Fill PMT
              for(Int_t m=0; m<64; m++)
              for(Int_t n=0; n<64; n++){
              glx_hdigi[PMT]->SetBinContent(m, n,val_1);
              }
-
+  
             // default correction
             //array_correction[PMT]= -0.004;
             fHistPMT_read_pi[PMT]->Draw();
-            glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-            //glx_canvasGet("r_pmt_correction")->Update();
+            //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+            glx_canvasGet("r_pmt_correction")->Update();
             TLine *lin_ref = new TLine(0,0,0,1000);
             lin_ref->SetX1(referance_angle);
             lin_ref->SetX2(referance_angle);
@@ -329,13 +346,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             lin_ref_k->SetLineColor(kRed);
             lin_ref_k->Draw();
 
-            glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-            //glx_canvasGet("r_pmt_correction")->Update();
-            //glx_waitPrimitive("r_pmt_correction");
+            //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+            glx_canvasGet("r_pmt_correction")->Update();
+            glx_waitPrimitive("r_pmt_correction");
             //hsigma_test->Fill(sigma_cherenkov_cor*1000);
             //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
             //hmean_test->Fill(mean_cherenkov_cor);
-	    
+*/	    
             // }
             ++pmtCounter;
         }
@@ -370,7 +387,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     
     
-    /*
+  /*  
      glx_canvasAdd("r_diff_test",800,400);
      hdiff_test->Draw();
      glx_canvasAdd("r_hsigma_test",800,400);
@@ -385,8 +402,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
      glx_canvasSave(0);
      
      return;
-     */
-return;
+    */ 
+//return;
 
     //////////////////
     /// Reco Method //
@@ -448,24 +465,27 @@ return;
             //hdir_y->Fill(dir_y);
             //hdir_z->Fill(dir_z);
             //cout<<"=========>" << dir_x << "  "<< dir_y<< endl;
-            hExtrapolatedBarHitXY->Fill(posInBar.X(), posInBar.Y());
+
+
+
+
+
+
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
-            
+
+
+            if(glx_event->GetParent()>0) continue;
+
             //////////////////////////////
             //////// Momentum Cut //////
             /////////////////////////////
-            
+
             if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
-            
-            
-            double theta_mom =  momInBar_unit.Theta()* 180/PI;
-            double ph_mom =  momInBar_unit.Phi()* 180/PI;
-            
+
             /////////////////////////////
             //////// DIRC Wall Cut //////
             /////////////////////////////
-            
-            
+
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
             int bin = (100+posInBar.X())/200.*nbins;
@@ -477,91 +497,136 @@ return;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
-            
-            
+
+	    if (xmin <  posInBar.X()) xmin=posInBar.X();
+	    if (xmax >  posInBar.X()) xmax=posInBar.X();
+	    if (ymin <  posInBar.Y()) ymin=posInBar.Y();
+	    if (ymax >  posInBar.Y()) ymax=posInBar.Y();
+
+
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
-            
+
             double percentage = kaon_counter/pion_counter*100.0;
-            if (percentage <100 && pdgId == 2 )continue;
+            if (percentage <80 && pdgId == 2 )continue;
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
-  
 
-    //newtree->Fill();
-    //glx_event->Clear();
-            
+
+            ///////////////////////
+            //////// pos map //////
+            ///////////////////////
+
+	if (pdgId == 2){
+                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_k->Fill(100+posInBar.X(), posInBar.Y());
+                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_k->Fill(-100+ posInBar.X(), posInBar.Y());
+		}
+	if (pdgId == 3){
+                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_pi->Fill(100+posInBar.X(), posInBar.Y());
+                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_pi->Fill(-100+ posInBar.X(), posInBar.Y());
+		}
+
             /////////////////////////////
             //////// theta phi map //////
             /////////////////////////////
-            
+
+            double theta_mom =  momInBar_unit.Theta()* 180/PI;
+            double ph_mom =  momInBar_unit.Phi()* 180/PI;
+            if (glx_event->GetPdg() < 0 ) theta_mom = theta_mom *-1.0 ;
+
             int theta_bin(-1), phi_bin(-1);
             double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
-            
+
             if (pdgId == 2){
                 histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
                 histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
+
                 theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
                 phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
                 content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
                 content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
                 average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                //cout<< "###### average_bin= "<<average_bin<<"	"<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<"	"<<momInBar_unit.Mag()<<endl;
+                //cout<< "###### average_bin= "<<average_bin<<" "<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<" "<<momInBar_unit.Mag()<<endl;
                 histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
             }
             if (pdgId == 3){
                 histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
                 histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
+
                 theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
                 phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
                 content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
                 content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
                 average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                
+
                 histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
             }
-            //cout<< "ID= "<<pdgId<<" theta_mom= "<<theta_mom<<"ph_mom,momentum= "<<ph_mom<<endl;
-            
-            
-            //if (bar != 6 )continue ;
-            hExtrapolatedBarHitXY_cut->Fill(posInBar.X(), posInBar.Y());
+
+
+            /////////////////////////////
+            //////// DIRC Wall Cut //////
+            /////////////////////////////
+/*
+
+            //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
+            //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
+            int bin = (100+posInBar.X())/200.*nbins;
+            // not used
+            // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
+            // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
+            // commented
+            if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
+            //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
+            //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
+            if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
+
+
+if (xmin >  posInBar.X()) xmin=posInBar.X();
+if (xmax <  posInBar.X()) xmax=posInBar.X();
+
+if (ymin >  posInBar.Y()) ymin=posInBar.Y();
+if (ymax <  posInBar.Y()) ymax=posInBar.Y();
+
+*/
+
+    	       //newtree->Fill();
+	       //glx_event->Clear();
+               //cout<< "ID= "<<pdgId<<" theta_mom= "<<theta_mom<<"ph_mom,momentum= "<<ph_mom<<endl;
+
+
+
+                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_cut->Fill(100+posInBar.X(), posInBar.Y());
+                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_cut->Fill(-100+  posInBar.X(), posInBar.Y());
+
             //if(fabs(dir_x)>0.01 )continue;
             //if(dir_y<-0.05)continue;
             hdir_x->Fill(dir_x);
             hdir_y->Fill(dir_y);
             hdir_z->Fill(dir_z);
-            
             if (pdgId == 2){
                 hist_ev_rho_mass_cut->Fill(inv_mass);
                 hist_ev_missing_mass_rho_cut->Fill(missing_mass);
                 hist_ev_chi_rho_cut->Fill(chi_square);
-                
                 if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
                 if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
             }
-            
             if (pdgId == 3){
                 hist_ev_phi_mass_cut->Fill(inv_mass);
                 hist_ev_missing_mass_phi_cut->Fill(missing_mass);
                 hist_ev_chi_phi_cut->Fill(chi_square);
-                
                 if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
                 if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
             }
-            
-            
-            if(glx_event->GetParent()>0) continue;
+
+
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
-            
+
             for(int p=0; p<5; p++){
                 mAngle[p] = acos(sqrt(momentum * momentum + glx_mass[p]*glx_mass[p])/momentum/1.473);  //1.4738
                 fAngle[p]->SetParameter(1,mAngle[p]);// mean
             }
-            
             sum1=0;
             sum2=0;
             int nph=0;
@@ -632,7 +697,7 @@ return;
                             // PMT Correction //
                             ////////////////////
                             
-                           // if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir)+ referance_angle - 0.8257;
+                            //if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir)+ referance_angle - 0.8257;
 			    if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
                             if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction[pmt];
                             
@@ -665,7 +730,7 @@ return;
                             if(gPDF_pix ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
                             if(gPDF_pix ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
                             
-                            // cherenkove PDF per PIX
+                            // cherenkove PDF per PMT
                             if(gPDF_pmt ==1 && pdgId == 3) fHistPMT_PDF_k[pmt]->Fill(tangle); // good after time cut
                             if(gPDF_pmt ==1 && pdgId == 2) fHistPMT_PDF_pi[pmt]->Fill(tangle); // good after time cut
                             
@@ -685,13 +750,16 @@ return;
                             //if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
                             
                             if(fabs(tangle-0.5*(referance_angle_k+referance_angle_pi))>cut_cangle) continue;
+
+                            //if(tangle> 0.844 ||tangle < 0.798)  continue;
+
                             
                             isGood=true;
                             hTime->Fill(hitTime);
                             hCalc->Fill(totalTime);
                             
                             
-                            if(gPDF_pix !=2 || gPDF_pmt !=2 ){
+                            if(gPDF_pix !=2 || gPDF_pmt !=2 ){ // fixed
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
@@ -1168,11 +1236,6 @@ return;
      hist_ev_chi_phi->Draw();
      
      
-     glx_canvasAdd("13",800,400);
-     hExtrapolatedBarHitXY->Draw("colz");
-     
-     glx_canvasAdd("14",800,400);
-     hExtrapolatedBarHitXY_cut->Draw("colz");
      
      
      
@@ -1203,7 +1266,7 @@ return;
      
      */
     
-    
+/*    
     glx_canvasAdd("26",800,400);
     histo_theta_phi_map_pi->Draw("colz");
     glx_canvasAdd("27",800,400);
@@ -1215,6 +1278,66 @@ return;
     histo_theta_phi_mom_map_k->Draw("colz");    
     
     
+
+     glx_canvasAdd("13",800,400);
+     hExtrapolatedBarHitXY_k->Draw("colz");
+     
+glx_canvasAdd("14",800,400);
+ hExtrapolatedBarHitXY_pi->Draw("colz");
+
+
+glx_canvasGet("14")->Update();
+    TLine *linex1 = new TLine(0,0,0,1000);
+    linex1->SetLineStyle(2);
+    linex1->SetX1(xmin);
+    linex1->SetX2(xmin);
+    linex1->SetY1(gPad->GetUymin());
+    linex1->SetY2(gPad->GetUymax());
+    linex1->SetLineColor(kRed);
+    linex1->Draw();
+
+glx_canvasGet("14")->Update();
+
+    TLine *linex2 = new TLine(0,0,0,1000);
+    linex2->SetLineStyle(2);
+    linex2->SetX1(xmax);
+    linex2->SetX2(xmax);
+    linex2->SetY1(gPad->GetUymin());
+    linex2->SetY2(gPad->GetUymax());
+    linex2->SetLineColor(kGreen);
+    linex2->Draw();
+
+glx_canvasGet("14")->Update();
+
+    TLine *liney1 = new TLine(0,0,0,1000);
+    liney1->SetLineStyle(2);
+    liney1->SetX1(gPad->GetUxmin());
+    liney1->SetX2(gPad->GetUxmax());
+    liney1->SetY1(ymin);
+    liney1->SetY2(ymin);
+    liney1->SetLineColor(kBlack);
+    liney1->Draw();
+
+glx_canvasGet("14")->Update();
+    TLine *liney2 = new TLine(0,0,0,1000);
+    liney2->SetLineStyle(2);
+    liney2->SetX1(gPad->GetUxmin());
+    liney2->SetX2(gPad->GetUxmax());
+    liney2->SetY1(ymax);
+    liney2->SetY2(ymax);
+    liney2->SetLineColor(kBlue);
+    liney2->Draw();
+
+cout<<"###########"<<xmin<<"	"<<xmax<<"	"<<ymin<<"	"<<ymax<<endl;
+*/
+
+//glx_canvasGet("14")->Update();
+
+
+/*
+     glx_canvasAdd("14",800,400);
+     hExtrapolatedBarHitXY_cut->Draw("colz");
+*/
     
     glx_canvasSave(0);
     
