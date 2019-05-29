@@ -57,7 +57,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     
     TF1 *fit_track = new TF1("fit_track","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
-    fit_track->SetLineColor(kBlue);
+    fit_track->SetNpx(1000);
     
     TF1 *fit = new TF1("fgaus","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
     TSpectrum *spect = new TSpectrum(10);
@@ -65,7 +65,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TF1  *fAngle[5];
     double mAngle[5];
     
-    TH1F * histo_cherenkov_track = new TH1F("histo_cherenkov_track","histo_cherenkov_track", 250,0.6,1);
+    TH1F * histo_cherenkov_track = new TH1F("histo_cherenkov_track","histo_cherenkov_track", 100,0.6,1); //250
     TH1F *hDiff = new TH1F("hDiff",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
     TH1F *hDiffT = new TH1F("hDiffT",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
     TH1F *hDiffD = new TH1F("hDiffD",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
@@ -435,7 +435,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
-    int track_pid(-1), ,track_nbar(-1);
+    int track_pid(-1), track_nbar(-1);
     
     tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
     tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
@@ -477,7 +477,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //////// selection//////
             ////////////////////////
             
-            
+            if (!(pdgId ==2 || pdgId ==3)) continue;
+
             // pion =2  ,kaon=3
             if(true){
                 if (pdgId == 2 && chi_square> 10) continue;
@@ -658,6 +659,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             int nphc=0;
             //      hNphC->Fill(glx_event->GetHitSize());
             bool goodevt=0;
+            // reset variables
+            track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
+            track_pid=-1; track_nbar=-1;
+            histo_cherenkov_track->Reset();
+
             for(int h = 0; h < glx_event->GetHitSize(); h++){
                 hit = glx_event->GetHit(h);
                 int ch = hit.GetChannel();
@@ -753,7 +759,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             // Cherenkov track  //
                             //////////////////////
                             
-                            if(pdgId == 2) histo_cherenkov_track->Fill(tangle);
+                            histo_cherenkov_track->Fill(tangle);
                             
                             ////////////////
                             // Fill PDF   //
@@ -791,7 +797,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                             hCalc->Fill(totalTime);
                             
                             
-                            if(gPDF_pix !=2 && gPDF_pmt !=2 ){ // fixed
+                            if(!(gPDF_pix==2||gPDF_pmt==2 )){ // fixed
                                 sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
                                 sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
                             }
@@ -920,16 +926,17 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fit_track->SetParLimits(0,0.1,1E6);
             fit_track->SetParLimits(1,0.809,0.835);
             fit_track->SetParLimits(2,0.005,0.030);
-            histo_cherenkov_track->Fit("fit_track","M","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
+            if (pdgId==3)fit_track->SetLineColor(kRed);
+	    else fit_track->SetLineColor(kBlue);
+            histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
             
-            track_mean=  fit_track->GetParameter(1);
-            track_spr= fit_track->GetParameter(2);
-            
-            cc->cd();
-            histo_cherenkov_track->Draw();
-            cc->Update();
+            //cc->cd();
+            //histo_cherenkov_track->Draw();
+            //cc->Update();
             //cc->WaitPrimitive();
 
+            track_mean=  fit_track->GetParameter(1);
+            track_spr= fit_track->GetParameter(2);
             track_yield = nph;
             track_mom = momInBar.Mag();
             track_xbar = momInBar.X();
@@ -939,13 +946,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             tree_variables.Fill();
             
-            // reset variables
-            track_spr(-1); track_mean(-1); track_yield(-1); track_mom(-1); track_xbar(0);track_ybar(0);
-            track_pid(-1); track_nbar(-1);
-            histo_cherenkov_track->Reset();
-            
-            
-            
+
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
