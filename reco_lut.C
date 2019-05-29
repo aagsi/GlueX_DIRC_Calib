@@ -487,7 +487,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //////// Momentum Cut //////
             /////////////////////////////
             
-            if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
+            //if(momInBar.Mag()<3.5 || momInBar.Mag()>4.0 ) continue;
             
             /////////////////////////////
             //////// DIRC Wall Cut //////
@@ -902,7 +902,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fit_track->SetParLimits(0,0.1,1E6);
             fit_track->SetParLimits(1,0.809,0.835);
             fit_track->SetParLimits(2,0.005,0.030);
-            histo_cherenkov_track->Fit("fit_track","M","",rang_min,rang_max);
+            histo_cherenkov_track->Fit("fit_track","M","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
             
             cc->cd();
             histo_cherenkov_track->Draw();
