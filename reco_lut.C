@@ -425,8 +425,31 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     } else {
         outFile= "outFile.root";
     }
+    
+    /////////////////////////////////
+    //////// Creat file and trees ///
+    /////////////////////////////////
+    
     TFile file(outFile,"recreate");
-    //TTree *newtree = glx_ch->CloneTree(0);
+    //TTree *tree_cut = glx_ch->CloneTree(0);
+    
+    TTree tree_variables("tree_variables","tree for cherenkov track resolution");
+    double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
+    int track_pid(-1), ,track_nbar(-1);
+    
+    tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
+    tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
+    tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
+    tree_variables.Branch("track_yield",&track_yield,"track_yield/D");
+    tree_variables.Branch("track_mom",&track_mom,"track_mom/D");
+    tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
+    tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
+    tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
+    
+    
+    
+    
+    
     double pion_counter =0;
     double kaon_counter =0;
     DrcHit hit;
@@ -511,15 +534,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if (ymax >  posInBar.Y()) ymax=posInBar.Y();
             
             
-            ///////////////////////////////////
-            //////// reduce pions number //////
-            ///////////////////////////////////
             
-            double percentage = kaon_counter/pion_counter*100.0;
-            if (percentage <80 && pdgId == 2 )continue;
-            if (pdgId == 2) pion_counter++;
-            if (pdgId == 3) kaon_counter++;
-            //cout << "pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<"persentage "<< percentage<<endl;
+            
             
             
             ///////////////////////
@@ -598,7 +614,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
              
              */
             
-            //newtree->Fill(); old
+            //tree_cut->Fill(); old
             //glx_event->Clear();
             //cout<< "ID= "<<pdgId<<" theta_mom= "<<theta_mom<<"ph_mom,momentum= "<<ph_mom<<endl;
             
@@ -895,8 +911,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // hAngle[2]->Reset();
             // hAngle[3]->Reset();
             
+            /////////////////////
+            // fill tree here////
+            /////////////////////
             
-            // fill tree here
             fit_track->SetParameters(100,0.82,0.010,10);
             fit_track->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
             fit_track->SetParLimits(0,0.1,1E6);
@@ -904,14 +922,38 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fit_track->SetParLimits(2,0.005,0.030);
             histo_cherenkov_track->Fit("fit_track","M","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
             
+            track_mean=  fit_track->GetParameter(1);
+            track_spr= fit_track->GetParameter(2);
+            
             cc->cd();
             histo_cherenkov_track->Draw();
             cc->Update();
-            cc->WaitPrimitive();
+            //cc->WaitPrimitive();
+
+            track_yield = nph;
+            track_mom = momInBar.Mag();
+            track_xbar = momInBar.X();
+            track_ybar = momInBar.Y();
+            track_pid = pdgId;
+            track_nbar = bar;
             
+            tree_variables.Fill();
+            
+            // reset variables
+            track_spr(-1); track_mean(-1); track_yield(-1); track_mom(-1); track_xbar(0);track_ybar(0);
+            track_pid(-1); track_nbar(-1);
             histo_cherenkov_track->Reset();
             
-            //newtree->Fill();
+            
+            
+            ///////////////////////////////////
+            //////// reduce pions number //////
+            ///////////////////////////////////
+            
+            double percentage = kaon_counter/pion_counter*100.0;
+            if (percentage <100 && pdgId == 2 )continue;
+            if (pdgId == 2) pion_counter++;
+            if (pdgId == 3) kaon_counter++;
             
         }
     } // Event Loop
@@ -1402,15 +1444,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //mom_theta_phi->Write();
     
     
-    TTree *tc = new TTree("reco","reco");
-    tc->Branch("pion_counter",&pion_counter,"pion_counter/D");
-    tc->Branch("kaon_counter",&kaon_counter,"kaon_counter/D");
-    tc->Fill();
-    tc->Write();
     
     file.Write();
     file.Close();
     
-    //  newtree->Print();
-    //  newtree->AutoSave();
+    //  tree_cut->Print();
+    //  tree_cut->AutoSave();
+    
+    
+    cout << "##########  pion_counter = " << pion_counter <<"   "<<" Kaon_counter = "<<kaon_counter<<endl;
 }
