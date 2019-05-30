@@ -1,5 +1,6 @@
 #include "TMultiGraph.h"
 #include "TGraph.h"
+#include "TGraphAsymmErrors.h"
 #include "glxtools.C"
 void analyses(){
     
@@ -25,7 +26,7 @@ void analyses(){
     TH1F* histo_track_mean = new TH1F("histo_track_mean",";track mean [rad]; entries [#]",250,0.80,0.84);
     TH1F* histo_track_spr = new TH1F("histo_track_spr",";track SPR [m rad]; entries [#]",250,5.1,20);
     
-    int nbin_yield =100; // 100
+    const int nbin_yield =100; // 100
     TH1F*  histo_track_yield = new TH1F("histo_track_yield",";phton yield; entries [#]",nbin_yield ,0,100);
     
     TH1F*  histo_track_resolution[nbin_yield];
@@ -35,7 +36,7 @@ void analyses(){
     
     
     // variables
-    Double_t track_resolution(-1);
+    Double_t diff(-1);
     
     double mean_max(0.834), mean_min (0.818) ;
     double spr_max(11), spr_min(6);
@@ -57,12 +58,12 @@ void analyses(){
     tree_variables->SetBranchAddress("track_ybar",&track_ybar);
     tree_variables->SetBranchAddress("track_nbar",&track_nbar);
     
-    int couter(0);
+    
     Long64_t nentries = tree_variables->GetEntries();
     for (Long64_t i=0;i<nentries;i++) {
         tree_variables->GetEntry(i);
         
-        if(track_pid != 2 ) continue; // select pion
+        if(track_pid !=2 ) continue; // select pion !=2
         
         histo_track_mean->Fill(track_mean);
         histo_track_spr->Fill(track_spr*1000);
@@ -71,45 +72,77 @@ void analyses(){
         if(track_spr*1000> spr_max || track_spr*1000<spr_min ) continue;
         
         
-        //track_resolution = fAnglePi-track_mean;
-        track_resolution = track_mean-   0.82608;
+        //diff = fAnglePi-track_mean;
+        diff = track_mean-   0.82608;
         
-        //std::cout<<"couter "<<couter<<"   "<<"track_yield "<<track_yield<<"   "<<"track_resolution"<<track_resolution*1000<<std::endl;
+        //std::cout<<"couter "<<couter<<"   "<<"track_yield "<<track_yield<<"   "<<"diff"<<diff*1000<<std::endl;
         
         histo_track_yield->Fill(track_yield);
         int xbin_yield = histo_track_yield->GetXaxis()->FindBin(track_yield);
         //cout<<xbin_yield<<endl;
-        histo_track_resolution[xbin_yield]->Fill(track_resolution*1000);
+        histo_track_resolution[xbin_yield]->Fill(diff*1000);
         
         
-        g_pi->SetPoint(couter, track_yield, track_resolution*1000);
-        ++couter;
-    }
-    
-    TCanvas *cc = new TCanvas("cc","cc",800,500);
-    TF1 *fit_track_resolution = new TF1("fit_track_resolution","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",-50,50);
-    fit_track_resolution->SetLineColor(kBlack);
-    fit_track_resolution->SetParameters(100,0,2);
-    fit_track_resolution->SetParNames("p0","mean","cherenkov track resolution");
-    fit_track_resolution->SetParLimits(0,0.1,1E6);
-    fit_track_resolution->SetParLimits(1,-1,1);
-    fit_track_resolution->SetParLimits(2,1,5);
-    
-    for (int i=0;i<nbin_yield;i++){
-
         
-        
-        histo_track_resolution[i]->Fit("fit_track_resolution","M","", -50, 50) ;
-        cc->cd();
-        cc->Update();
-        histo_track_resolution[i]->Draw();
-        cc->Update();
-        cc->WaitPrimitive();
     }
     
     
     glx_canvasAdd("r_yield",800,400);
     histo_track_yield->Draw();
+    
+    TCanvas *cc = new TCanvas("cc","cc",800,500);
+    TF1 *fit_track_resolution = new TF1("fit_track_resolution","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",-50,50);
+    fit_track_resolution->SetLineColor(kBlack);
+    fit_track_resolution->SetParameters(100,0,2);
+    fit_track_resolution->SetParNames("p0","mean","resolution");
+    fit_track_resolution->SetParLimits(0,0.1,1E6);
+    fit_track_resolution->SetParLimits(1,-1,1);
+    fit_track_resolution->SetParLimits(2,1,5);
+    
+    
+    double track_resolution(-1),track_resolution_error(-1), yield_BinCenter(-1);
+    double width =histo_track_yield->GetBinWidth(1);
+    
+    
+    TGraphAsymmErrors *graph_reso = new TGraphAsymmErrors();
+    graph_reso->SetTitle("Cherenkov Track resolution");
+    graph_reso->SetMarkerColor(4);
+    graph_reso->SetMarkerStyle(21);
+    
+    int couter(0);
+    for (int i=0;i<nbin_yield;i++){
+        if (histo_track_resolution[i]->GetEntries() <175)continue; //400
+        histo_track_resolution[i]->Fit("fit_track_resolution","M","", -50, 50) ;
+        if(false){
+            cc->cd();
+            cc->Update();
+            histo_track_resolution[i]->Draw();
+            cc->Update();
+            cc->WaitPrimitive();
+        }
+        
+        track_resolution= fit_track_resolution->GetParameter(2);
+        track_resolution_error= fit_track_resolution->GetParError(2);
+        yield_BinCenter = histo_track_yield->GetXaxis()->GetBinCenter(i);
+        
+        graph_reso->SetPoint(couter, yield_BinCenter, track_resolution);
+        graph_reso->SetPointError(couter, width/2, width/2,track_resolution_error/2,track_resolution_error/2);
+        
+        ++couter;
+    }
+    
+    
+    
+    
+    
+    glx_canvasAdd("r_resolution",800,400);
+    TMultiGraph *mg = new TMultiGraph();
+    //mg->Add(g_pi);
+    mg->Add(graph_reso);
+    mg->SetTitle(" Cherenkov resolution per track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
+    mg->Draw("APL");
+    //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
+    
     
     
     
@@ -152,16 +185,6 @@ void analyses(){
         lin_spr_min->SetLineColor(kBlack);
         lin_spr_min->Draw();
         glx_canvasGet("r_spr")->Update();
-        
-        
-        
-        glx_canvasAdd("r_graph1",800,400);
-        TMultiGraph *mg = new TMultiGraph();
-        mg->Add(g_pi);
-        mg->SetTitle(" yield ; Yield [#]; SPR [m rad]");
-        mg->Draw("AP");
-        //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
-        g_pi->Draw("AP");
     }
     
 }
