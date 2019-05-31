@@ -9,15 +9,27 @@ void analyses(){
     Int_t pdg[]= {11,13,211,321,2212};
     Double_t mass[] = {0.000511,0.1056584,0.139570,0.49368,0.9382723};
     Double_t angle1(0), angle2(0),sum1(0),sum2(0), sigma(0.009),range(5*sigma),noise(0.3);
-    Double_t fAngleP = acos(sqrt(momentum*momentum+ mass[4]*mass[4])/momentum/1.4738)-0.00;
+    Double_t fAngleK = acos(sqrt(momentum*momentum+ mass[3]*mass[3])/momentum/1.4738)-0.00;
     Double_t fAnglePi= acos(sqrt(momentum*momentum + mass[2]*mass[2])/momentum/1.4738)-0.00;
     
     // graphs
     TGraph *g_pi = new TGraph();
     g_pi->SetMarkerColor(kBlue);
-    g_pi->SetMarkerStyle(20);
+    g_pi->SetMarkerStyle(0);
     g_pi->SetLineColor(kBlue);
     g_pi->SetLineWidth(1);
+    
+    TGraph *g_k = new TGraph();
+    g_k->SetMarkerColor(kBlue);
+    g_k->SetMarkerStyle(0);
+    g_k->SetLineColor(kRed);
+    g_k->SetLineWidth(1);
+    
+    TGraph *g_calc_trk_res = new TGraph();
+    g_calc_trk_res->SetMarkerColor(kBlue);
+    g_calc_trk_res->SetMarkerStyle(0);
+    g_calc_trk_res->SetLineColor(kRed);
+    g_calc_trk_res->SetLineWidth(1);
     
     TGraphAsymmErrors *graph_reso = new TGraphAsymmErrors();
     graph_reso->SetTitle("Cherenkov track resolution vs Photon yield");
@@ -57,6 +69,7 @@ void analyses(){
     
     double mean_max(0.834), mean_min (0.818) ; // 0.817,0.8348);
     double spr_max(11.5), spr_min(6);
+    double calc_trk_res(-1);
 
 
     
@@ -86,7 +99,7 @@ void analyses(){
         
         if(track_mean> mean_max   || track_mean<mean_min) continue;
         if(track_spr*1000> spr_max || track_spr*1000<spr_min ) continue;
-        //if(track_mom> 4.5   || track_mom<3.5) continue;
+        if(track_mom> 4.5   || track_mom<3.5) continue;
         
         
         
@@ -132,6 +145,16 @@ void analyses(){
     fit_track_mean->SetParLimits(1,0.80,0.84);
     fit_track_mean->SetParLimits(2,0.001,500);
     
+    TF1 *fit_trk_reso = new TF1("fit_trk_reso","[0]*sqrt(([1]/sqrt(x))^2+[2])",0,100);
+    fit_trk_reso->SetLineColor(kRed);
+    fit_trk_reso->SetParameters(100,9,2);
+    fit_trk_reso->SetParNames("p0","SPR","Reso");
+    fit_trk_reso->SetParLimits(0,0.1,1E6);
+    fit_trk_reso->SetParLimits(1,8,12);
+    fit_trk_reso->SetParLimits(2,1,5);
+    
+    
+    
     double track_resolution(-1),track_resolution_error(-1), yield_BinCenter(-1);
     double track_spr_bin(-1),track_spr_error(-1);
     double track_mean_bin(-1),track_mean_error(-1);
@@ -140,7 +163,7 @@ void analyses(){
     
     int couter(0);
     for (int i=0;i<nbin_yield;i++){
-        if (histo_track_resolution_bin[i]->GetEntries() <200)continue; //400 //175
+        if (histo_track_resolution_bin[i]->GetEntries() <200)continue; //400 //175 // 200
         histo_track_resolution_bin[i]->Fit("fit_track_resolution","M","", -50, 50) ;
         histo_track_spr_bin[i]->Fit("fit_track_spr","M","", 0, 30) ;
         histo_track_mean_bin[i]->Fit("fit_track_mean","M","", 0, 30) ;
@@ -174,19 +197,23 @@ void analyses(){
         track_resolution_error= fit_track_resolution->GetParError(2);
         
         track_mean_bin= fit_track_mean->GetParameter(1);
-        track_mean_error= fit_track_mean->GetParError(1);
-
+        //track_mean_error= fit_track_mean->GetParError(1);
+        track_mean_error= fit_track_mean->GetParameter(2);
+        
+        //spr
         //track_spr_bin= fit_track_spr->GetParameter(2);
         //track_spr_error= fit_track_spr->GetParError(2);
         
-        //track_spr_bin= fit_track_spr->GetParameter(1);
+        track_spr_bin= fit_track_spr->GetParameter(1);
         //track_spr_error= fit_track_spr->GetParError(1);
         
         //track_spr_bin= histo_track_spr_bin[i]->GetStdDev();
         //track_spr_error= histo_track_spr_bin[i]->GetStdDevError();
         
-        track_spr_bin= histo_track_spr_bin[i]->GetMean();
-        track_spr_error= histo_track_spr_bin[i]->GetMeanError();
+        //track_spr_bin= histo_track_spr_bin[i]->GetMean();
+        //track_spr_error= histo_track_spr_bin[i]->GetMeanError();
+        //track_spr_error= histo_track_spr_bin[i]->GetStdDev();
+        track_spr_error= fit_track_spr->GetParameter(2);
 
         graph_reso->SetPoint(couter, yield_BinCenter, track_resolution);
         graph_reso->SetPointError(couter, width/2, width/2,track_resolution_error/2,track_resolution_error/2);
@@ -197,36 +224,67 @@ void analyses(){
         graph_mean->SetPoint(couter, yield_BinCenter, track_mean_bin);
         graph_mean->SetPointError(couter, width/2, width/2,track_mean_error/2,track_mean_error/2);
         
+        /////////
+        g_pi->SetPoint(couter, yield_BinCenter, fAnglePi);
+        g_k->SetPoint(couter, yield_BinCenter, fAngleK);
+        /////////
+        
+        calc_trk_res=sqrt(track_resolution*track_resolution - (track_spr_bin/sqrt(yield_BinCenter))* (track_spr_bin/sqrt(yield_BinCenter)));
+        g_calc_trk_res->SetPoint(couter, yield_BinCenter, calc_trk_res);
+        
         ++couter;
     }
     
     glx_canvasAdd("r_resolution_bin",800,400);
     TMultiGraph *mg = new TMultiGraph();
-    //mg->Add(g_pi);
+    graph_reso->Fit("fit_trk_reso","M","", 0, 100) ;
+    //graph_reso->Fit("fit_trk_reso","M","", 015, 50) ;
     mg->Add(graph_reso);
+    //mg->Add(g_calc_trk_res);
     mg->SetTitle(" Cherenkov Resolution per Track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
     mg->Draw("APL");
-    //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
-    
-    glx_canvasAdd("r_spr_bin",800,400);
-    TMultiGraph *mg2 = new TMultiGraph();
-    mg2->Add(graph_spr);
-    mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
-    mg2->Draw("APL");
-
-    glx_canvasAdd("r_mean_bin",800,400);
-    TMultiGraph *mg3 = new TMultiGraph();
-    mg3->Add(graph_mean);
-    mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
-    mg3->Draw("APL");
-    
-    
 
     
-    if(false){
+    if(true){
+        glx_canvasAdd("r_mean_bin",800,400);
+        TMultiGraph *mg3 = new TMultiGraph();
+        mg3->Add(graph_mean);
+        mg3->Add(g_pi);
+        mg3->Add(g_k);
+        mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
+        mg3->Draw("APL");
+        mg3->GetHistogram()->GetYaxis()->SetRangeUser(0.8,0.84);
+        glx_canvasGet("r_mean_bin")->Update();
+        TLine *line_pi= new TLine(0,0,0,1000);
+        line_pi->SetY1(fAnglePi);
+        line_pi->SetY2(fAnglePi);
+        line_pi->SetX1(gPad->GetUymin());
+        line_pi->SetX2(gPad->GetUymax());
+        line_pi->SetLineColor(kBlack);
+        line_pi->Draw();
+        TLine *line_k= new TLine(0,0,0,1000);
+        line_k->SetY1(fAngleK);
+        line_k->SetY2(fAngleK);
+        line_k->SetX1(gPad->GetUymin());
+        line_k->SetX2(gPad->GetUymax());
+        line_k->SetLineColor(kBlack);
+        line_k->Draw();
+        glx_canvasGet("r_mean_bin")->Update();
+        /////////////
+        glx_canvasAdd("r_spr_bin",800,400);
+        TMultiGraph *mg2 = new TMultiGraph();
+        mg2->Add(graph_spr);
+        mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
+        mg2->Draw("APL");
+        mg2->GetHistogram()->GetYaxis()->SetRangeUser(0,15);
+        line_k->Draw();// to fix bug on canvas update
+        glx_canvasGet("r_spr_bin")->Update();
+        /////////////
+
         glx_canvasAdd("r_yield",800,400);
         histo_track_yield->Draw();
-        
+        /////////////
+
         glx_canvasAdd("r_histo_track_mean",800,400);
         histo_track_mean->Draw();
         glx_canvasGet("r_histo_track_mean")->Update();
@@ -245,7 +303,8 @@ void analyses(){
         lin_mean_min->SetLineColor(kBlack);
         lin_mean_min->Draw();
         glx_canvasGet("r_histo_track_mean")->Update();
-        
+        /////////////
+
         glx_canvasAdd("r_spr",800,400);
         histo_track_spr->Draw();
         glx_canvasGet("r_spr")->Update();
@@ -267,5 +326,7 @@ void analyses(){
         
 
     }
+    
+    cout<<"####### fAngleK "<< fAngleK<<"  fAnglePi "<<fAnglePi<<endl;
     
 }
