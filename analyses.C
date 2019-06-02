@@ -143,6 +143,9 @@ void analyses(){
         
         if(track_pid !=2 ) continue; // select pion !=2
         
+        //if(track_fit_chisqu>100)continue;
+        //if(track_yield<10)continue;
+        
         histo_track_mean->Fill(track_mean);
         histo_track_spr->Fill(track_spr*1000);
         
@@ -410,20 +413,15 @@ void analyses(){
         
     }
     
-    
-    
-    ///////////////
-    
+
+    // resolution map
     TCanvas *cc2 = new TCanvas("cc2","cc2",800,500);
     int couter2(0);
     for (int x=0;x<pos_bin;x++){
         for (int y=0;y<pos_bin;y++){
             double hentry =histo_track_pos_resolution_bin[x][y]->GetEntries();
-            if (hentry <5)continue;//200
-            cout<<x<<"  "<<hentry<<endl;
-            
+            if (hentry <100)continue;
             histo_track_pos_resolution_bin[x][y]->Fit("fit_track_resolution","M","", -50, 50) ;
-            
             if(false){
                 cc2->cd();
                 cc2->Update();
@@ -445,17 +443,9 @@ void analyses(){
         }
     }
     
-    
     glx_canvasAdd("r_pos_resolution_map",800,400);
     histo_pos_xy_reso->Draw("colz");
     
-    
-    //    // histograms
-    //    glx_canvasAdd("r_pos_resolution_bin",800,400);
-    //    TMultiGraph *mg4 = new TMultiGraph();
-    //    mg4->Add(graph_pos_reso);
-    //    mg4->SetTitle(" Cherenkov Resolution per Track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
-    //    mg4->Draw("APL");
     
     
     // delete histograms
@@ -464,20 +454,7 @@ void analyses(){
             delete histo_track_pos_resolution_bin[x][y];
         }
     }
-    //    delete histo_pos_xy;
-    //    delete histo_pos_xy_yield_tmp;
-    //    delete histo_pos_xy_yield;
-    //    delete histo_pos_xy_spr_tmp;
-    //    delete histo_pos_xy_spr;
-    //    delete histo_track_mean;
-    //    delete histo_track_spr;
-    //    delete histo_track_yield;
-    
-    //    for(Int_t bin=0; bin<=nbin_yield+1; bin++) {
-    //        delete histo_track_resolution_bin[bin];
-    //        delete histo_track_spr_bin[bin];
-    //        delete histo_track_mean_bin[bin];
-    //    }
+
     
     cout<<"####### fAngleK "<< fAngleK<<"  fAnglePi "<<fAnglePi<<endl;
     
