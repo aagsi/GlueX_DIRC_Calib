@@ -3,18 +3,28 @@
 #include "TGraphAsymmErrors.h"
 #include <TLegend.h>
 #include "glxtools.C"
-void analyses(){
+#include "THStack.h"
+
+int analyses(){
     
     gStyle->SetOptStat(0);
     gStyle->SetPalette(55);
     
     // calculate cherenkov angle
-    Double_t momentum=3.5;
+    // Double_t momentum=3.5;
     Int_t pdg[]= {11,13,211,321,2212};
     Double_t mass[] = {0.000511,0.1056584,0.139570,0.49368,0.9382723};
     Double_t angle1(0), angle2(0),sum1(0),sum2(0), sigma(0.009),range(5*sigma),noise(0.3);
-    Double_t fAngleK = acos(sqrt(momentum*momentum+ mass[3]*mass[3])/momentum/1.4738)-0.00;
-    Double_t fAnglePi= acos(sqrt(momentum*momentum + mass[2]*mass[2])/momentum/1.4738)-0.00;
+    
+    Double_t fAngleK[10]={0};
+    Double_t fAnglePi[10]={0};
+    
+    //Double_t momentum[] = {2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
+    Double_t momentum[] = {3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5};
+    for(int f=0;f<10;f++){
+        fAngleK[f] = acos(sqrt(momentum[f]*momentum[f] + mass[3]*mass[3])/momentum[f]/1.4738)-0.00;
+        fAnglePi[f]= acos(sqrt(momentum[f]*momentum[f] + mass[2]*mass[2])/momentum[f]/1.4738)-0.00;
+    }
     
     
     
@@ -96,12 +106,14 @@ void analyses(){
         g_pi[j]->SetMarkerStyle(0);
         g_pi[j]->SetLineColor(kBlue);
         g_pi[j]->SetLineWidth(1);
+        g_pi[j]->SetLineColor(j+1);
         
         g_k[j] = new TGraph();
         g_k[j]->SetMarkerColor(kBlue);
         g_k[j]->SetMarkerStyle(0);
         g_k[j]->SetLineColor(kRed);
         g_k[j]->SetLineWidth(1);
+        g_k[j]->SetLineColor(j+1);
         
         graph_reso[j] = new TGraphAsymmErrors();
         graph_reso[j]->SetTitle("Cherenkov track resolution vs Photon yield");
@@ -310,7 +322,14 @@ void analyses(){
             cctest3->WaitPrimitive();
         }
     }
+    Double_t spr_array[10]={0};
+    for(int i=0;i<10;i++){
+        if(histo_track_spr_mom[i]->GetEntries()<1)continue;
+        spr_array[i]=histo_track_spr_mom[i]->GetMean();
+        //cout<<"########## spr_array[i]= "<< spr_array[i] <<endl;
+    }
     
+    //return 0;
     
     TCanvas *cc = new TCanvas("cc","cc",800,500);
     
@@ -328,7 +347,7 @@ void analyses(){
     fit_track_spr->SetParameters(100,9,2);
     fit_track_spr->SetParNames("p0","mean of sigma","sigma of sigma");
     fit_track_spr->SetParLimits(0,0.1,1E6);
-    fit_track_spr->SetParLimits(1,8,11);
+    fit_track_spr->SetParLimits(1,2,12); //(1,8,11);
     fit_track_spr->SetParLimits(2,1,5);
     
     TF1 *fit_track_mean = new TF1("fit_track_mean","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
@@ -350,8 +369,11 @@ void analyses(){
     int couter[nbin_mom]={0};
     for(int f=0;f<nbin_mom;f++){
         fit_track_resolution->SetLineColor(f+1);
+        fit_track_spr->SetLineColor(f+1);
+        fit_track_mean->SetLineColor(f+1);
+        
         for (int i=0;i<nbin_yield;i++){
-            if (histo_track_resolution_bin[f][i]->GetEntries() <500)continue; //400 //175 // 200
+            if (histo_track_resolution_bin[f][i]->GetEntries() <1500)continue; //400 //175 // 200 // 500
             histo_track_resolution_bin[f][i]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
             histo_track_spr_bin[f][i]->Fit("fit_track_spr","MQ0","", 0, 30) ;
             histo_track_mean_bin[f][i]->Fit("fit_track_mean","MQ0","", 0, 30) ;
@@ -392,16 +414,17 @@ void analyses(){
             //track_spr_bin= fit_track_spr->GetParameter(2);
             //track_spr_error= fit_track_spr->GetParError(2);
             
-            track_spr_bin= fit_track_spr->GetParameter(1);
             //track_spr_error= fit_track_spr->GetParError(1);
             
-            //track_spr_bin= histo_track_spr_bin[i]->GetStdDev();
-            //track_spr_error= histo_track_spr_bin[i]->GetStdDevError();
+            //track_spr_bin= histo_track_spr_bin[f][i]->GetStdDev();
+            //track_spr_error= histo_track_spr_bin[f][i]->GetStdDevError();
             
-            //track_spr_bin= histo_track_spr_bin[i]->GetMean();
-            //track_spr_error= histo_track_spr_bin[i]->GetMeanError();
-            //track_spr_error= histo_track_spr_bin[i]->GetStdDev();
-            track_spr_error= fit_track_spr->GetParameter(2);
+            track_spr_bin= histo_track_spr_bin[f][i]->GetMean();
+            //track_spr_error= histo_track_spr_bin[f][i]->GetMeanError();
+            track_spr_error= histo_track_spr_bin[f][i]->GetStdDev();
+            
+            //track_spr_bin= fit_track_spr->GetParameter(1);
+            //track_spr_error= fit_track_spr->GetParameter(2);
             
             graph_reso[f]->SetPoint(couter[f], yield_BinCenter, track_resolution);
             graph_reso[f]->SetPointError(couter[f], 1/2, 1/2,track_resolution_error/2,track_resolution_error/2);
@@ -414,8 +437,8 @@ void analyses(){
             
             /////////
             // warning
-            g_pi[f]->SetPoint(couter[f], yield_BinCenter, fAnglePi);
-            g_k[f]->SetPoint(couter[f], yield_BinCenter, fAngleK);
+            g_pi[f]->SetPoint(couter[f], yield_BinCenter, fAnglePi[f]);
+            g_k[f]->SetPoint(couter[f], yield_BinCenter, fAngleK[f]);
             /////////
             
             //calc_trk_res=sqrt(track_resolution*track_resolution - (track_spr_bin/sqrt(yield_BinCenter))* (track_spr_bin/sqrt(yield_BinCenter)));
@@ -425,7 +448,7 @@ void analyses(){
         }
     }
     
-    
+    ////////////
     glx_canvasAdd("r_resolution_bin",800,400);
     TMultiGraph *mg = new TMultiGraph();
     TGraphAsymmErrors *graph_tracker_reso = new TGraphAsymmErrors();
@@ -434,15 +457,14 @@ void analyses(){
     
     TLegend * legend_reso= new TLegend(0.630326, 0.466667,0.889724,0.872);
     //legend_reso->SetHeader("Pions","C");
-    
     int counter2=0;
     double tracker_reso(-1),tracker_reso_error(-1);
     for(int i=0;i<nbin_mom;i++){
         fit_trk_reso->SetLineColor(i+1);
         if(graph_reso[i]->GetN()<1)continue;
-        
-        legend_reso->AddEntry(graph_reso[i],Form("%d GeV/c",i+2) ,"l");
-        
+        legend_reso->AddEntry(graph_reso[i],Form("%d : %d GeV/c",i+2,i+3) ,"l");
+        cout<<"########## i= "<<i<<" spr_array[i]= "<< spr_array[i]<<endl;
+        fit_trk_reso->SetParameter(1,spr_array[i]); // 9
         graph_reso[i]->Fit("fit_trk_reso","M","", 7, 100) ;
         tracker_reso=fit_trk_reso->GetParameter(2);
         tracker_reso_error=fit_trk_reso->GetParError(2);
@@ -454,12 +476,11 @@ void analyses(){
     }
     mg->SetTitle(" Cherenkov Resolution per Track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
     mg->Draw("APL");
-    TLine *test= new TLine(0,0,0,1000);
     legend_reso->Draw();
-    test->Draw();
     
     
     
+    ////////////
     glx_canvasAdd("r_resolution_bin_fit",800,400);
     TMultiGraph *mg_reo_fit = new TMultiGraph();
     mg_reo_fit->Add(graph_tracker_reso);
@@ -469,108 +490,111 @@ void analyses(){
     glx_canvasGet("r_resolution_bin_fit")->Update();
     TLine *test2= new TLine(0,0,0,1000);
     test2->Draw();
-
-    //
-    //    ///////////
-    //    glx_canvasAdd("r_spr_bin",800,400);
-    //    TMultiGraph *mg2 = new TMultiGraph();
-    //    mg2->Add(graph_spr);
-    //    mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
-    //    mg2->Draw("APL");
-    //    mg2->GetHistogram()->GetYaxis()->SetRangeUser(0,15);
-    //    line_k->Draw();// to fix bug on canvas update
-    //    glx_canvasGet("r_spr_bin")->Update();
-    //
-    //    /////////////
-    //    glx_canvasAdd("r_mean_bin",800,400);
-    //    TMultiGraph *mg3 = new TMultiGraph();
-    //    mg3->Add(graph_mean);
-    //    mg3->Add(g_pi);
-    //    mg3->Add(g_k);
-    //    mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
-    //    mg3->Draw("APL");
-    //    mg3->GetHistogram()->GetYaxis()->SetRangeUser(0.8,0.84);
-    //    glx_canvasGet("r_mean_bin")->Update();
-    //    TLine *line_pi= new TLine(0,0,0,1000);
-    //    line_pi->SetY1(fAnglePi);
-    //    line_pi->SetY2(fAnglePi);
-    //    line_pi->SetX1(gPad->GetUymin());
-    //    line_pi->SetX2(gPad->GetUymax());
-    //    line_pi->SetLineColor(kBlack);
-    //    line_pi->Draw();
-    //    TLine *line_k= new TLine(0,0,0,1000);
-    //    line_k->SetY1(fAngleK);
-    //    line_k->SetY2(fAngleK);
-    //    line_k->SetX1(gPad->GetUymin());
-    //    line_k->SetX2(gPad->GetUymax());
-    //    line_k->SetLineColor(kBlack);
-    //    line_k->Draw();
-    //    glx_canvasGet("r_mean_bin")->Update();
     
-    //    if(false){
-    //        // histograms
-    //        //glx_canvasAdd("r_chiNDF",800,400);
-    //        //histo_chiNDF->Draw();
-    //        //histo_chiNDF_cut->Draw("same");
-    //
-    //
-    //
-    //        glx_canvasAdd("r_pos",800,400);
-    //        histo_pos_xy->Draw("colz");
-    //
-    //        glx_canvasAdd("r_pos_yield",800,400);
-    //        histo_pos_xy_yield->Draw("colz");
-    //
-    //        glx_canvasAdd("r_pos_spr",800,400);
-    //        histo_pos_xy_spr->Draw("colz");
-    //
-    //
-    //
-    //        glx_canvasAdd("r_yield",800,400);
-    //        histo_track_yield[mom_bin_flag]->Draw();
-    //        /////////////
-    //
-    //        glx_canvasAdd("r_histo_track_mean",800,400);
-    //        histo_track_mean->Draw();
-    //        glx_canvasGet("r_histo_track_mean")->Update();
-    //        TLine *lin_mean_max= new TLine(0,0,0,1000);
-    //        lin_mean_max->SetX1(mean_max);
-    //        lin_mean_max->SetX2(mean_max);
-    //        lin_mean_max->SetY1(gPad->GetUymin());
-    //        lin_mean_max->SetY2(gPad->GetUymax());
-    //        lin_mean_max->SetLineColor(kBlack);
-    //        lin_mean_max->Draw();
-    //        TLine *lin_mean_min= new TLine(0,0,0,1000);
-    //        lin_mean_min->SetX1(mean_min);
-    //        lin_mean_min->SetX2(mean_min);
-    //        lin_mean_min->SetY1(gPad->GetUymin());
-    //        lin_mean_min->SetY2(gPad->GetUymax());
-    //        lin_mean_min->SetLineColor(kBlack);
-    //        lin_mean_min->Draw();
-    //        glx_canvasGet("r_histo_track_mean")->Update();
-    //        /////////////
-    //
-    //        glx_canvasAdd("r_spr",800,400);
-    //        histo_track_spr->Draw();
-    //        glx_canvasGet("r_spr")->Update();
-    //        TLine *lin_spr_max= new TLine(0,0,0,1000);
-    //        lin_spr_max->SetX1(spr_max);
-    //        lin_spr_max->SetX2(spr_max);
-    //        lin_spr_max->SetY1(gPad->GetUymin());
-    //        lin_spr_max->SetY2(gPad->GetUymax());
-    //        lin_spr_max->SetLineColor(kBlack);
-    //        lin_spr_max->Draw();
-    //        TLine *lin_spr_min= new TLine(0,0,0,1000);
-    //        lin_spr_min->SetX1(spr_min);
-    //        lin_spr_min->SetX2(spr_min);
-    //        lin_spr_min->SetY1(gPad->GetUymin());
-    //        lin_spr_min->SetY2(gPad->GetUymax());
-    //        lin_spr_min->SetLineColor(kBlack);
-    //        lin_spr_min->Draw();
-    //        glx_canvasGet("r_spr")->Update();
-    //
-    //
-    //    }
+    ////////////
+    glx_canvasAdd("r_spr_bin",800,400);
+    TMultiGraph *mg2 = new TMultiGraph();
+    for(int i=0;i<nbin_mom;i++){
+        fit_track_spr->SetLineColor(i+1);
+        if(graph_spr[i]->GetN()<1)continue;
+        mg2->Add(graph_spr[i]);
+    }
+    mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
+    mg2->Draw("APL");
+    mg2->GetHistogram()->GetYaxis()->SetRangeUser(0,15);
+    glx_canvasGet("r_spr_bin")->Update();
+    legend_reso->Draw();
+    
+    
+    /////////////
+    glx_canvasAdd("r_mean_bin",800,400);
+    TMultiGraph *mg3 = new TMultiGraph();
+    for(int i=0;i<nbin_mom;i++){
+        fit_track_mean->SetLineColor(i+1);
+        if(graph_mean[i]->GetN()<1)continue;
+        mg3->Add(graph_mean[i]);
+        mg3->Add(g_pi[i]);
+        mg3->Add(g_k[i]);
+    }
+    mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
+    mg3->Draw("APL");
+    mg3->GetHistogram()->GetYaxis()->SetRangeUser(0.8,0.84);
+    legend_reso->Draw();
+    
+    
+    if(true){
+
+        glx_canvasAdd("r_yield",800,400);
+        THStack *hs = new THStack("hs","Stacked 1D histograms");
+        hs->SetTitle("Photon Yield");
+        for(int i=0;i<mom_bin_flag;i++){
+            histo_track_yield[i]->SetLineColor(i+1);
+            hs->Add(histo_track_yield[i]);
+        }
+        hs->Draw("nostack");
+        hs->GetYaxis()->SetTitle("Entries [#]");
+        hs->GetXaxis()->SetTitle("Photon Yield per track [#]");
+        legend_reso->Draw();
+        
+        glx_canvasAdd("r_pos",800,400);
+        histo_pos_xy->Draw("colz");
+        
+        glx_canvasAdd("r_pos_spr",800,400);
+        histo_pos_xy_spr->SetMinimum(5);
+        histo_pos_xy_spr->SetMaximum(12);
+        histo_pos_xy_spr->Draw("colz");
+        
+        glx_canvasAdd("r_pos_yield",800,400);
+        histo_pos_xy_yield->SetMinimum(5);
+        histo_pos_xy_yield->SetMaximum(47);
+        histo_pos_xy_yield->Draw("colz");
+        
+        
+        /////////////
+        glx_canvasAdd("r_histo_track_mean",800,400);
+        histo_track_mean->Draw();
+        glx_canvasGet("r_histo_track_mean")->Update();
+        TLine *lin_mean_max= new TLine(0,0,0,1000);
+        lin_mean_max->SetX1(mean_max);
+        lin_mean_max->SetX2(mean_max);
+        lin_mean_max->SetY1(gPad->GetUymin());
+        lin_mean_max->SetY2(gPad->GetUymax());
+        lin_mean_max->SetLineColor(kBlack);
+        lin_mean_max->Draw();
+        TLine *lin_mean_min= new TLine(0,0,0,1000);
+        lin_mean_min->SetX1(mean_min);
+        lin_mean_min->SetX2(mean_min);
+        lin_mean_min->SetY1(gPad->GetUymin());
+        lin_mean_min->SetY2(gPad->GetUymax());
+        lin_mean_min->SetLineColor(kBlack);
+        lin_mean_min->Draw();
+        glx_canvasGet("r_histo_track_mean")->Update();
+        
+        /////////////
+        glx_canvasAdd("r_spr",800,400);
+        histo_track_spr->Draw();
+        glx_canvasGet("r_spr")->Update();
+        TLine *lin_spr_max= new TLine(0,0,0,1000);
+        lin_spr_max->SetX1(spr_max);
+        lin_spr_max->SetX2(spr_max);
+        lin_spr_max->SetY1(gPad->GetUymin());
+        lin_spr_max->SetY2(gPad->GetUymax());
+        lin_spr_max->SetLineColor(kBlack);
+        lin_spr_max->Draw();
+        TLine *lin_spr_min= new TLine(0,0,0,1000);
+        lin_spr_min->SetX1(spr_min);
+        lin_spr_min->SetX2(spr_min);
+        lin_spr_min->SetY1(gPad->GetUymin());
+        lin_spr_min->SetY2(gPad->GetUymax());
+        lin_spr_min->SetLineColor(kBlack);
+        lin_spr_min->Draw();
+        glx_canvasGet("r_spr")->Update();
+        
+        // histograms
+        //glx_canvasAdd("r_chiNDF",800,400);
+        //histo_chiNDF->Draw();
+        //histo_chiNDF_cut->Draw("same");
+    }
     
     
     // resolution map
@@ -603,7 +627,6 @@ void analyses(){
     }
     
     glx_canvasAdd("r_pos_resolution_map",800,400);
-    
     histo_pos_xy_reso->SetMinimum(1);
     histo_pos_xy_reso->SetMaximum(5);
     histo_pos_xy_reso->Draw("colz");
@@ -630,4 +653,6 @@ void analyses(){
     
     
     //delete [] mean_array;
+    
+    return 0;
 }
