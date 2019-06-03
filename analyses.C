@@ -26,8 +26,6 @@ int analyses(){
         fAnglePi[f]= acos(sqrt(momentum[f]*momentum[f] + mass[2]*mass[2])/momentum[f]/1.4738)-0.00;
     }
     
-    
-    
     // histograms
     
     //TH1F*  histo_chiNDF = new TH1F("histo_chiNDF",";ChiSquare/NDF; entries [#]",200 ,0,10);
@@ -48,11 +46,8 @@ int analyses(){
     TH1F* histo_track_mean = new TH1F("histo_track_mean",";Track Mean [rad]; entries [#]",250,0.817,0.8348);
     TH1F* histo_track_spr = new TH1F("histo_track_spr",";Track SPR [m rad]; entries [#]",250,5.1,20);
     
-    
-    
     const int nbin_yield =100;
     const int nbin_mom =10;
-    
     
     TH1F*  histo_track_yield[10];
     TH1F*  histo_track_mean_mom[10];
@@ -67,15 +62,12 @@ int analyses(){
         histo_track_mean_mom[i] = new TH1F(Form("histo_track_mean_mom_%d",i), Form("Track Mean @ mom bin %d ; Mean [rad]; Entries [#]",i) ,250,0.817,0.8348);
         histo_track_spr_mom[i] = new TH1F(Form("histo_track_spr_mom_%d",i), Form("Track SPR @ mom bin %d ; SPR [mrad]; Entries [#]",i) ,250,5.1,20);
         
-        
-        
         for(Int_t j=0; j<100; j++) {
             histo_track_resolution_bin[i][j] = new TH1F(Form("histo_track_resolution_%d_mom_%d",j,i), Form("Cherenkov track resolution @ yield bin %d mom flag %d;Expected - measured [m rad]; Entries [#]",j,i) , 100, -50, 50 );
             histo_track_spr_bin[i][j] = new TH1F(Form("histo_spr_resolution_%d_mom_%d",j,i), Form("SPR @ yield bin %d mom flag %d ;SPR [m rad];  [#]",j,i) ,250,5.1,20);
             histo_track_mean_bin[i][j] = new TH1F(Form("histo_mean_resolution_%d_mom_%d",j,i), Form("#theta_{c}^{tr} @ yield bin %d mom flag %d ;#theta_{c}^{tr}  [rad]; Entries [#]",j,i), 100,0.817,0.8348);
         }
     }
-    
     
     TH1F * histo_track_pos_resolution_bin[pos_bin][pos_bin];
     //TH1F * histo_track_pos_spr_bin[pos_bin][pos_bin];
@@ -91,6 +83,12 @@ int analyses(){
     }
     
     // graphs
+    
+    TGraphAsymmErrors *g_yield_mom = new TGraphAsymmErrors();
+    g_yield_mom->SetMarkerColor(kBlue);
+    g_yield_mom->SetMarkerStyle(21);
+    g_yield_mom->SetLineColor(kBlack);
+
     
     TGraph *g_pi[nbin_mom];
     TGraph *g_k[nbin_mom];
@@ -135,17 +133,11 @@ int analyses(){
         
     }
     
-    
     TGraphAsymmErrors *graph_pos_reso = new TGraphAsymmErrors();
     graph_pos_reso->SetTitle("Cherenkov track resolution vs Photon yield");
     graph_pos_reso->SetMarkerColor(4);
     graph_pos_reso->SetMarkerStyle(21);
     
-    //    TGraph *g_calc_trk_res = new TGraph();
-    //    g_calc_trk_res->SetMarkerColor(kBlue);
-    //    g_calc_trk_res->SetMarkerStyle(0);
-    //    g_calc_trk_res->SetLineColor(kRed);
-    //    g_calc_trk_res->SetLineWidth(1);
     
     
     // variables
@@ -358,7 +350,7 @@ int analyses(){
     fit_track_mean->SetParLimits(1,0.80,0.84);
     fit_track_mean->SetParLimits(2,0.001,500);
     
-    TF1 *fit_trk_reso = new TF1("fit_trk_reso","[0]*sqrt(([1]/sqrt(x))^2+[2])",7,100);
+    TF1 *fit_trk_reso = new TF1("fit_trk_reso","[0]*sqrt(([1]/sqrt(x))^2+[2])",7,48);
     fit_trk_reso->SetLineColor(kRed);
     fit_trk_reso->SetParameters(100,9,2);
     fit_trk_reso->SetParNames("p0","SPR","Reso");
@@ -441,8 +433,6 @@ int analyses(){
             g_k[f]->SetPoint(couter[f], yield_BinCenter, fAngleK[f]);
             /////////
             
-            //calc_trk_res=sqrt(track_resolution*track_resolution - (track_spr_bin/sqrt(yield_BinCenter))* (track_spr_bin/sqrt(yield_BinCenter)));
-            //g_calc_trk_res->SetPoint(couter, yield_BinCenter, calc_trk_res);
             
             ++couter[f];
         }
@@ -465,11 +455,11 @@ int analyses(){
         legend_reso->AddEntry(graph_reso[i],Form("%d : %d GeV/c",i+2,i+3) ,"l");
         cout<<"########## i= "<<i<<" spr_array[i]= "<< spr_array[i]<<endl;
         fit_trk_reso->SetParameter(1,spr_array[i]); // 9
-        graph_reso[i]->Fit("fit_trk_reso","M","", 7, 100) ;
+        graph_reso[i]->Fit("fit_trk_reso","M","", 7, 48) ;
         tracker_reso=fit_trk_reso->GetParameter(2);
         tracker_reso_error=fit_trk_reso->GetParError(2);
         
-        graph_tracker_reso->SetPoint(counter2,i+2, tracker_reso);
+        graph_tracker_reso->SetPoint(counter2,i+2+0.5, tracker_reso);
         graph_tracker_reso->SetPointError(counter2, 1/2, 1/2,tracker_reso_error/2,tracker_reso_error/2);
         mg->Add(graph_reso[i]);
         ++counter2;
@@ -527,15 +517,30 @@ int analyses(){
         glx_canvasAdd("r_yield",800,400);
         THStack *hs = new THStack("hs","Stacked 1D histograms");
         hs->SetTitle("Photon Yield");
+        int counter3=0;
         for(int i=0;i<mom_bin_flag;i++){
+            if( histo_track_yield[i]->GetEntries()<1)continue;
             histo_track_yield[i]->SetLineColor(i+1);
+            g_yield_mom->SetPoint(counter3, i+2 , histo_track_yield[i]->GetMean());
+            g_yield_mom->SetPointError(counter3 ,1/2,1/2, histo_track_yield[i]->GetStdDev()/2,histo_track_yield[i]->GetStdDev()/2);
             hs->Add(histo_track_yield[i]);
+            ++counter3;
         }
         hs->Draw("nostack");
         hs->GetYaxis()->SetTitle("Entries [#]");
         hs->GetXaxis()->SetTitle("Photon Yield per track [#]");
         legend_reso->Draw();
         
+        glx_canvasAdd("r_yield_graph",800,400);
+        TMultiGraph *mg4 = new TMultiGraph();
+        mg4->Add(g_yield_mom);
+        mg4->SetTitle(" Photon Yield; Pion Momentun [GeV/c]; Photon Yield [#] ");
+        mg4->Draw("APL");
+        mg4->GetHistogram()->GetYaxis()->SetRangeUser(0,45);
+        glx_canvasGet("r_yield_graph")->Update();
+        TLine *tes= new TLine(0,0,0,0);
+        tes->Draw();
+
         glx_canvasAdd("r_pos",800,400);
         histo_pos_xy->Draw("colz");
         
@@ -548,6 +553,8 @@ int analyses(){
         histo_pos_xy_yield->SetMinimum(5);
         histo_pos_xy_yield->SetMaximum(47);
         histo_pos_xy_yield->Draw("colz");
+        
+
         
         
         /////////////
@@ -651,8 +658,6 @@ int analyses(){
     //    }
     cout<<"####### fAngleK "<< fAngleK<<"  fAnglePi "<<fAnglePi<<endl;
     
-    
-    //delete [] mean_array;
-    
+    glx_canvasSave(0);
     return 0;
 }
