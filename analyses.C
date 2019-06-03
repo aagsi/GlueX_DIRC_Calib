@@ -88,7 +88,7 @@ int analyses(){
     g_yield_mom->SetMarkerColor(kBlue);
     g_yield_mom->SetMarkerStyle(21);
     g_yield_mom->SetLineColor(kBlack);
-
+    
     
     TGraph *g_pi[nbin_mom];
     TGraph *g_k[nbin_mom];
@@ -180,6 +180,8 @@ int analyses(){
     
     Long64_t nentries = tree_variables->GetEntries();
     Double_t mean_array[]={0.824512,0.825366,0.826363,0.826648,0.826861,0.826576 ,0.826149};
+    //Double_t mean_array[]={0.824202, 0.826007, 0.82663, 0.826798,  0.826776, 0.826793, 0.826775 };
+    
     for (Long64_t i=0;i<nentries;i++) {
         tree_variables->GetEntry(i);
         
@@ -277,7 +279,9 @@ int analyses(){
         //histo_track_pos_spr_bin[xbin_pos][ybin_pos]->Fill(track_spr*1000);
         //histo_track_pos_mean_bin[xbin_pos][ybin_pos]->Fill(track_mean);
     }
-    if(false){
+    
+    Double_t spr_array[10]={0};
+    if(true){
         TCanvas *cctest = new TCanvas("cctest","cctest",800,500);
         for(int i=0;i<nbin_mom;i++){
             //cout<<"####### i= "<<i<<"  "<<histo_track_yield[i]->GetEntries()<<endl;
@@ -289,24 +293,38 @@ int analyses(){
             cctest->WaitPrimitive();
         }
         
+        TF1 *fit_gause = new TF1("fit_gause","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
+        fit_gause->SetLineColor(kBlack);
+        fit_gause->SetParameters(100,9,2);
+        fit_gause->SetParNames("p0","mean ","sigma");
+        fit_gause->SetParLimits(0,0.1,1E6);
+        
         TCanvas *cctest2 = new TCanvas("cctest2","cctest2",800,500);
         for(int i=0;i<nbin_mom;i++){
             if(histo_track_mean_mom[i]->GetEntries()<1)continue;
+            
+            fit_gause->SetParLimits(1,0.80,0.84);
+            fit_gause->SetParLimits(2,0.0001,500);
+            histo_track_mean_mom[i]->Fit("fit_gause","MQ","", 0, 30) ;
+            
             cctest2->cd();
             cctest2->Update();
             histo_track_mean_mom[i]->Draw();
             cctest2->Update();
             cctest2->WaitPrimitive();
-            
-            int binmax = histo_track_mean_mom[i]->GetMaximumBin();
-            double x = histo_track_mean_mom[i]->GetXaxis()->GetBinCenter(binmax);
-            
-            cout<<"###### i  "<<i<< " x  "<<x<<endl;
+            //int binmax = histo_track_mean_mom[i]->GetMaximumBin();
+            //double x = histo_track_mean_mom[i]->GetXaxis()->GetBinCenter(binmax);
+            //cout<<"###### i  "<<i<< " x  "<<x<<endl;
+            cout<<"#############  "<< fit_gause->GetParameter(1)<<endl;
         }
         
         TCanvas *cctest3 = new TCanvas("cctest3","cctest3",800,500);
         for(int i=0;i<nbin_mom;i++){
             if(histo_track_spr_mom[i]->GetEntries()<1)continue;
+            fit_gause->SetParLimits(1,5,12);
+            fit_gause->SetParLimits(2,0.0001,500);
+            histo_track_spr_mom[i]->Fit("fit_gause","MQ)","", 0, 30) ;
+            spr_array[i]=fit_gause->GetParameter(1);
             cctest3->cd();
             cctest3->Update();
             histo_track_spr_mom[i]->Draw();
@@ -314,13 +332,7 @@ int analyses(){
             cctest3->WaitPrimitive();
         }
     }
-    Double_t spr_array[10]={0};
-    for(int i=0;i<10;i++){
-        if(histo_track_spr_mom[i]->GetEntries()<1)continue;
-        spr_array[i]=histo_track_spr_mom[i]->GetMean();
-        //cout<<"########## spr_array[i]= "<< spr_array[i] <<endl;
-    }
-    
+
     //return 0;
     
     TCanvas *cc = new TCanvas("cc","cc",800,500);
@@ -366,10 +378,10 @@ int analyses(){
         
         for (int i=0;i<nbin_yield;i++){
             if (histo_track_resolution_bin[f][i]->GetEntries() <1500)continue; //400 //175 // 200 // 500
-            histo_track_resolution_bin[f][i]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
+            histo_track_resolution_bin[f][i]->Fit("fit_track_resolution","M","", -50, 50) ;
             histo_track_spr_bin[f][i]->Fit("fit_track_spr","MQ0","", 0, 30) ;
             histo_track_mean_bin[f][i]->Fit("fit_track_mean","MQ0","", 0, 30) ;
-            if(false){
+            if(true){
                 cc->cd();
                 cc->Update();
                 histo_track_resolution_bin[f][i]->Draw();
@@ -477,6 +489,7 @@ int analyses(){
     mg_reo_fit->SetTitle(" Tracker Resolution ; Pion Momentum [GeV/c]; #sigma_{tracker} [m rad]");
     mg_reo_fit->Draw("APL");
     mg_reo_fit->GetHistogram()->GetYaxis()->SetRangeUser(0,5);
+    mg_reo_fit->GetHistogram()->GetXaxis()->SetRangeUser(0,10);
     glx_canvasGet("r_resolution_bin_fit")->Update();
     TLine *test2= new TLine(0,0,0,1000);
     test2->Draw();
@@ -513,7 +526,7 @@ int analyses(){
     
     
     if(true){
-
+        
         glx_canvasAdd("r_yield",800,400);
         THStack *hs = new THStack("hs","Stacked 1D histograms");
         hs->SetTitle("Photon Yield");
@@ -540,7 +553,7 @@ int analyses(){
         glx_canvasGet("r_yield_graph")->Update();
         TLine *tes= new TLine(0,0,0,0);
         tes->Draw();
-
+        
         glx_canvasAdd("r_pos",800,400);
         histo_pos_xy->Draw("colz");
         
@@ -554,7 +567,7 @@ int analyses(){
         histo_pos_xy_yield->SetMaximum(47);
         histo_pos_xy_yield->Draw("colz");
         
-
+        
         
         
         /////////////
@@ -610,7 +623,7 @@ int analyses(){
     for (int x=0;x<pos_bin;x++){
         for (int y=0;y<pos_bin;y++){
             double hentry =histo_track_pos_resolution_bin[x][y]->GetEntries();
-            if (hentry <100)continue;
+            if (hentry <100)continue; //100
             histo_track_pos_resolution_bin[x][y]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
             if(false){
                 cc2->cd();
