@@ -43,8 +43,8 @@ int analyses(){
     TH2F * histo_pos_xy_reso_tmp = new TH2F( "histo_pos_xy_reso_tmp" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     TH2F * histo_pos_xy_reso = new TH2F( "histo_pos_xy_reso" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
-    TH1F* histo_track_mean = new TH1F("histo_track_mean",";Track Mean [rad]; entries [#]",250,0.817,0.8348);
-    TH1F* histo_track_spr = new TH1F("histo_track_spr",";Track SPR [m rad]; entries [#]",250,5.1,20);
+    TH1F* histo_track_mean = new TH1F("histo_track_mean","; Mean per Track [rad]; entries [#]",250,0.817,0.8348);
+    TH1F* histo_track_spr = new TH1F("histo_track_spr","; SPR per Track [m rad]; entries [#]",250,5.1,20);
     
     const int nbin_yield =100;
     const int nbin_mom =10;
@@ -63,7 +63,9 @@ int analyses(){
         histo_track_spr_mom[i] = new TH1F(Form("histo_track_spr_mom_%d",i), Form("Track SPR @ mom bin %d ; SPR [mrad]; Entries [#]",i) ,250,5.1,20);
         
         for(Int_t j=0; j<100; j++) {
-            histo_track_resolution_bin[i][j] = new TH1F(Form("histo_track_resolution_%d_mom_%d",j,i), Form("Cherenkov track resolution @ yield bin %d mom flag %d;Expected - measured [m rad]; Entries [#]",j,i) , 100, -50, 50 );
+            int k = i+2;
+            int l =i+3;
+            histo_track_resolution_bin[i][j] = new TH1F(Form("histo_track_resolution_%d_mom_%d_%d",j,k,l ), Form("Cherenkov track resolution @ yield bin %d momentum %d - %d GeV/c;Expected #theta_{c}- Measured #theta_{c} [m rad]; Entries [#]",j,k,l) , 100, -50, 50 );
             histo_track_spr_bin[i][j] = new TH1F(Form("histo_spr_resolution_%d_mom_%d",j,i), Form("SPR @ yield bin %d mom flag %d ;SPR [m rad];  [#]",j,i) ,250,5.1,20);
             histo_track_mean_bin[i][j] = new TH1F(Form("histo_mean_resolution_%d_mom_%d",j,i), Form("#theta_{c}^{tr} @ yield bin %d mom flag %d ;#theta_{c}^{tr}  [rad]; Entries [#]",j,i), 100,0.817,0.8348);
         }
@@ -345,6 +347,7 @@ int analyses(){
     fit_track_resolution->SetParLimits(0,0.1,1E6);
     fit_track_resolution->SetParLimits(1,-1,1);
     fit_track_resolution->SetParLimits(2,1,20); //5
+    fit_track_resolution->SetNpx(1000);
     
     TF1 *fit_track_spr = new TF1("fit_track_spr","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
     fit_track_spr->SetLineColor(kBlack);
@@ -353,6 +356,7 @@ int analyses(){
     fit_track_spr->SetParLimits(0,0.1,1E6);
     fit_track_spr->SetParLimits(1,2,12); //(1,8,11);
     fit_track_spr->SetParLimits(2,1,5);
+    fit_track_spr->SetNpx(1000);
     
     TF1 *fit_track_mean = new TF1("fit_track_mean","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
     fit_track_mean->SetLineColor(kBlack);
@@ -361,6 +365,7 @@ int analyses(){
     fit_track_mean->SetParLimits(0,0.1,1E6);
     fit_track_mean->SetParLimits(1,0.80,0.84);
     fit_track_mean->SetParLimits(2,0.001,500);
+    fit_track_mean->SetNpx(1000);
     
     TF1 *fit_trk_reso = new TF1("fit_trk_reso","[0]*sqrt(([1]/sqrt(x))^2+[2])",7,48);
     fit_trk_reso->SetLineColor(kRed);
@@ -369,6 +374,7 @@ int analyses(){
     fit_trk_reso->SetParLimits(0,0.1,1E6);
     fit_trk_reso->SetParLimits(1,8,12);
     fit_trk_reso->SetParLimits(2,1,5);
+    fit_trk_reso->SetNpx(1000);
     
     int couter[nbin_mom]={0};
     for(int f=0;f<nbin_mom;f++){
@@ -541,7 +547,7 @@ int analyses(){
         }
         hs->Draw("nostack");
         hs->GetYaxis()->SetTitle("Entries [#]");
-        hs->GetXaxis()->SetTitle("Photon Yield per track [#]");
+        hs->GetXaxis()->SetTitle("Photon Yield [#]");
         legend_reso->Draw();
         
         glx_canvasAdd("r_yield_graph",800,400);
@@ -555,16 +561,19 @@ int analyses(){
         tes->Draw();
         
         glx_canvasAdd("r_pos",800,400);
+        histo_pos_xy->GetYaxis()->SetRangeUser(-100,0);
         histo_pos_xy->Draw("colz");
         
         glx_canvasAdd("r_pos_spr",800,400);
         histo_pos_xy_spr->SetMinimum(5);
-        histo_pos_xy_spr->SetMaximum(12);
+        histo_pos_xy_spr->SetMaximum(10);
+        histo_pos_xy_spr->GetYaxis()->SetRangeUser(-100,0);
         histo_pos_xy_spr->Draw("colz");
         
         glx_canvasAdd("r_pos_yield",800,400);
         histo_pos_xy_yield->SetMinimum(5);
-        histo_pos_xy_yield->SetMaximum(47);
+        histo_pos_xy_yield->SetMaximum(37);
+        histo_pos_xy_yield->GetYaxis()->SetRangeUser(-100,0);
         histo_pos_xy_yield->Draw("colz");
         
         
@@ -649,6 +658,7 @@ int analyses(){
     glx_canvasAdd("r_pos_resolution_map",800,400);
     histo_pos_xy_reso->SetMinimum(1);
     histo_pos_xy_reso->SetMaximum(5);
+    histo_pos_xy_reso->GetYaxis()->SetRangeUser(-100,0);
     histo_pos_xy_reso->Draw("colz");
     
     
