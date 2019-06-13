@@ -434,9 +434,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //TTree *tree_cut = glx_ch->CloneTree(0);
     
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
-    double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
+    double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1);
-    
+
     tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
     tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
     tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
@@ -445,6 +445,8 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
     tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
     tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
+tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
+tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
     
     
     
@@ -524,10 +526,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
             // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
             // commented
-            if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
+     //if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
-            if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
+     //if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
             if (xmin <  posInBar.X()) xmin=posInBar.X();
             if (xmax >  posInBar.X()) xmax=posInBar.X();
@@ -939,10 +941,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             track_spr= fit_track->GetParameter(2);
             track_yield = nph;
             track_mom = momInBar.Mag();
-            track_xbar = momInBar.X();
-            track_ybar = momInBar.Y();
+            track_xbar = posInBar.X();
+            track_ybar = posInBar.Y();
             track_pid = pdgId;
             track_nbar = bar;
+	    track_fit_chisqu = fit_track->GetChisquare();
+	    track_fit_NDF = fit_track->GetNDF();
+
             
             tree_variables.Fill();
             
@@ -952,7 +957,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             ///////////////////////////////////
             
             double percentage = kaon_counter/pion_counter*100.0;
-            if (percentage <100 && pdgId == 2 )continue;
+            //if (percentage <100 && pdgId == 2 )continue;
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             
