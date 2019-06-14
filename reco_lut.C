@@ -871,7 +871,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                         
                         vpx.push_back(pmt);
                         vpy.push_back(pix%8);
+<<<<<<< HEAD
                         vpz.push_back(pix/8);
+=======
+                        vpz.push_back(pix/8)
+>>>>>>> 8616596ecf45f11c4241a98165b8b911267ba894
                         
                         goodevt=1;
                     }
