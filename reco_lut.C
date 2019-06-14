@@ -825,7 +825,6 @@ vtangle.clear();
                             //if(tangle> 0.844 ||tangle < 0.798)  continue;
                             
                             if (tangle > 1.0 ) continue;
-)
                             vtdiff.push_back(totalTime-hitTime);
                             vtime.push_back(hitTime);
                             vtangle.push_back(tangle);
