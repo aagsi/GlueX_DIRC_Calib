@@ -5,6 +5,7 @@
 
 #include "TMultiGraph.h"
 #include "TGraph.h"
+#include <vector>
 
 #include "glxtools.C"
 #define PI 3.14159265
@@ -113,24 +114,24 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     
     //TFile file("outFile.root","recreate");
     double inv_mass, missing_mass, chi_square, TofTrackDist;
-    TH1F *hist_ev_rho_mass = new TH1F("hist_ev_rho_mass","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
-    TH1F *hist_ev_phi_mass = new TH1F("hist_ev_phi_mass","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
-    TH1F *hist_ev_missing_mass_phi = new TH1F("hist_ev_missing_mass_phi",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
-    TH1F *hist_ev_missing_mass_rho = new TH1F("hist_ev_missing_mass_rho",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
-    TH1F *hist_ev_chi_phi = new TH1F("hist_ev_chi_phi","; #phi Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
-    TH1F *hist_ev_chi_rho = new TH1F("hist_ev_chi_rho","; #rho Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
-    
-    TH1F *hist_ev_rho_mass_cut = new TH1F("hist_ev_rho_mass_cut","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
-    TH1F *hist_ev_phi_mass_cut = new TH1F("hist_ev_phi_mass_cut","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
-    TH1F *hist_ev_missing_mass_phi_cut = new TH1F("hist_ev_missing_mass_phi_cut",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
-    TH1F *hist_ev_missing_mass_rho_cut = new TH1F("hist_ev_missing_mass_rho_cut",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
-    TH1F *hist_ev_chi_phi_cut = new TH1F("hist_ev_chi_phi_cut","; #phi Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
-    TH1F *hist_ev_chi_rho_cut = new TH1F("hist_ev_chi_rho_cut","; #rho Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
-    
-    hist_ev_rho_mass->SetTitle("#rho Invariant Mass");
-    hist_ev_phi_mass->SetTitle("#phi Invariant Mass");
-    hist_ev_rho_mass_cut->SetTitle("#rho Invariant Mass cut");
-    hist_ev_phi_mass_cut->SetTitle("#phi Invariant Mass cut");
+//    TH1F *hist_ev_rho_mass = new TH1F("hist_ev_rho_mass","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
+//    TH1F *hist_ev_phi_mass = new TH1F("hist_ev_phi_mass","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
+//    TH1F *hist_ev_missing_mass_phi = new TH1F("hist_ev_missing_mass_phi",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
+//    TH1F *hist_ev_missing_mass_rho = new TH1F("hist_ev_missing_mass_rho",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
+//    TH1F *hist_ev_chi_phi = new TH1F("hist_ev_chi_phi","; #phi Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
+//    TH1F *hist_ev_chi_rho = new TH1F("hist_ev_chi_rho","; #rho Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
+//
+//    TH1F *hist_ev_rho_mass_cut = new TH1F("hist_ev_rho_mass_cut","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
+//    TH1F *hist_ev_phi_mass_cut = new TH1F("hist_ev_phi_mass_cut","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
+//    TH1F *hist_ev_missing_mass_phi_cut = new TH1F("hist_ev_missing_mass_phi_cut",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
+//    TH1F *hist_ev_missing_mass_rho_cut = new TH1F("hist_ev_missing_mass_rho_cut",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.2, 0.2);
+//    TH1F *hist_ev_chi_phi_cut = new TH1F("hist_ev_chi_phi_cut","; #phi Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
+//    TH1F *hist_ev_chi_rho_cut = new TH1F("hist_ev_chi_rho_cut","; #rho Kinematic Fit #chi^{2}/NDF ;entries [#]", 100, 0, 45);
+//
+//    hist_ev_rho_mass->SetTitle("#rho Invariant Mass");
+//    hist_ev_phi_mass->SetTitle("#phi Invariant Mass");
+//    hist_ev_rho_mass_cut->SetTitle("#rho Invariant Mass cut");
+//    hist_ev_phi_mass_cut->SetTitle("#phi Invariant Mass cut");
     
     
     
@@ -138,38 +139,38 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //TH2F * mom_theta = new TH2F( "mom_theta" , "; Momentum [Gev/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
     //TH2F * mom_theta_cut = new TH2F( "mom_theta_cut" , "; Momentum [GeV/c]; Polar Angle [degree]", 100, 0, 12, 100, 0, 12);
     
-    TH2F * mom_theta_phi= new TH2F("mom_theta_phi", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
-    TH2F * mom_theta_rho= new TH2F("mom_theta_rho", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
-    
-    TH2F * mom_theta_phi_cut= new TH2F("mom_theta_phi_cut", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
-    TH2F * mom_theta_rho_cut= new TH2F("mom_theta_rho_cut", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
-    
-    TH1F * hmom_phi = new TH1F("hmom_phi",";kaon Momentum [GeV/c];entries [#]", 100,0,12);
-    TH1F * hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
-    
-    TH1F*  hdir_x = new TH1F("hdir_x",";dir x component ;entries [#]", 100,-1.0,1.0);
-    TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
-    TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
-    
-    
-    
-    
-    TH2F * hExtrapolatedBarHitXY_k = new TH2F( "hExtrapolatedBarHitXY_k" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
-    TH2F * hExtrapolatedBarHitXY_pi = new TH2F( "hExtrapolatedBarHitXY_pi" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+//    TH2F * mom_theta_phi= new TH2F("mom_theta_phi", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
+//    TH2F * mom_theta_rho= new TH2F("mom_theta_rho", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
+//
+//    TH2F * mom_theta_phi_cut= new TH2F("mom_theta_phi_cut", " ;kaons #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
+//    TH2F * mom_theta_rho_cut= new TH2F("mom_theta_rho_cut", " ;pions #theta X charge (deg); #p [GeV/c]", 200, -12, 12, 200, 0, 12);
+//
+//    TH1F * hmom_phi = new TH1F("hmom_phi",";kaon Momentum [GeV/c];entries [#]", 100,0,12);
+//    TH1F * hmom_rho = new TH1F("hmom_rho",";pions Momentum [GeV/c];entries [#]", 100,0,12);
+//
+//    TH1F*  hdir_x = new TH1F("hdir_x",";dir x component ;entries [#]", 100,-1.0,1.0);
+//    TH1F*  hdir_y = new TH1F("hdir_y",";dir y component ;entries [#]", 100,-1.0,1.0);
+//    TH1F*  hdir_z = new TH1F("hdir_z",";dir z component;entries [#]", 100,-1.0,1.0);
+//
     
     
-    TH2F * hExtrapolatedBarHitXY_cut = new TH2F( "hExtrapolatedBarHitXY_cut" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
     
-    Int_t nf= 121;
-    TH2F * histo_theta_phi_map_pi =  new TH2F("histo_theta_phi_map_pi",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_map_k =  new TH2F("histo_theta_phi_map_k",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
-    
-    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_mom_map_k  =  new TH2F("histo_theta_phi_mom_map_k ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
-    
-    
-    TH2F * histo_theta_phi_mom_tmp_map_pi =  new TH2F("histo_theta_phi_mom_tmp_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
-    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//    TH2F * hExtrapolatedBarHitXY_k = new TH2F( "hExtrapolatedBarHitXY_k" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+//    TH2F * hExtrapolatedBarHitXY_pi = new TH2F( "hExtrapolatedBarHitXY_pi" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+//
+//
+//    TH2F * hExtrapolatedBarHitXY_cut = new TH2F( "hExtrapolatedBarHitXY_cut" , "; Bar Hit X + (100* charge) (cm); Bar Hit Y (cm)", 200, -200, 200, 200, -200, 200);
+//
+//    Int_t nf= 121;
+//    TH2F * histo_theta_phi_map_pi =  new TH2F("histo_theta_phi_map_pi",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//    TH2F * histo_theta_phi_map_k =  new TH2F("histo_theta_phi_map_k",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//
+//    TH2F * histo_theta_phi_mom_map_pi =  new TH2F("histo_theta_phi_mom_map_pi ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//    TH2F * histo_theta_phi_mom_map_k  =  new TH2F("histo_theta_phi_mom_map_k ",";#Theta multiplied by charge [Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//
+//
+//    TH2F * histo_theta_phi_mom_tmp_map_pi =  new TH2F("histo_theta_phi_mom_tmp_map_pi ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
+//    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
     
     
     
@@ -318,9 +319,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
             
             cout<<"##########"<<"PMT= "<<PMT<< "	delta_cherenkov_cor= " << delta_cherenkov_cor<<endl;
-            hsigma_test->Fill(sigma_cherenkov_cor*1000);
-            hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
-            hmean_test->Fill(mean_cherenkov_cor);
+            //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+            //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+            //hmean_test->Fill(mean_cherenkov_cor);
             // correction condition
             // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
             array_correction[PMT]= delta_cherenkov_cor;
@@ -434,8 +435,12 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //TTree *tree_cut = glx_ch->CloneTree(0);
     
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
-    double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
+    double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1);
+    
+    std::vector<int> vpx;
+    std::vector<int> vpy;
+    std::vector<int> vpz;
     
     tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
     tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
@@ -445,6 +450,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
     tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
     tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
+    tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
+    tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
+    
+    
+    tree_variables.Branch("vpx",&vpx);
+    tree_variables.Branch("vpy",&vpy);
+    tree_variables.Branch("vpz",&vpz);
     
     
     
@@ -478,7 +490,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             ////////////////////////
             
             if (!(pdgId ==2 || pdgId ==3)) continue;
-
+            
             // pion =2  ,kaon=3
             if(true){
                 if (pdgId == 2 && chi_square> 10) continue;
@@ -524,10 +536,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
             // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
             // commented
-            if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
+            //if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
-            if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
+            //if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
             if (xmin <  posInBar.X()) xmin=posInBar.X();
             if (xmax >  posInBar.X()) xmax=posInBar.X();
@@ -543,50 +555,50 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //////// pos map //////
             ///////////////////////
             
-            if (pdgId == 2){
-                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_k->Fill(100+posInBar.X(), posInBar.Y());
-                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_k->Fill(-100+ posInBar.X(), posInBar.Y());
-            }
-            if (pdgId == 3){
-                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_pi->Fill(100+posInBar.X(), posInBar.Y());
-                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_pi->Fill(-100+ posInBar.X(), posInBar.Y());
-            }
+//            if (pdgId == 2){
+//                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_k->Fill(100+posInBar.X(), posInBar.Y());
+//                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_k->Fill(-100+ posInBar.X(), posInBar.Y());
+//            }
+//            if (pdgId == 3){
+//                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_pi->Fill(100+posInBar.X(), posInBar.Y());
+//                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_pi->Fill(-100+ posInBar.X(), posInBar.Y());
+//            }
             
             /////////////////////////////
             //////// theta phi map //////
             /////////////////////////////
             
-            double theta_mom =  momInBar_unit.Theta()* 180/PI;
-            double ph_mom =  momInBar_unit.Phi()* 180/PI;
-            if (glx_event->GetPdg() < 0 ) theta_mom = theta_mom *-1.0 ;
-            
-            int theta_bin(-1), phi_bin(-1);
-            double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
-            
-            if (pdgId == 2){
-                histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
-                theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
-                phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
-                content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
-                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
-                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                //cout<< "###### average_bin= "<<average_bin<<" "<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<" "<<momInBar_unit.Mag()<<endl;
-                histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
-            }
-            if (pdgId == 3){
-                histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
-                theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
-                phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
-                content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
-                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
-                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                
-                histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
-            }
+//            double theta_mom =  momInBar_unit.Theta()* 180/PI;
+//            double ph_mom =  momInBar_unit.Phi()* 180/PI;
+//            if (glx_event->GetPdg() < 0 ) theta_mom = theta_mom *-1.0 ;
+//
+//            int theta_bin(-1), phi_bin(-1);
+//            double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
+//
+//            if (pdgId == 2){
+//                histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
+//                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
+//
+//                theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
+//                phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
+//                content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
+//                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
+//                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+//                //cout<< "###### average_bin= "<<average_bin<<" "<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<" "<<momInBar_unit.Mag()<<endl;
+//                histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
+//            }
+//            if (pdgId == 3){
+//                histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
+//                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
+//
+//                theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
+//                phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
+//                content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
+//                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
+//                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+//
+//                histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
+//            }
             
             
             /////////////////////////////
@@ -621,29 +633,29 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             
             
-            if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_cut->Fill(100+posInBar.X(), posInBar.Y());
-            if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_cut->Fill(-100+  posInBar.X(), posInBar.Y());
+//            if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_cut->Fill(100+posInBar.X(), posInBar.Y());
+//            if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_cut->Fill(-100+  posInBar.X(), posInBar.Y());
             
             //if(fabs(dir_x)>0.01 )continue;
             //if(dir_y<-0.05)continue;
-            hdir_x->Fill(dir_x);
-            hdir_y->Fill(dir_y);
-            hdir_z->Fill(dir_z);
-            if (pdgId == 2){
-                hist_ev_rho_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
-                hist_ev_chi_rho_cut->Fill(chi_square);
-                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
-            if (pdgId == 3){
-                hist_ev_phi_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
-                hist_ev_chi_phi_cut->Fill(chi_square);
-                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
-            
+//            hdir_x->Fill(dir_x);
+//            hdir_y->Fill(dir_y);
+//            hdir_z->Fill(dir_z);
+//            if (pdgId == 2){
+//                hist_ev_rho_mass_cut->Fill(inv_mass);
+//                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
+//                hist_ev_chi_rho_cut->Fill(chi_square);
+//                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+//                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+//            }
+//            if (pdgId == 3){
+//                hist_ev_phi_mass_cut->Fill(inv_mass);
+//                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
+//                hist_ev_chi_phi_cut->Fill(chi_square);
+//                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+//                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+//            }
+//
             
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
             
@@ -663,7 +675,10 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
             track_pid=-1; track_nbar=-1;
             histo_cherenkov_track->Reset();
-
+            vpx.clear();
+            vpy.clear();
+            vpz.clear();
+            
             for(int h = 0; h < glx_event->GetHitSize(); h++){
                 hit = glx_event->GetHit(h);
                 int ch = hit.GetChannel();
@@ -853,6 +868,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
                     //if (glx_event->GetPdg() < 0 ) nph_n++;
                     if(pmt<108) {
                         glx_hdigi[pmt]->Fill(pix%8, pix/8);
+                        
+                        vpx.push_back(pmt);
+                        vpy.push_back(pix%8);
+                        vpz.push_back(pix/8);
+                        
                         goodevt=1;
                     }
                 }
@@ -927,32 +947,35 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             fit_track->SetParLimits(1,0.809,0.835);
             fit_track->SetParLimits(2,0.005,0.030);
             if (pdgId==3)fit_track->SetLineColor(kRed);
-	    else fit_track->SetLineColor(kBlue);
+            else fit_track->SetLineColor(kBlue);
             histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
             
             //cc->cd();
             //histo_cherenkov_track->Draw();
             //cc->Update();
             //cc->WaitPrimitive();
-
+            
             track_mean=  fit_track->GetParameter(1);
             track_spr= fit_track->GetParameter(2);
             track_yield = nph;
             track_mom = momInBar.Mag();
-            track_xbar = momInBar.X();
-            track_ybar = momInBar.Y();
+            track_xbar = posInBar.X();
+            track_ybar = posInBar.Y();
             track_pid = pdgId;
             track_nbar = bar;
+            track_fit_chisqu = fit_track->GetChisquare();
+            track_fit_NDF = fit_track->GetNDF();
+            
             
             tree_variables.Fill();
             
-
+            
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
             
             double percentage = kaon_counter/pion_counter*100.0;
-            if (percentage <100 && pdgId == 2 )continue;
+            //if (percentage <100 && pdgId == 2 )continue;
             if (pdgId == 2) pion_counter++;
             if (pdgId == 3) kaon_counter++;
             
