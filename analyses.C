@@ -4,11 +4,14 @@
 #include <TLegend.h>
 #include "glxtools.C"
 #include "THStack.h"
+//#include "TH3D.h"
+#include "TNtuple.h"
 
 int analyses(){
     
     gStyle->SetOptStat(0);
     gStyle->SetPalette(55);
+    glx_initDigi();
     
     // calculate cherenkov angle
     // Double_t momentum=3.5;
@@ -19,8 +22,8 @@ int analyses(){
     Double_t fAngleK[10]={0};
     Double_t fAnglePi[10]={0};
     
-    //Double_t momentum[] = {2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
-    Double_t momentum[] = {3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5};
+    Double_t momentum[] = {2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
+    //Double_t momentum[] = {3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5};
     for(int f=0;f<10;f++){
         fAngleK[f] = acos(sqrt(momentum[f]*momentum[f] + mass[3]*mass[3])/momentum[f]/1.4738)-0.00;
         fAnglePi[f]= acos(sqrt(momentum[f]*momentum[f] + mass[2]*mass[2])/momentum[f]/1.4738)-0.00;
@@ -43,6 +46,8 @@ int analyses(){
     TH2F * histo_pos_xy_reso_tmp = new TH2F( "histo_pos_xy_reso_tmp" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     TH2F * histo_pos_xy_reso = new TH2F( "histo_pos_xy_reso" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
+    //TH3D * histo_pos_xy_reso_4d = new TH3D( "histo_pos_xy_reso_4d" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max,100,0,10);
+    
     TH1F* histo_track_mean = new TH1F("histo_track_mean","; Mean per Track [rad]; entries [#]",250,0.817,0.8348);
     TH1F* histo_track_spr = new TH1F("histo_track_spr","; SPR per Track [m rad]; entries [#]",250,5.1,20);
     
@@ -58,20 +63,23 @@ int analyses(){
     TH1F*  histo_track_mean_bin[10][100];
     
     for(Int_t i=0; i<10; i++){
-        histo_track_yield[i] = new TH1F(Form("histo_track_yield_%d",i), Form("Photon Yield @ mom bin %d ; Photon Yield; Entries [#]",i) ,100 ,0,100);
-        histo_track_mean_mom[i] = new TH1F(Form("histo_track_mean_mom_%d",i), Form("Track Mean @ mom bin %d ; Mean [rad]; Entries [#]",i) ,250,0.817,0.8348);
-        histo_track_spr_mom[i] = new TH1F(Form("histo_track_spr_mom_%d",i), Form("Track SPR @ mom bin %d ; SPR [mrad]; Entries [#]",i) ,250,5.1,20);
+        int kk = i+2;
+        int ll =i+3;
+        histo_track_yield[i] = new TH1F(Form("histo_track_yield_%d",i), Form("Photon Yield @ momentum %d - %d GeV/c ; Photon Yield; Entries [#]",kk,ll) ,100 ,0,100);
+        histo_track_mean_mom[i] = new TH1F(Form("histo_track_mean_mom_%d",i), Form("Track Mean @ momentum %d - %d GeV/c ; Mean [rad]; Entries [#]",kk,ll) ,250,0.817,0.8348);
+        histo_track_spr_mom[i] = new TH1F(Form("histo_track_spr_mom_%d",i), Form("Track SPR @ momentum %d - %d GeV/c ; SPR [mrad]; Entries [#]",kk,ll) ,250,5.1,20);
         
         for(Int_t j=0; j<100; j++) {
             int k = i+2;
             int l =i+3;
             histo_track_resolution_bin[i][j] = new TH1F(Form("histo_track_resolution_%d_mom_%d_%d",j,k,l ), Form("Cherenkov track resolution @ yield bin %d momentum %d - %d GeV/c;Expected #theta_{c}- Measured #theta_{c} [m rad]; Entries [#]",j,k,l) , 100, -50, 50 );
-            histo_track_spr_bin[i][j] = new TH1F(Form("histo_spr_resolution_%d_mom_%d",j,i), Form("SPR @ yield bin %d mom flag %d ;SPR [m rad];  [#]",j,i) ,250,5.1,20);
-            histo_track_mean_bin[i][j] = new TH1F(Form("histo_mean_resolution_%d_mom_%d",j,i), Form("#theta_{c}^{tr} @ yield bin %d mom flag %d ;#theta_{c}^{tr}  [rad]; Entries [#]",j,i), 100,0.817,0.8348);
+            histo_track_spr_bin[i][j] = new TH1F(Form("histo_spr_resolution_%d_mom_%d",j,i), Form("SPR @ yield bin %d momentum %d - %d GeV/c ;SPR [m rad];  [#]",j,k,l) ,250,5.1,20);
+            histo_track_mean_bin[i][j] = new TH1F(Form("histo_mean_resolution_%d_mom_%d",j,i), Form("#theta_{c}^{tr} @ yield bin %d momentum %d - %d GeV/c ;#theta_{c}^{tr}  [rad]; Entries [#]",j,k,l), 100,0.817,0.8348);
         }
     }
     
     TH1F * histo_track_pos_resolution_bin[pos_bin][pos_bin];
+    TH1F * histo_track_pos_mom_bin[pos_bin][pos_bin];
     //TH1F * histo_track_pos_spr_bin[pos_bin][pos_bin];
     //TH1F * histo_track_pos_mean_bin[pos_bin][pos_bin];
     
@@ -79,6 +87,8 @@ int analyses(){
         for(Int_t y=0; y<pos_bin; y++) {
             
             histo_track_pos_resolution_bin[x][y] = new TH1F(Form("histo_track_resolution_xbin_%d_ybin_%d",x,y), Form("Cherenkov track resolution @ xbin %d ybin %d; X [cm]; Y [cm]",x,y) , 100, -50, 50 );
+            histo_track_pos_mom_bin[x][y] = new TH1F(Form("histo_track_pos_mom_bin_%d_ybin_%d",x,y), Form("Cherenkov track mom @ xbin %d ybin %d; X [cm]; Y [cm]",x,y) , 100, 0, 10 );
+            
             //histo_track_pos_spr_bin[x][y] = new TH1F(Form("histo_track_pos_spr_xbin_%d_ybin_%d",x,y), Form("SPR @ xbin %d ybin %d; X [cm]; Y [cm]",x,y) , 250,5.1,20);
             //histo_track_pos_mean_bin[x][y] = new TH1F(Form("histo_track_pos_mean_xbin_%d_ybin_%d",x,y), Form("#theta_{c}^{tr} @ xbin %d ybin %d; X [cm]; Y [cm]",x,y) ,  100,0.817,0.8348);
         }
@@ -90,7 +100,6 @@ int analyses(){
     g_yield_mom->SetMarkerColor(kBlue);
     g_yield_mom->SetMarkerStyle(21);
     g_yield_mom->SetLineColor(kBlack);
-    
     
     TGraph *g_pi[nbin_mom];
     TGraph *g_k[nbin_mom];
@@ -105,15 +114,16 @@ int analyses(){
         g_pi[j]->SetMarkerColor(kBlue);
         g_pi[j]->SetMarkerStyle(0);
         g_pi[j]->SetLineColor(kBlue);
-        g_pi[j]->SetLineWidth(1);
+        g_pi[j]->SetLineWidth(3);
         g_pi[j]->SetLineColor(j+1);
         
         g_k[j] = new TGraph();
         g_k[j]->SetMarkerColor(kBlue);
         g_k[j]->SetMarkerStyle(0);
         g_k[j]->SetLineColor(kRed);
-        g_k[j]->SetLineWidth(1);
+        g_k[j]->SetLineWidth(3);
         g_k[j]->SetLineColor(j+1);
+        g_k[j]->SetLineStyle(2);
         
         graph_reso[j] = new TGraphAsymmErrors();
         graph_reso[j]->SetTitle("Cherenkov track resolution vs Photon yield");
@@ -139,8 +149,8 @@ int analyses(){
     graph_pos_reso->SetTitle("Cherenkov track resolution vs Photon yield");
     graph_pos_reso->SetMarkerColor(4);
     graph_pos_reso->SetMarkerStyle(21);
-    
-    
+    graph_pos_reso->SetLineStyle(0);
+
     
     // variables
     double diff(-1);
@@ -161,9 +171,8 @@ int analyses(){
     
     int mom_bin_flag(-1);
     
-    
     // read tree
-    TFile *f = new TFile("outFile.root");
+    TFile *f = new TFile("outFile_v2.root");
     TTree *tree_variables = (TTree*)f->Get("tree_variables");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
     double track_fit_chisqu(-1),track_fit_NDF(-1);
@@ -180,12 +189,27 @@ int analyses(){
     tree_variables->SetBranchAddress("track_fit_chisqu",&track_fit_chisqu);
     tree_variables->SetBranchAddress("track_fit_NDF",&track_fit_NDF);
     
+    std::vector<int> *vpx = 0;
+    std::vector<int> *vpy = 0;
+    std::vector<int> *vpz = 0;
+    
+    TBranch *bvpx = 0;
+    TBranch *bvpy = 0;
+    TBranch *bvpz = 0;
+    
+    tree_variables->SetBranchAddress("vpx",&vpx,&bvpx);
+    tree_variables->SetBranchAddress("vpy",&vpy,&bvpy);
+    tree_variables->SetBranchAddress("vpz",&vpz,&bvpz);
+    
     Long64_t nentries = tree_variables->GetEntries();
     Double_t mean_array[]={0.824512,0.825366,0.826363,0.826648,0.826861,0.826576 ,0.826149};
     //Double_t mean_array[]={0.824202, 0.826007, 0.82663, 0.826798,  0.826776, 0.826793, 0.826775 };
     
     for (Long64_t i=0;i<nentries;i++) {
         tree_variables->GetEntry(i);
+        bvpx->GetEntry(i);
+        bvpy->GetEntry(i);
+        bvpz->GetEntry(i);
         
         if(track_pid !=2 ) continue; // select pion !=2
         //fit_quality=track_fit_chisqu/track_fit_NDF;
@@ -209,9 +233,15 @@ int analyses(){
         //if(fit_quality>2) continue;
         //histo_chiNDF_cut->Fill(fit_quality);
         
-        //diff = fAnglePi-track_mean;
-        diff = track_mean-   0.82608;
+        // mean tail study
+        //if(track_mean< mean_max) continue;
+        //if(track_spr*1000< spr_max) continue;
+        for (UInt_t j = 0; j < vpx->size(); ++j) {
+            glx_hdigi[vpx->at(j)]->Fill(vpy->at(j),vpz->at(j));
+        }
         
+        //diff = fAnglePi-track_mean; // not used because there are systematic shifts
+        diff = track_mean-   0.82608; // default value will be changed
         
         if(track_mom>1 && track_mom<2){
             mom_bin_flag=0;
@@ -278,6 +308,7 @@ int analyses(){
         int ybin_pos = histo_pos_xy->GetYaxis()->FindBin(track_ybar);
         //cout<<"#######"<< xbin_pos <<"   "<<ybin_pos<<endl;
         histo_track_pos_resolution_bin[xbin_pos][ybin_pos]->Fill(diff*1000);
+        histo_track_pos_mom_bin[xbin_pos][ybin_pos]->Fill(track_mom);
         //histo_track_pos_spr_bin[xbin_pos][ybin_pos]->Fill(track_spr*1000);
         //histo_track_pos_mean_bin[xbin_pos][ybin_pos]->Fill(track_mean);
     }
@@ -334,7 +365,7 @@ int analyses(){
             cctest3->WaitPrimitive();
         }
     }
-
+    
     //return 0;
     
     TCanvas *cc = new TCanvas("cc","cc",800,500);
@@ -387,7 +418,7 @@ int analyses(){
             histo_track_resolution_bin[f][i]->Fit("fit_track_resolution","M","", -50, 50) ;
             histo_track_spr_bin[f][i]->Fit("fit_track_spr","MQ0","", 0, 30) ;
             histo_track_mean_bin[f][i]->Fit("fit_track_mean","MQ0","", 0, 30) ;
-            if(true){
+            if(false){
                 cc->cd();
                 cc->Update();
                 histo_track_resolution_bin[f][i]->Draw();
@@ -537,7 +568,7 @@ int analyses(){
         THStack *hs = new THStack("hs","Stacked 1D histograms");
         hs->SetTitle("Photon Yield");
         int counter3=0;
-        for(int i=0;i<mom_bin_flag;i++){
+        for(int i=0;i<nbin_mom ;i++){  //  mom_bin_flag
             if( histo_track_yield[i]->GetEntries()<1)continue;
             histo_track_yield[i]->SetLineColor(i+1);
             g_yield_mom->SetPoint(counter3, i+2 , histo_track_yield[i]->GetMean());
@@ -575,9 +606,6 @@ int analyses(){
         histo_pos_xy_yield->SetMaximum(37);
         histo_pos_xy_yield->GetYaxis()->SetRangeUser(-100,0);
         histo_pos_xy_yield->Draw("colz");
-        
-        
-        
         
         /////////////
         glx_canvasAdd("r_histo_track_mean",800,400);
@@ -627,6 +655,15 @@ int analyses(){
     
     
     // resolution map
+    
+    
+    // 4D resolution moentum position
+    Float_t xpos,ypos,mom_pos,reso_pos;
+    auto f2 = TFile::Open("reso_pos_mom.root","RECREATE");
+    TNtuple ntuple("ntuple","data from ascii file","xpos:ypos:mom_pos:reso_pos");
+    
+    
+    double mom_avr(-1);
     TCanvas *cc2 = new TCanvas("cc2","cc2",800,500);
     int couter2(0);
     for (int x=0;x<pos_bin;x++){
@@ -634,6 +671,7 @@ int analyses(){
             double hentry =histo_track_pos_resolution_bin[x][y]->GetEntries();
             if (hentry <100)continue; //100
             histo_track_pos_resolution_bin[x][y]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
+            mom_avr = histo_track_pos_mom_bin[x][y]->GetMean();
             if(false){
                 cc2->cd();
                 cc2->Update();
@@ -647,19 +685,49 @@ int analyses(){
             track_pos_resolution_error= fit_track_resolution->GetParError(2);
             
             histo_pos_xy_reso->SetBinContent(x,y,track_pos_resolution);
+            //histo_pos_xy_reso_4d->SetBinContent(x,y,mom_avr,track_pos_resolution);
             
-            graph_pos_reso->SetPoint(couter2, pos_BinCenter, track_pos_resolution);
-            graph_pos_reso->SetPointError(couter2, 1/2, 1/2,track_pos_resolution_error/2,track_pos_resolution_error/2);
+            double  xpos = histo_pos_xy_reso->GetXaxis()->GetBinCenter(x);
+            double  ypos = histo_pos_xy_reso->GetYaxis()->GetBinCenter(y);
+            double  mom_pos = mom_avr;
+            double  reso_pos = track_pos_resolution;
+            if (track_pos_resolution<5 && track_pos_resolution>1 )ntuple.Fill(xpos,ypos,mom_pos,reso_pos);
+            
+            graph_pos_reso->SetPoint(couter2, mom_pos, track_pos_resolution); // pos_BinCenter
+            //graph_pos_reso->SetPointError(couter2, 1/2, 1/2,track_pos_resolution_error/2,track_pos_resolution_error/2);
             
             ++couter2;
         }
     }
+    f2->Write();
     
     glx_canvasAdd("r_pos_resolution_map",800,400);
     histo_pos_xy_reso->SetMinimum(1);
     histo_pos_xy_reso->SetMaximum(5);
     histo_pos_xy_reso->GetYaxis()->SetRangeUser(-100,0);
     histo_pos_xy_reso->Draw("colz");
+    
+    glx_canvasAdd("r_pos_resolution_map_4d",800,400);
+    ntuple.SetMarkerStyle(20);
+    ntuple.SetMarkerSize(2);
+    ntuple.Draw("ypos:xpos:mom_pos:reso_pos","","COLZ");
+    // to run with relavent axis title use root d3_reso.C
+    
+    glx_canvasAdd("r_graph_pos_reso",800,400);
+    TMultiGraph *mg_4d = new TMultiGraph();
+    mg_4d->Add(graph_pos_reso);
+    mg_4d->SetTitle(" Averaged Cherenkov Resolution per Track all DIRC wall all Photon yield; Momentum [GeV/c]; #sigma( #theta_{c}^{tr} ) [m rad]");
+    mg_4d->Draw("AP");
+    mg_4d->GetHistogram()->GetYaxis()->SetRangeUser(1,6);
+    glx_canvasGet("r_graph_pos_reso")->Update();
+    TLine *tet= new TLine(0,0,0,0);
+    tet->Draw();
+    
+    
+    
+    cout<<"####### @ 3.5 GeV/c fAngleK "<< fAngleK[1]<<"  fAnglePi "<<fAnglePi[1]<<endl;
+    glx_drawDigi("m,p,v\n",0);
+    glx_canvasSave(0);
     
     
     //delete histograms
@@ -669,18 +737,6 @@ int analyses(){
         }
     }
     
-    //
-    //    for(Int_t i=0; i<nbin_mom; i++){
-    //        delete histo_track_yield[i];
-    //        for(Int_t j=0; j<=nbin_yield+1; j++) {
-    //            delete histo_track_resolution_bin[i][j];
-    //            delete histo_track_spr_bin[i][j];
-    //            delete histo_track_mean_bin[i][j];
-    //
-    //        }
-    //    }
-    cout<<"####### fAngleK "<< fAngleK<<"  fAnglePi "<<fAnglePi<<endl;
     
-    glx_canvasSave(0);
     return 0;
 }

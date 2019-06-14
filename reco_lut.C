@@ -5,6 +5,7 @@
 
 #include "TMultiGraph.h"
 #include "TGraph.h"
+#include <vector>
 
 #include "glxtools.C"
 #define PI 3.14159265
@@ -318,9 +319,9 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
             
             cout<<"##########"<<"PMT= "<<PMT<< "	delta_cherenkov_cor= " << delta_cherenkov_cor<<endl;
-            hsigma_test->Fill(sigma_cherenkov_cor*1000);
-            hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
-            hmean_test->Fill(mean_cherenkov_cor);
+            //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+            //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+            //hmean_test->Fill(mean_cherenkov_cor);
             // correction condition
             // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
             array_correction[PMT]= delta_cherenkov_cor;
@@ -436,7 +437,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1);
-
+    
+    std::vector<int> vpx;
+    std::vector<int> vpy;
+    std::vector<int> vpz;
+    
     tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
     tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
     tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
@@ -445,8 +450,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
     tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
     tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
-tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
-tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
+    tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
+    tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
+    
+    
+    tree_variables.Branch("vpx",&vpx);
+    tree_variables.Branch("vpy",&vpy);
+    tree_variables.Branch("vpz",&vpz);
     
     
     
@@ -480,7 +490,7 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             ////////////////////////
             
             if (!(pdgId ==2 || pdgId ==3)) continue;
-
+            
             // pion =2  ,kaon=3
             if(true){
                 if (pdgId == 2 && chi_square> 10) continue;
@@ -526,10 +536,10 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
             // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
             // commented
-     //if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
+            //if(bar<0 || bar>=luts || (bar<4 || bar>8)) continue;
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
-     //if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
+            //if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
             
             if (xmin <  posInBar.X()) xmin=posInBar.X();
             if (xmax >  posInBar.X()) xmax=posInBar.X();
@@ -545,50 +555,50 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             //////// pos map //////
             ///////////////////////
             
-            if (pdgId == 2){
-                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_k->Fill(100+posInBar.X(), posInBar.Y());
-                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_k->Fill(-100+ posInBar.X(), posInBar.Y());
-            }
-            if (pdgId == 3){
-                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_pi->Fill(100+posInBar.X(), posInBar.Y());
-                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_pi->Fill(-100+ posInBar.X(), posInBar.Y());
-            }
+//            if (pdgId == 2){
+//                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_k->Fill(100+posInBar.X(), posInBar.Y());
+//                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_k->Fill(-100+ posInBar.X(), posInBar.Y());
+//            }
+//            if (pdgId == 3){
+//                if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_pi->Fill(100+posInBar.X(), posInBar.Y());
+//                if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_pi->Fill(-100+ posInBar.X(), posInBar.Y());
+//            }
             
             /////////////////////////////
             //////// theta phi map //////
             /////////////////////////////
             
-            double theta_mom =  momInBar_unit.Theta()* 180/PI;
-            double ph_mom =  momInBar_unit.Phi()* 180/PI;
-            if (glx_event->GetPdg() < 0 ) theta_mom = theta_mom *-1.0 ;
-            
-            int theta_bin(-1), phi_bin(-1);
-            double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
-            
-            if (pdgId == 2){
-                histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
-                theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
-                phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
-                content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
-                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
-                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                //cout<< "###### average_bin= "<<average_bin<<" "<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<" "<<momInBar_unit.Mag()<<endl;
-                histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
-            }
-            if (pdgId == 3){
-                histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
-                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
-                
-                theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
-                phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
-                content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
-                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
-                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
-                
-                histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
-            }
+//            double theta_mom =  momInBar_unit.Theta()* 180/PI;
+//            double ph_mom =  momInBar_unit.Phi()* 180/PI;
+//            if (glx_event->GetPdg() < 0 ) theta_mom = theta_mom *-1.0 ;
+//
+//            int theta_bin(-1), phi_bin(-1);
+//            double content_histo_theta_phi_map(-1), content_histo_theta_phi_mom_map(-1), average_bin(-1);
+//
+//            if (pdgId == 2){
+//                histo_theta_phi_map_pi->Fill(theta_mom,ph_mom);
+//                histo_theta_phi_mom_tmp_map_pi->Fill(theta_mom,ph_mom,momInBar.Mag());
+//
+//                theta_bin = histo_theta_phi_map_pi->GetXaxis()->FindBin(theta_mom);
+//                phi_bin = histo_theta_phi_map_pi->GetYaxis()->FindBin(ph_mom);
+//                content_histo_theta_phi_map=histo_theta_phi_map_pi->GetBinContent(theta_bin,phi_bin);
+//                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_pi->GetBinContent(theta_bin,phi_bin);
+//                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+//                //cout<< "###### average_bin= "<<average_bin<<" "<<content_histo_theta_phi_map<<" "<<content_histo_theta_phi_mom_map<<" "<<momInBar_unit.Mag()<<endl;
+//                histo_theta_phi_mom_map_pi->SetBinContent(theta_bin,phi_bin,average_bin);
+//            }
+//            if (pdgId == 3){
+//                histo_theta_phi_map_k->Fill(theta_mom,ph_mom);
+//                histo_theta_phi_mom_tmp_map_k->Fill(theta_mom,ph_mom,momInBar.Mag());
+//
+//                theta_bin = histo_theta_phi_map_k->GetXaxis()->FindBin(theta_mom);
+//                phi_bin = histo_theta_phi_map_k->GetYaxis()->FindBin(ph_mom);
+//                content_histo_theta_phi_map=histo_theta_phi_map_k->GetBinContent(theta_bin,phi_bin);
+//                content_histo_theta_phi_mom_map=histo_theta_phi_mom_tmp_map_k->GetBinContent(theta_bin,phi_bin);
+//                average_bin= content_histo_theta_phi_mom_map/content_histo_theta_phi_map;
+//
+//                histo_theta_phi_mom_map_k->SetBinContent(theta_bin,phi_bin,average_bin);
+//            }
             
             
             /////////////////////////////
@@ -623,29 +633,29 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             
             
             
-            if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_cut->Fill(100+posInBar.X(), posInBar.Y());
-            if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_cut->Fill(-100+  posInBar.X(), posInBar.Y());
+//            if (glx_event->GetPdg() > 0 ) hExtrapolatedBarHitXY_cut->Fill(100+posInBar.X(), posInBar.Y());
+//            if (glx_event->GetPdg() < 0 ) hExtrapolatedBarHitXY_cut->Fill(-100+  posInBar.X(), posInBar.Y());
             
             //if(fabs(dir_x)>0.01 )continue;
             //if(dir_y<-0.05)continue;
-            hdir_x->Fill(dir_x);
-            hdir_y->Fill(dir_y);
-            hdir_z->Fill(dir_z);
-            if (pdgId == 2){
-                hist_ev_rho_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
-                hist_ev_chi_rho_cut->Fill(chi_square);
-                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
-            if (pdgId == 3){
-                hist_ev_phi_mass_cut->Fill(inv_mass);
-                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
-                hist_ev_chi_phi_cut->Fill(chi_square);
-                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
-                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
-            }
-            
+//            hdir_x->Fill(dir_x);
+//            hdir_y->Fill(dir_y);
+//            hdir_z->Fill(dir_z);
+//            if (pdgId == 2){
+//                hist_ev_rho_mass_cut->Fill(inv_mass);
+//                hist_ev_missing_mass_rho_cut->Fill(missing_mass);
+//                hist_ev_chi_rho_cut->Fill(chi_square);
+//                if (glx_event->GetPdg() > 0 ) mom_theta_rho_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+//                if (glx_event->GetPdg() < 0 ) mom_theta_rho_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+//            }
+//            if (pdgId == 3){
+//                hist_ev_phi_mass_cut->Fill(inv_mass);
+//                hist_ev_missing_mass_phi_cut->Fill(missing_mass);
+//                hist_ev_chi_phi_cut->Fill(chi_square);
+//                if (glx_event->GetPdg() > 0 ) mom_theta_phi_cut->Fill(momInBar.Theta()*180/PI, momInBar.Mag());
+//                if (glx_event->GetPdg() < 0 ) mom_theta_phi_cut->Fill(-1.0 * momInBar.Theta()*180/PI, momInBar.Mag());
+//            }
+//
             
             // if(hLnDiff[pdgId]->GetEntries()>200) continue;
             
@@ -665,7 +675,10 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
             track_pid=-1; track_nbar=-1;
             histo_cherenkov_track->Reset();
-
+            vpx.clear();
+            vpy.clear();
+            vpz.clear();
+            
             for(int h = 0; h < glx_event->GetHitSize(); h++){
                 hit = glx_event->GetHit(h);
                 int ch = hit.GetChannel();
@@ -855,6 +868,11 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
                     //if (glx_event->GetPdg() < 0 ) nph_n++;
                     if(pmt<108) {
                         glx_hdigi[pmt]->Fill(pix%8, pix/8);
+                        
+                        vpx.push_back(pmt);
+                        vpy.push_back(pix%8);
+                        vpz.push_back(pix/8)
+                        
                         goodevt=1;
                     }
                 }
@@ -929,14 +947,14 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             fit_track->SetParLimits(1,0.809,0.835);
             fit_track->SetParLimits(2,0.005,0.030);
             if (pdgId==3)fit_track->SetLineColor(kRed);
-	    else fit_track->SetLineColor(kBlue);
+            else fit_track->SetLineColor(kBlue);
             histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
             
             //cc->cd();
             //histo_cherenkov_track->Draw();
             //cc->Update();
             //cc->WaitPrimitive();
-
+            
             track_mean=  fit_track->GetParameter(1);
             track_spr= fit_track->GetParameter(2);
             track_yield = nph;
@@ -945,13 +963,13 @@ tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
             track_ybar = posInBar.Y();
             track_pid = pdgId;
             track_nbar = bar;
-	    track_fit_chisqu = fit_track->GetChisquare();
-	    track_fit_NDF = fit_track->GetNDF();
-
+            track_fit_chisqu = fit_track->GetChisquare();
+            track_fit_NDF = fit_track->GetNDF();
+            
             
             tree_variables.Fill();
             
-
+            
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
