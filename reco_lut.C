@@ -1,6 +1,9 @@
 #define glx__sim
 
-#include "/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/classes/DrcEvent.h"
+//#include "/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/classes/DrcEvent.h"
+
+#include "/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/classes_v2/DrcEvent.h"
+#include "/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/classes_v2/DrcHit.h"
 #include "/lustre/nyx/panda/aali/gluex/gluex_top/halld_recon/halld_recon-4.2.0/src/plugins/Analysis/lut_dirc/DrcLutNode.h"
 
 #include "TMultiGraph.h"
@@ -20,7 +23,7 @@
 // gCherenkov_Correction = 1 Create histo per PMT
 // gCherenkov_Correction = 2 Apply per PMT correction
 
-void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lut_all_avr.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
+void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/lut_all_avr.root", TString justName="NoName.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
     
     double momentum=3.75;
@@ -173,6 +176,18 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     //    TH2F * histo_theta_phi_mom_tmp_map_k  =  new TH2F("histo_theta_phi_mom_tmp_map_k ",";#Theta[Degree]; #Phi[Degree]", nf, -12, 12, nf, -180 , 20);
     
     
+    TH1F*  histo_time_bar_pos[24][40];
+    TH1F*  histo_tdiffD_bar_pos[24][40];
+    TH1F*  histo_tdiffR_bar_pos[24][40];
+    
+    TH1F* histo_tmp_pos = new TH1F("histo_tmp_pos","; X Bar Hit [cm]; entries [#]",40,-100,100);
+    
+    for(Int_t i=0; i<24; i++)
+        for(Int_t j=0; j<40; j++)  {
+            histo_time_bar_pos[i][j] = new TH1F(Form("histo_time_bar_pos_%d_%d",i,j),Form("histo_time_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 100,0,100);
+            histo_tdiffD_bar_pos[i][j] = new TH1F(Form("histo_tdiffD_bar_pos_%d_%d",i,j),Form("histo_tdiffD_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 200,-50,50);
+            histo_tdiffR_bar_pos[i][j] = new TH1F(Form("histo_tdiffR_bar_pos_%d_%d",i,j),Form("histo_tdiffR_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 200,-50,50);
+        }
     
     //////////////////////////////
     /// cherenkove PDF per pix ///
@@ -424,8 +439,15 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     } else if(gPDF_pmt==1){ outFile= "created_cherenkovPDF_pmt_NotCorrected.root";
     } else if(gCherenkov_Correction==1){ outFile= "cherenkov_correction.root";
     } else {
-        outFile= "outFile.root";
+        //outFile= "outFile.root";
+        //outFile= "out_"+infile;
+        outFile= "out2_"+justName;
+        
     }
+    cout<<"####"<<outFile<<endl;
+    double cop[]= {62,62,62,62,62,62,62,62,60,58,56,54,53,52,52,51,50,49,47,46,46,45,45,44,44,43,43,42,41,41,40,40,38,37.5,37,37.5,37,36.5,36,36};
+    double shift_tdiff[24][40]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0484555,-0.0354493,0.35056,0.099063,0.106277,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.128436,0.0400649,0.105171,0.0283179,0.136207,0.129174,0.0509148,0.0244918,-0.0016855,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.219853,-0.0737354,0.159231,0.146284,0.123299,0.0353285,0.057264,0.0669868,-0.0431749,0.124274,0.11793,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0443389,-0.010351,0.144584,0.167535,0.129673,0.0894336,0.0149637,0.0334035,0.0312673,0.134101,0.157287,0.163244,0,0,0,0,0,0,0,0,0,0,0,0,-0.0109966,-0.220774,0.169731,0.212142,0.16085,0.126701,0.135627,0.121442,0.0499737,0.122402,0.128811,0.15737,0.11934,0,0,0,0,0,0,0,0,0,0,0,-0.00782742,-0.150989,0.186154,0.21918,0.178342,0.136228,0.123202,0.154193,0.133912,0.163065,0.181085,0.171055,0.0391149,0.0889785,0,0,0,0,0,0,0,0,0,0,0.0835393,0.150198,0.177662,0.183543,0.137075,0.153928,0.181749,0.15866,0.154047,0.19948,0.232563,0.226626,0.0704589,0.086086,0.121518,0.0662947,0,0,0,0,0,0,0,0,0.0841535,0.145702,0.206464,0.169638,0.141065,0.172967,0.174205,0.144694,0.184069,0.199037,0.244997,0.210197,0.0292002,0.0355092,0.0290452,0.0534557,-0.0351165,0,0,0,0,0,0,0,0.085724,0.164682,0.2165,0.167911,0.150495,0.183209,0.169329,0.166109,0.177069,0.227666,0.241485,0.184138,0.0027776,0.0243227,0.00654651,-0.0541308,-0.00404641,0,0,0,0,0,0,0,0.107842,0.19749,0.252776,0.219025,0.185657,0.190596,0.204788,0.17564,0.167063,0.233824,0.253876,0.208454,-0.0317229,0.0565071,-0.00870096,-0.032719,0.00610309,-0.0738033,0,0,0,0,0,0,0.107041,0.252879,0.311105,0.280969,0.215917,0.247506,0.221,0.20466,0.186726,0.234477,0.237015,0.170027,-0.0439488,0.0759515,0.0869067,-0.0135607,0.116568,0.0471306,0.0723177,0,0,0,0,0,0.141757,0.261828,0.319707,0.302958,0.257017,0.256147,0.200369,0.161661,0.125224,0.160671,0.196845,0.14449,-0.0520265,0.11576,0.121756,0.122954,0.163013,0.111975,0.0484454,0.194809,0,0,0,0,0.171518,0.275187,0.307965,0.291526,0.266654,0.230735,0.172033,0.114582,0.0966193,0.137031,0.183111,0.0891136,0.012301,0.127834,0.183852,0.179489,0.204186,0.164188,0.192083,0.106122,0,0,0,0,0.256979,0.337382,0.367115,0.34409,0.244315,0.199646,0.16355,0.116371,0.121487,0.169231,0.175652,0.149268,0.0205011,0.166876,0.222973,0.21423,0.235252,0.180907,0.227778,0.177711,0.292843,0,0,0,0.423643,0.465037,0.479693,0.410611,0.263701,0.242166,0.21457,0.166087,0.16705,0.192644,0.204521,0.191679,0.0869033,0.206789,0.250065,0.272298,0.241632,0.222175,0.268539,0.293759,0.33817,0,0,0,0.725575,0.740799,0.715482,0.621035,0.40466,0.354143,0.324878,0.299437,0.260641,0.279625,0.307112,0.265067,0.163861,0.280992,0.321935,0.355474,0.301971,0.283339,0.373811,0.457592,0.417735,0,0,0,0.950818,0.951673,0.890637,0.745973,0.596449,0.601227,0.465558,0.411163,0.345117,0.368678,0.366612,0.303725,0.196065,0.314516,0.358048,0.329245,0.294593,0.297833,0.345911,0.403051,0.513864,0.38563,0,0,1.36867,1.12123,0.94363,0.839209,0.652887,0.628982,0.540399,0.452434,0.36597,0.411794,0.384593,0.309495,0.148578,0.281512,0.263998,0.229866,0.226089,0.222082,0.343845,0.420341,0.442428,0,0,0,1.92236,1.36569,1.09846,0.887148,0.712891,0.64572,0.545014,0.42746,0.319841,0.378124,0.372523,0.284111,0.128976,0.207101,0.194574,0.16628,0.2005,0.155013,0.259195,0.375682,0.470856,0.407513,0,0,2.01906,1.41681,1.13046,0.896505,0.709332,0.648193,0.517753,0.406326,0.304463,0.345361,0.373136,0.294617,0.0993746,0.188603,0.173755,0.179623,0.195836,0.191101,0.287064,0.400992,0.466,0.361539,0,0,1.4621,1.29693,1.09323,0.831755,0.644312,0.597216,0.490958,0.364789,0.270081,0.315619,0.353508,0.290061,0.11985,0.182116,0.199869,0.160848,0.202368,0.23682,0.322385,0.382495,0.434683,0.405445,0,0,1.14012,1.14301,0.976661,0.79192,0.616518,0.539383,0.474992,0.352494,0.266265,0.309797,0.33003,0.280832,0.145202,0.187874,0.18328,0.196861,0.213956,0.177515,0.273324,0.352289,0.397228,0.37937,0,0,0.827087,0.890285,0.786642,0.664625,0.510495,0.470278,0.404346,0.290087,0.211788,0.268287,0.312761,0.246882,0.126446,0.230824,0.225923,0.179073,0.214367,0.193096,0.261107,0.345096,0.330653,0,0,0,0.515694,0.644616,0.632142,0.542591,0.403364,0.381829,0.294817,0.202702,0.137065,0.221989,0.252789,0.199705,0.105985,0.190114,0.218622,0.212496,0.19969,0.142444,0.220413,0.236997,0.324881,0,0,0,0.312724,0.473409,0.442828,0.412404,0.309941,0.284752,0.220669,0.060527,0.0779171,0.164957,0.215385,0.137745,0.00932066,0.150187,0.191998,0.161405,0.191306,0.0578354,0.224053,0.27969,0.293328,0,0,0,0.177287,0.348568,0.358936,0.307365,0.233995,0.221168,0.204349,0.0965681,0.0239412,0.177434,0.251703,0.125934,0.0330784,0.179473,0.153984,0.167659,0.183589,0.116312,0.237547,0.201601,0,0,0,0,-0.0669073,0.137761,0.171553,0.174695,0.144268,0.159986,0.136592,0.0128444,-0.00955643,0.145326,0.21197,0.149466,-0.0294701,0.101494,0.0940754,0.0808618,0.0282518,0.00325814,0.173595,0.208221,0,0,0,0,-0.231522,-0.179675,-0.0590653,0.0142431,0.0257128,0.0939398,0.105458,-0.0330371,-0.0311701,0.0289467,0.173189,0.0227273,-0.101745,-0.0506557,-0.0609564,-0.0104289,0.0358258,-0.048497,0.189429,0,0,0,0,0,-0.319261,-0.288284,-0.175551,-0.106451,-0.134527,0.00727297,0.0393707,-0.00510716,-0.00323208,0.117724,0.171612,-0.0613118,-0.165411,-0.0928218,-0.140565,-0.110293,-0.0336569,-0.0909058,0,0,0,0,0,0,-0.432025,-0.369398,-0.275893,-0.232665,-0.324574,-0.197646,-0.052544,0.0754222,0.0867731,0.134527,0.0342633,-0.0946818,-0.255951,-0.0927508,-0.0671486,-0.043222,-0.0636675,0,0,0,0,0,0,0,-0.575479,-0.480157,-0.332118,-0.337863,-0.495491,-0.28086,-0.0680482,0.0643614,0.0254752,0.163175,0.109449,-0.196485,-0.257506,-0.0974613,0.00714947,0.0879513,-0.0235813,0,0,0,0,0,0,0,-0.71696,-0.546338,-0.49057,-0.476121,-0.52483,-0.288839,-0.124298,-0.0956534,-0.091014,0.108539,0.183561,-0.225335,-0.330447,-0.00225432,-0.0179166,0,0,0,0,0,0,0,0,0,-0.818417,-0.736128,-0.737093,-0.723545,-0.53314,-0.330092,-0.403355,-0.293202,-0.24218,-0.128041,0.116102,-0.261308,-0.457386,-0.0902638,0,0,0,0,0,0,0,0,0,0,-0.894983,-0.863325,-1.0398,-0.75881,-0.516174,-0.331565,-0.447565,-0.439813,-0.412139,-0.117445,0.148536,-0.251335,0,0,0,0,0,0,0,0,0,0,0,0,-0.71129,-1.09435,-1.02932,-0.753744,-0.490395,-0.364743,-0.44317,-0.60414,-0.586372,-0.197612,0.0720365,-0.288913,0,0,0,0,0,0,0,0,0,0,0,0,-0.184685,-1.10635,-0.780496,-0.584552,-0.534895,-0.210287,-0.255855,-0.509604,-0.509893,-0.41877,0.14744,0,0,0,0,0,0,0,0,0,0,0,0,0,6.54575,0.0786484,-0.380539,-0.503242,-0.477557,-0.0942726,-0.109767,-0.542088,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.5,-0.5,-0.5,-0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    //double shift_tdiff[24][40]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.206375,-0.120977,-0.0632259,-0.0429772,0.00747347,-0.0146532,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.182306,-0.232246,-0.176029,0.0152093,-0.0418729,-0.0245196,-0.0133792,-0.0537889,-0.11011,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.105011,-0.0782876,0.00766007,0.0348279,-0.0191352,0.0217075,-0.044096,-0.0512151,-0.0294671,0.0567046,0.0841607,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0951189,0.0165561,-0.0559123,0.144276,0.00961639,-0.0119877,-0.0032614,-0.00882342,-0.0275106,-0.00472598,-0.00213266,0.073259,0,0,0,0,0,0,0,0,0,0,0,0,-0.070211,-0.0293339,0.129513,0.145992,0.0456247,0.0120037,-0.0105453,0.0260046,0.00662134,0.0349205,0.109562,0.109924,0,0,0,0,0,0,0,0,0,0,0,0,-0.022451,0.0817875,0.113035,0.120863,0.0210432,0.0835056,0.116326,0.0861171,0.0819289,0.124119,0.161047,0.164751,-0.0700882,-0.0365541,0,0,0,0,0,0,0,0,0,0,-0.0233332,0.0862023,0.141587,0.105897,0.0236786,0.108331,0.104791,0.0906122,0.114128,0.127726,0.181853,0.141345,-0.0873594,-0.0414573,-0.0924231,0,0,0,0,0,0,0,0,0,0.0176569,0.105414,0.155845,0.102785,0.0827252,0.108978,0.10364,0.100162,0.118493,0.15658,0.17382,0.113746,-0.104513,-0.0361405,-0.0468388,-0.116422,0,0,0,0,0,0,0,0,0.0470503,0.136206,0.189396,0.15627,0.12275,0.132528,0.140132,0.114471,0.103533,0.17471,0.186681,0.149281,-0.0975165,-0.0622213,-0.0758128,-0.106883,-0.0906574,0,0,0,0,0,0,0,0.0350743,0.185329,0.250495,0.21582,0.155364,0.187518,0.153889,0.139597,0.122184,0.174551,0.173563,0.0997633,-0.114964,-0.028553,-0.0386911,-0.0835532,0.0464993,-0.0853314,0,0,0,0,0,0,0.0682792,0.199881,0.258163,0.239962,0.19224,0.196294,0.145619,0.102063,0.00399847,0.0957003,0.130271,0.0843635,-0.111692,-0.000247798,0.0055788,0.0144015,0.037596,0.003136,0,0,0,0,0,0,0.101523,0.209164,0.248916,0.233186,0.196796,0.169061,0.106062,-0.0123911,-0.0273042,0.077524,0.118173,0.0296335,-0.0570873,0.00240015,0.126288,0.119882,0.137874,0.0978324,0.133246,0,0,0,0,0,0.192402,0.275101,0.30872,0.280945,0.185974,0.140566,0.100579,-0.00243232,-0.000675846,0.10292,0.108936,0.0247199,-0.0420769,0.101744,0.151405,0.146548,0.168609,0.0509927,0.160777,0,0,0,0,0,0.357617,0.40312,0.417512,0.34748,0.201496,0.177813,0.153136,0.105488,0.101254,0.128386,0.136196,0.126364,-0.0250021,0.145194,0.185316,0.137221,0.126271,0.0980243,0.204516,0.217792,0,0,0,0,0.656715,0.680235,0.652814,0.500618,0.339135,0.291788,0.25842,0.238501,0.195156,0.217345,0.246385,0.19604,0.0348437,0.223829,0.26325,0.281999,0.23499,0.210771,0.298814,0.379574,0,0,0,0,0.883868,0.886061,0.821912,0.681943,0.474418,0.468443,0.402174,0.34882,0.284041,0.308701,0.307586,0.24706,0.138672,0.255879,0.294335,0.267102,0.239704,0.231805,0.274282,0.368345,0,0,0,0,1.30366,1.0509,0.878242,0.775212,0.587467,0.510003,0.47769,0.389596,0.305923,0.347708,0.320987,0.250304,0.0825788,0.218644,0.198415,0.168737,0.157952,0.0736943,0.281943,0.372571,0,0,0,0,1.85218,1.2975,0.992593,0.820532,0.645445,0.528325,0.476375,0.366335,0.257308,0.312215,0.307261,0.217868,0.0628457,0.145219,0.125537,0.102688,0.132491,0.0805325,0.192931,0.29885,0,0,0,0,1.95276,1.3382,1.02442,0.829505,0.640167,0.530475,0.454082,0.3424,0.237855,0.282463,0.307611,0.229658,-0.0183328,0.125308,0.109486,0.112934,0.130076,0.0515368,0.227634,0.332633,0.406381,0,0,0,1.38598,1.2341,0.98184,0.767929,0.534755,0.481209,0.425954,0.298727,0.206334,0.252278,0.284897,0.222402,0.0517366,0.12054,0.129048,0.0951738,0.0827893,0.161261,0.255696,0.322637,0.386345,0,0,0,1.04886,1.07806,0.902163,0.725041,0.50761,0.470327,0.407936,0.288444,0.200643,0.242038,0.265568,0.216087,0.028602,0.12573,0.116091,0.121369,0.14353,0.0554943,0.216787,0.2889,0.323208,0,0,0,0.759166,0.824731,0.717299,0.599859,0.438278,0.399089,0.334255,0.226427,0.145044,0.197248,0.244311,0.177303,0.0625023,0.172256,0.159303,0.11263,0.141516,0.053383,0.113653,0.282784,0,0,0,0,0.442804,0.571157,0.519125,0.438746,0.337019,0.314312,0.228918,0.0853099,0.0241698,0.155896,0.189898,0.133067,-0.0067844,0.084858,0.156968,0.149541,0.131152,0.00874533,0.0963787,0.169875,0,0,0,0,0.242857,0.404417,0.370217,0.344157,0.240356,0.217933,0.152823,-0.00255466,-0.0300135,0.0514462,0.152049,0.042377,-0.0555858,0.0918079,0.0837694,0.106264,0.0690981,-0.0122815,0.0840268,0.131297,0,0,0,0,0.0983326,0.277509,0.281437,0.238535,0.167504,0.153848,0.135528,-0.00984144,-0.0434906,0.109989,0.184929,0.0576361,-0.0676725,0.111528,0.0839548,0.105897,0.0729967,-0.0294737,0.169866,0,0,0,0,0,-0.137766,0.067839,0.0993935,0.103282,0.0775381,0.0943456,0.0272432,-0.0575783,-0.0799284,0.0295568,0.156486,0.0393061,-0.0969438,-0.0138838,-0.0203956,-0.0310712,-0.0375451,-0.0529255,0.115933,0,0,0,0,0,-0.293959,-0.241706,-0.132339,-0.0577204,-0.0772528,-0.0114359,-0.00884542,-0.10428,-0.0928766,-0.030287,0.105486,-0.0439717,-0.172406,-0.116128,-0.13064,-0.125332,-0.0374852,-0.113614,0,0,0,0,0,0,-0.382473,-0.362927,-0.234509,-0.167022,-0.199928,-0.10027,-0.0288441,-0.0762747,-0.0624127,0.00566043,0.0470891,-0.113922,-0.240428,-0.159455,-0.197585,-0.187921,-0.1187,0,0,0,0,0,0,0,-0.543142,-0.485574,-0.33891,-0.290941,-0.390789,-0.270084,-0.108127,-0.0296511,-0.0154228,0.0207321,-0.0235342,-0.163968,-0.332387,-0.172064,-0.139598,-0.120121,0,0,0,0,0,0,0,0,-0.63883,-0.551125,-0.392767,-0.386559,-0.614114,-0.358374,-0.141736,-0.00555223,-0.033874,0.0415662,0.0300131,-0.267633,-0.342674,-0.162464,-0.0725263,0,0,0,0,0,0,0,0,0,-0.766841,-0.600636,-0.556217,-0.546904,-0.592107,-0.353903,-0.242189,-0.169991,-0.15218,0.0356908,0.112256,-0.305968,-0.410471,-0.13413,0,0,0,0,0,0,0,0,0,0,-0.864668,-0.805071,-0.784181,-0.797985,-0.590788,-0.408068,-0.498623,-0.4176,-0.318743,-0.171815,0.0551932,-0.344196,0,0,0,0,0,0,0,0,0,0,0,0,-0.911755,-0.929319,-1.13094,-0.809612,-0.575254,-0.383256,-0.505917,-0.497968,-0.479322,-0.228721,0.0510376,-0.310328,0,0,0,0,0,0,0,0,0,0,0,0,-0.574165,-1.10109,-1.11278,-0.791123,-0.569908,-0.416169,-0.509241,-0.679135,-0.647672,-0.255733,-0.0209098,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.22699,-1.19949,-0.853074,-0.611401,-0.672023,-0.275643,-0.337414,-0.575414,-0.58357,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5.58213,0.0936823,-0.434353,-0.553283,-0.581149,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     
     /////////////////////////////////
     //////// Creat file and trees ///
@@ -437,17 +459,19 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1);
-    
+
+    TString track_file="noname";
+
     std::vector<int> vpx;
     std::vector<int> vpy;
     std::vector<int> vpz;
-    
+
     std::vector<double> vtdiff;
-    std::vector<double> vtime;
+    //    std::vector<double> vtime;
     std::vector<double> vtangle;
-    
+
     double track_inv_mass(-1),track_missing_mass(-1),track_chi_square(-1),track_TofTrackDist(-1);
-    
+
     tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
     tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
     tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
@@ -458,21 +482,21 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
     tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
     tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
-    
+    tree_variables.Branch("track_file",&track_file,"track_file/C");
+
     tree_variables.Branch("vpx",&vpx);
     tree_variables.Branch("vpy",&vpy);
     tree_variables.Branch("vpz",&vpz);
-    
+
     tree_variables.Branch("vtdiff",&vtdiff);
-    tree_variables.Branch("vtime",&vtime);
+    //    tree_variables.Branch("vtime",&vtime);
     tree_variables.Branch("vtangle",&vtangle);
-    
-    
+
+
     tree_variables.Branch("track_inv_mass",&track_inv_mass,"track_inv_mass/D");
     tree_variables.Branch("track_missing_mass",&track_missing_mass,"track_missing_mass/D");
     tree_variables.Branch("track_chi_square",&track_chi_square,"track_chi_square/D");
     tree_variables.Branch("track_TofTrackDist",&track_TofTrackDist,"track_TofTrackDist/D");
-    
 
     
     
@@ -481,12 +505,13 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
     DrcHit hit;
     for (int e = 0; e < glx_ch->GetEntries(); e++){
         glx_ch->GetEntry(e);
+        //if(e>2000)break;
         for (int t = 0; t < glx_events->GetEntriesFast(); t++){
             // cut in Event criteria here
             
-            
             glx_nextEventc(e,t,1000);
             posInBar = glx_event->GetPosition();
+            int x_pos_bin = histo_tmp_pos->GetXaxis()->FindBin(posInBar.X());
             momInBar = glx_event->GetMomentum();
             double momentum = momInBar.Mag();
             int pdgId = glx_findPdgId(glx_event->GetPdg());
@@ -494,7 +519,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //if(count[pdgId]>1000) continue;
             
             //std::cout<<"######### No Problem "<<pdgId<<std::endl;
-
+            
             double inv_mass=  glx_event->GetInvMass();
             double missing_mass=  glx_event->GetMissMass();
             double chi_square=  glx_event->GetChiSq();
@@ -507,31 +532,25 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             if (!(pdgId ==2 || pdgId ==3)) continue;
             
             // pion =2  ,kaon=3
-//            if(true){
-//                if (pdgId == 2 && chi_square> 10) continue;
-//                if (pdgId == 3 && chi_square> 20)continue;
-//                if (pdgId == 2 && (inv_mass< 0.66  || inv_mass> 0.82 )  ) continue;
-//                if (pdgId == 3 && (inv_mass< 1.015 || inv_mass> 1.025) ) continue;
-//                if(missing_mass< -0.01 || missing_mass> 0.01 )continue;
-//            }
+            //            if(true){
+            //                if (pdgId == 2 && chi_square> 10) continue;
+            //                if (pdgId == 3 && chi_square> 20)continue;
+            //                if (pdgId == 2 && (inv_mass< 0.66  || inv_mass> 0.82 )  ) continue;
+            //                if (pdgId == 3 && (inv_mass< 1.015 || inv_mass> 1.025) ) continue;
+            //                if(missing_mass< -0.01 || missing_mass> 0.01 )continue;
+            //            }
             
-//            momInBar_unit=momInBar.Unit();
-//            double dir_x =momInBar_unit.X();
-//            double dir_y =momInBar_unit.Y();
-//            double dir_z =momInBar_unit.Z();
+            //            momInBar_unit=momInBar.Unit();
+            //            double dir_x =momInBar_unit.X();
+            //            double dir_y =momInBar_unit.Y();
+            //            double dir_z =momInBar_unit.Z();
             //hdir_x->Fill(dir_x);
             //hdir_y->Fill(dir_y);
             //hdir_z->Fill(dir_z);
             //cout<<"=========>" << dir_x << "  "<< dir_y<< endl;
             
             
-            
-            
-            
-            
             if(glx_event->GetType()!=2) continue; //1-LED 2-beam 0-rest
-            
-            
             if(glx_event->GetParent()>0) continue;
             
             //////////////////////////////
@@ -546,7 +565,7 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             
             //if(momInBar.Mag()<2.8 || momInBar.Mag()>3 ) continue;
             //if(momInBar.Mag()<3.9 || momInBar.Mag()>4.1 ) continue;
-//            int bin = (100+posInBar.X())/200.*nbins;
+            //            int bin = (100+posInBar.X())/200.*nbins;
             // not used
             // if(bar<0 || bar>=luts || (bar!=ybar && ybar!=-1)) continue;
             // if(bin<0 || bin>nbins || (bin!=xbar && xbar!=-1)) continue;
@@ -555,11 +574,11 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             //if(bin<0 || bin>nbins || (bin<7 || bin>13)) continue;
             //std::cout<<"##################### bar "<<bar<<" "<<"####### bin "<<bin<<std::endl;
             //if ( posInBar.X()>10 || posInBar.X() < -10 ) continue;
-//
-//            if (xmin <  posInBar.X()) xmin=posInBar.X();
-//            if (xmax >  posInBar.X()) xmax=posInBar.X();
-//            if (ymin <  posInBar.Y()) ymin=posInBar.Y();
-//            if (ymax >  posInBar.Y()) ymax=posInBar.Y();
+            //
+            //            if (xmin <  posInBar.X()) xmin=posInBar.X();
+            //            if (xmax >  posInBar.X()) xmax=posInBar.X();
+            //            if (ymin <  posInBar.Y()) ymin=posInBar.Y();
+            //            if (ymax >  posInBar.Y()) ymax=posInBar.Y();
             
             
             
@@ -693,27 +712,31 @@ void reco_lut(TString infile="vol/tree_060772.root",TString inlut="lut/lut_12/lu
             vpx.clear();
             vpy.clear();
             vpz.clear();
+
+            vtdiff.clear();
+            //vtime.clear();
+            vtangle.clear();
             
-vtdiff.clear();
-vtime.clear();
-vtangle.clear();
             
             for(int h = 0; h < glx_event->GetHitSize(); h++){
                 hit = glx_event->GetHit(h);
                 int ch = hit.GetChannel();
                 int pmt = hit.GetPmtId();
                 int pix = hit.GetPixelId();
-                
                 double hitTime = hit.GetLeadTime()-glx_event->GetTime();
-                
+                hitTime=hitTime+shift_tdiff[bar][x_pos_bin];
                 if(ch>glx_nch) continue;
+                //histo_time_bar_pos[bar][x_pos_bin]->Fill(hitTime);
                 //if(hitTime>40) continue;
                 nphc++;
                 
                 /////////////////////////////////////
                 // Reflection condition may change //
                 /////////////////////////////////////
-                bool reflected = hitTime>40;
+                //bool reflected = hitTime>40;
+                bool reflected = true;
+                if(hitTime < cop[x_pos_bin]) reflected = false;
+                
                 
                 
                 lenz = fabs(barend-posInBar.X());
@@ -725,7 +748,6 @@ vtangle.clear();
                 bool isGood(false);
                 
                 double p1,p2;
-                
                 
                 
                 
@@ -771,22 +793,41 @@ vtangle.clear();
                             // hTime->Fill(hitTime);
                             // hCalc->Fill(totalTime);
                             
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<cut_cangle){
+                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<0.01){
                                 hDiff->Fill(totalTime-hitTime);
                                 //if(samepath)
                                 {
                                     hDiffT->Fill(totalTime-hitTime);
-                                    if(r) hDiffR->Fill(totalTime-hitTime);
-                                    else hDiffD->Fill(totalTime-hitTime);
+                                    if(r) {
+                                        hDiffR->Fill(totalTime-hitTime);
+                                        histo_tdiffR_bar_pos[bar][x_pos_bin]->Fill(totalTime-hitTime);
+                                        
+                                    }
+                                    else {
+                                        hDiffD->Fill(totalTime-hitTime);
+                                        histo_tdiffD_bar_pos[bar][x_pos_bin]->Fill(totalTime-hitTime);
+                                        
+                                    }
+                                    
+                                    
                                 }
+                                
+                                if(fabs(totalTime-hitTime)< 5)histo_time_bar_pos[bar][x_pos_bin]->Fill(hitTime);
                             }
+                            // skim
+                            if(fabs(totalTime-hitTime)> 10) continue;
+                            if(tangle > 1.0) continue;
+                            if(tangle > 1.0) continue;
+                            
+                            vtdiff.push_back(totalTime-hitTime);
+                            //vtime.push_back(hitTime);
+                            vtangle.push_back(tangle);
                             
                             ///////////////
                             // Time Cut  //
                             ///////////////
-
-                            if(!r && fabs(totalTime-hitTime)>5) continue; // removed cut_tdiffd
-                            if(r && fabs(totalTime-hitTime) >5) continue; // removed cut_tdiffd
+                            if(!r && fabs(totalTime-hitTime)>cut_tdiffd) continue; // removed
+                            if(r && fabs(totalTime-hitTime) >cut_tdiffr) continue; // removed
                             
                             //////////////////////
                             // Cherenkov track  //
@@ -818,17 +859,9 @@ vtangle.clear();
                             ////////////////////
                             // Cherenkov Cut  //
                             ////////////////////
-                            //if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
-                            
+                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle) continue;
                             //if(fabs(tangle-0.5*(referance_angle_k+referance_angle_pi))>cut_cangle) continue; // removed
-                            
                             //if(tangle> 0.844 ||tangle < 0.798)  continue;
-                            
-                            if (tangle > 1.0 ) continue;
-                            vtdiff.push_back(totalTime-hitTime);
-                            vtime.push_back(hitTime);
-                            vtangle.push_back(tangle);
-                            
                             
                             isGood=true;
                             hTime->Fill(hitTime);
@@ -972,12 +1005,12 @@ vtangle.clear();
             if (pdgId==3)fit_track->SetLineColor(kRed);
             else fit_track->SetLineColor(kBlue);
             histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
-            
+
             //cc->cd();
             //histo_cherenkov_track->Draw();
             //cc->Update();
             //cc->WaitPrimitive();
-            
+
             track_mean=  fit_track->GetParameter(1);
             track_spr= fit_track->GetParameter(2);
             track_yield = nph;
@@ -988,22 +1021,19 @@ vtangle.clear();
             track_nbar = bar;
             track_fit_chisqu = fit_track->GetChisquare();
             track_fit_NDF = fit_track->GetNDF();
-            
-            
+            track_file= justName;
+
             track_inv_mass= inv_mass;
             track_missing_mass= missing_mass;
             track_chi_square= chi_square;
             track_TofTrackDist= TofTrackDist;
-            
-            
-            
+
             tree_variables.Fill();
-            
-            
+
+
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
-            
             //double percentage = kaon_counter/pion_counter*100.0;
             //if (percentage <100 && pdgId == 2 )continue;
             //if (pdgId == 2) pion_counter++;
@@ -1493,6 +1523,19 @@ vtangle.clear();
         }
     }
     
+   
+    for(Int_t i=0; i<24; i++)
+        for(Int_t j=0; j<40; j++)  {
+            histo_time_bar_pos[i][j]->Write();
+        }
+    for(Int_t i=0; i<24; i++)
+        for(Int_t j=0; j<40; j++)  {
+            histo_tdiffD_bar_pos[i][j]->Write();
+        }
+    for(Int_t i=0; i<24; i++)
+        for(Int_t j=0; j<40; j++)  {
+            histo_tdiffR_bar_pos[i][j]->Write();
+        }
     
     
     //mom_theta_phi->Write();
