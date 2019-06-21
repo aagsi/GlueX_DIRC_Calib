@@ -110,7 +110,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     hLnDiff[2]->SetLineColor(4);
     hLnDiff[3]->SetLineColor(2);
     int evtcount=0,count[5]={0};
-    //∑TCanvas *cc = new TCanvas("cc","cc",800,500);
+    //TCanvas *cc = new TCanvas("cc","cc",800,500);
     TLine *gLine = new TLine();
     // cuts
     double cut_cangle=0.04;
@@ -817,7 +817,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // hTime->Fill(hitTime);
                             // hCalc->Fill(totalTime);
                             
-                            if(!btree && (fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<0.001 )){
+                            if(!btree && (fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<0.01 )){ // 10 mrad
                                 //hDiff->Fill(totalTime-hitTime);
                                 //if(samepath)
                                 {
