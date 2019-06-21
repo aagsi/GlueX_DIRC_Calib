@@ -26,6 +26,10 @@
 void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/lut_all_avr.root", TString justName="NoName.root", int gPDF_pix=0,int gPDF_pmt=0, int gCherenkov_Correction=0, int xbar=-1, int ybar=-1, double moms=3.75){
     if(!glx_initc(infile,1,"data/reco_lut_sim")) return;
     
+    
+    int num_events=glx_ch->GetEntries();
+    cout<<"####### num_events ="<<num_events<<endl;
+    
     double momentum=3.75;
     const int nodes = glx_maxch;
     const int luts = 24;
@@ -70,6 +74,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     double mAngle[5];
     
     TH1F * histo_cherenkov_track = new TH1F("histo_cherenkov_track","histo_cherenkov_track", 100,0.6,1); //250
+    
     TH1F *hDiff = new TH1F("hDiff",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
     TH1F *hDiffT = new TH1F("hDiffT",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
     TH1F *hDiffD = new TH1F("hDiffD",";t_{calc}-t_{measured} [ns];entries [#]", 400,-40,40);
@@ -105,7 +110,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     hLnDiff[2]->SetLineColor(4);
     hLnDiff[3]->SetLineColor(2);
     int evtcount=0,count[5]={0};
-    TCanvas *cc = new TCanvas("cc","cc",800,500);
+    //∑TCanvas *cc = new TCanvas("cc","cc",800,500);
     TLine *gLine = new TLine();
     // cuts
     double cut_cangle=0.04;
@@ -182,231 +187,234 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     
     TH1F* histo_tmp_pos = new TH1F("histo_tmp_pos","; X Bar Hit [cm]; entries [#]",40,-100,100);
     
-    for(Int_t i=0; i<24; i++)
-        for(Int_t j=0; j<40; j++)  {
+    for(Int_t j=0; j<40; j++){
+      for(Int_t i=0; i<24; i++){
             histo_time_bar_pos[i][j] = new TH1F(Form("histo_time_bar_pos_%d_%d",i,j),Form("histo_time_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 100,0,100);
             histo_tdiffD_bar_pos[i][j] = new TH1F(Form("histo_tdiffD_bar_pos_%d_%d",i,j),Form("histo_tdiffD_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 200,-50,50);
             histo_tdiffR_bar_pos[i][j] = new TH1F(Form("histo_tdiffR_bar_pos_%d_%d",i,j),Form("histo_tdiffR_bar_pos_%d_%d; # X Bar Hit [cm]; Bar number [#]",i,j), 200,-50,50);
         }
-    
-    //////////////////////////////
-    /// cherenkove PDF per pix ///
-    //////////////////////////////
-    TH1F*  fHistCh_k[glx_nch], *fHistCh_pi[glx_nch], *fHistCh_read_k[glx_nch], *fHistCh_read_pi[glx_nch];
-    TFile *ffile_cherenkov_pdf_pix;
-    TString cherenkov_pdf_path_pix;
-    
-    for(Int_t i=0; i<glx_nch; i++) {
-        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
-        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
     }
-    // read pdf per pix
-    if (gPDF_pix==2) {
-        //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
-        cherenkov_pdf_path_pix ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pix.root";
-        cout<<"cherenkov_pdf_path_pix= " <<cherenkov_pdf_path_pix<<endl;
-        ffile_cherenkov_pdf_pix  = new TFile(cherenkov_pdf_path_pix, "READ");
-        for(Int_t pix=0; pix<glx_nch; pix++) {
-            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_k_%d",pix));
-            fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_pi_%d",pix));
-        }
-    }
-    
-    //////////////////////////////
-    /// cherenkove PDF per pmt ///
-    //////////////////////////////
-    int PMT_num=108; //108
-    //double norm = 20000;
-    
-    TH1F*  fHistPMT_PDF_k[PMT_num], *fHistPMT_PDF_pi[PMT_num], *fHistPMT_PDF_read_k[PMT_num], *fHistPMT_PDF_read_pi[PMT_num];
-    TFile *ffile_cherenkov_pdf_pmt;
-    TString cherenkov_pdf_path_pmt;
-    
-    for(Int_t i=0; i<PMT_num; i++) {
-        fHistPMT_PDF_k[i] = new TH1F(Form("fHistPMT_PDF_k_%d",i),Form("fHistPMT_PDF_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1);    // 250
-        fHistPMT_PDF_pi[i] = new TH1F(Form("fHistPMT_PDF_pi_%d",i),Form("fHistPMT_PDF_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); // 250
-    }
-    // read pdf per pmt
-    if (gPDF_pmt==2) {
-        //cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_pdf_pmt_corrected.root";
-        cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pmt_NotCorrected.root";
-        cout<<"cherenkov_pdf_path_pmt= " <<cherenkov_pdf_path_pmt<<endl;
-        ffile_cherenkov_pdf_pmt  = new TFile(cherenkov_pdf_path_pmt, "READ");
-        for(Int_t PMT=0; PMT<PMT_num; PMT++) {
-            fHistPMT_PDF_read_k[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_k_%d",PMT));
-            fHistPMT_PDF_read_pi[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_pi_%d",PMT));
-            
-            // No success
-            /*
-             double scale_k = norm/(fHistPMT_PDF_read_k[PMT]->Integral());
-             fHistPMT_PDF_read_k[PMT]->Scale(scale_k);
-             double scale_pi = norm/(fHistPMT_PDF_read_pi[PMT]->Integral());
-             fHistPMT_PDF_read_k[PMT]->Scale(scale_pi);
-             */
-        }
-    }
-    
-    
-    ////////////////////////////
-    /// cherenkove correction///
-    ////////////////////////////
-    double referance_angle = mAngle[2]; // pi
-    //double referance_angle = mAngle[3]; // k
+    //
+    //    //////////////////////////////
+    //    /// cherenkove PDF per pix ///
+    //    //////////////////////////////
+    //    TH1F*  fHistCh_k[glx_nch], *fHistCh_pi[glx_nch], *fHistCh_read_k[glx_nch], *fHistCh_read_pi[glx_nch];
+    //    TFile *ffile_cherenkov_pdf_pix;
+    //    TString cherenkov_pdf_path_pix;
+    //
+    //    for(Int_t i=0; i<glx_nch; i++) {
+    //        fHistCh_k[i] = new TH1F(Form("fHistCh_k_%d",i),Form("fHistCh_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
+    //        fHistCh_pi[i] = new TH1F(Form("fHistCh_pi_%d",i),Form("fHistCh_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); //2000
+    //    }
+    //    // read pdf per pix
+    //    if (gPDF_pix==2) {
+    //        //cherenkov_data_k_path = Form("/lustre/nyx/panda/aali/prtdrc_2017/final_2017/workspace/testbeam/recon/data/332/pdf/histo_%g_sph_p_data_cherenkovPDF.root", prtangle_pdf);
+    //        cherenkov_pdf_path_pix ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pix.root";
+    //        cout<<"cherenkov_pdf_path_pix= " <<cherenkov_pdf_path_pix<<endl;
+    //        ffile_cherenkov_pdf_pix  = new TFile(cherenkov_pdf_path_pix, "READ");
+    //        for(Int_t pix=0; pix<glx_nch; pix++) {
+    //            fHistCh_read_k[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_k_%d",pix));
+    //            fHistCh_read_pi[pix] = (TH1F*)ffile_cherenkov_pdf_pix->Get(Form("fHistCh_pi_%d",pix));
+    //        }
+    //    }
+    //
+    //    //////////////////////////////
+    //    /// cherenkove PDF per pmt ///
+    //    //////////////////////////////
+    //    int PMT_num=108; //108
+    //    //double norm = 20000;
+    //
+    //    TH1F*  fHistPMT_PDF_k[PMT_num], *fHistPMT_PDF_pi[PMT_num], *fHistPMT_PDF_read_k[PMT_num], *fHistPMT_PDF_read_pi[PMT_num];
+    //    TFile *ffile_cherenkov_pdf_pmt;
+    //    TString cherenkov_pdf_path_pmt;
+    //
+    //    for(Int_t i=0; i<PMT_num; i++) {
+    //        fHistPMT_PDF_k[i] = new TH1F(Form("fHistPMT_PDF_k_%d",i),Form("fHistPMT_PDF_k_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1);    // 250
+    //        fHistPMT_PDF_pi[i] = new TH1F(Form("fHistPMT_PDF_pi_%d",i),Form("fHistPMT_PDF_pi_%d;#theta_{C} [rad];entries [#]",i), 500,0.6,1); // 250
+    //    }
+    //    // read pdf per pmt
+    //    if (gPDF_pmt==2) {
+    //        //cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_pdf_pmt_corrected.root";
+    //        cherenkov_pdf_path_pmt ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/created_cherenkovPDF_pmt_NotCorrected.root";
+    //        cout<<"cherenkov_pdf_path_pmt= " <<cherenkov_pdf_path_pmt<<endl;
+    //        ffile_cherenkov_pdf_pmt  = new TFile(cherenkov_pdf_path_pmt, "READ");
+    //        for(Int_t PMT=0; PMT<PMT_num; PMT++) {
+    //            fHistPMT_PDF_read_k[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_k_%d",PMT));
+    //            fHistPMT_PDF_read_pi[PMT] = (TH1F*)ffile_cherenkov_pdf_pmt->Get(Form("fHistPMT_PDF_pi_%d",PMT));
+    //
+    //            // No success
+    //            /*
+    //             double scale_k = norm/(fHistPMT_PDF_read_k[PMT]->Integral());
+    //             fHistPMT_PDF_read_k[PMT]->Scale(scale_k);
+    //             double scale_pi = norm/(fHistPMT_PDF_read_pi[PMT]->Integral());
+    //             fHistPMT_PDF_read_k[PMT]->Scale(scale_pi);
+    //             */
+    //        }
+    //    }
+    //
+    //
+    //    ////////////////////////////
+    //    /// cherenkove correction///
+    //    ////////////////////////////
+    //    double referance_angle = mAngle[2]; // pi
+    //    //double referance_angle = mAngle[3]; // k
     double referance_angle_pi = mAngle[2];
     double referance_angle_k = mAngle[3];
-    TGraph *shifted_pi = new TGraph();
-    
-    shifted_pi->SetMarkerColor(kBlue);
-    shifted_pi->SetMarkerStyle(20);
-    shifted_pi->SetLineColor(kBlue);
-    shifted_pi->SetLineWidth(1);
-    
-    TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
-    TFile *ffile_cherenkov_correction;
-    TString cherenkov_correction_path;
-    // correction array
-    double array_correction[108]={0};
-    // creat histograms Cherenkov per PMT
-    for(Int_t i=0; i<PMT_num; i++) {
-        fHistPMT_k[i] = new TH1F(Form("fHistPMT_k_%d",i),Form("fHistPMT_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-        fHistPMT_pi[i] = new TH1F(Form("fHistPMT_pi_%d",i),Form("fHistPMT_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
-    }
-    // Read Cherenkov per PMT
-    TF1 *fit_PMT = new TF1("fit_PMT","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
-    fit_PMT->SetLineColor(kBlue);
-    TH1F*  hdiff_test = new TH1F("hdiff_test",";mean diff ;entries [#]", 100,0,0.1);
-    TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
-    TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
-    //gStyle->SetPalette(kLightTemperature);
-    //////////////////////////////////////////////////
-    //    glx_canvasAdd("r_pmt_correction",800,400);//
-    /////////////////////////////////////////////////
-    if (gCherenkov_Correction==2) {
-        cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";//outFile_separation_PDF_pmt.root //cherenkov_correction.root
-        cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
-        ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
-        int pmtCounter =0;
-        for(Int_t PMT=0; PMT<PMT_num; PMT++) {
-            TString pmt_counter=Form("_%d",pmtCounter);
-            if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
-            if((PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11 || PMT==102)) continue;
-            //if(! (PMT==102)) continue; // custmization
-            ////////////////////////////////////////////////////////////////////////
-            //            glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);//
-            ////////////////////////////////////////////////////////////////////////
-            fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
-            fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
-            fit_PMT->SetParameters(100,0.82,0.010,10);
-            fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
-            fit_PMT->SetParLimits(0,0.1,1E6);
-            //fit_PMT->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
-            fit_PMT->SetParLimits(1,0.809,0.835);
-            fit_PMT->SetParLimits(2,0.005,0.030); // width
-            
-            double  rang_min= 0.82-cut_cangle;
-            double  rang_max= 0.82+cut_cangle;
-            
-            //////////////////////////////////
-            /// custumize fitting function ///
-            //////////////////////////////////
-            
-            if(PMT==42) rang_min=0.81;
-            if(PMT==24 || PMT==26 ||PMT==18 ||PMT==11){
-                rang_min= 0.82-cut_cangle/2;
-                rang_max= 0.82+cut_cangle/2;
-            }
-            if(PMT==107){
-                rang_min= 0.82-cut_cangle/2;
-                rang_max= 0.82+cut_cangle;
-                
-            }
-            if(PMT==40 || PMT==41){
-                rang_min= 0.814;
-                rang_max= 0.84;
-            }
-            
-            fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
-            double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
-            double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
-            double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
-            double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
-            double val_1 = (delta_cherenkov_cor)*1000.0 ;
-            shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
-            
-            cout<<"##########"<<"PMT= "<<PMT<< "	delta_cherenkov_cor= " << delta_cherenkov_cor<<endl;
-            //hsigma_test->Fill(sigma_cherenkov_cor*1000);
-            //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
-            //hmean_test->Fill(mean_cherenkov_cor);
-            // correction condition
-            // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
-            array_correction[PMT]= delta_cherenkov_cor;
-            cout<<"##########"<< "shift "<<val_1<<endl;
-            /*
-             // Fill PMT
-             for(Int_t m=0; m<64; m++)
-             for(Int_t n=0; n<64; n++){
-             glx_hdigi[PMT]->SetBinContent(m, n,val_1);
-             }
-             
-             // default correction
-             //array_correction[PMT]= -0.004;
-             fHistPMT_read_pi[PMT]->Draw();
-             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-             glx_canvasGet("r_pmt_correction")->Update();
-             TLine *lin_ref = new TLine(0,0,0,1000);
-             lin_ref->SetX1(referance_angle);
-             lin_ref->SetX2(referance_angle);
-             lin_ref->SetY1(gPad->GetUymin());
-             lin_ref->SetY2(gPad->GetUymax());
-             lin_ref->SetLineColor(kBlue);
-             lin_ref->Draw();
-             
-             TLine *lin_ref_k = new TLine(0,0,0,1000);
-             lin_ref_k->SetX1(referance_angle_k);
-             lin_ref_k->SetX2(referance_angle_k);
-             lin_ref_k->SetY1(gPad->GetUymin());
-             lin_ref_k->SetY2(gPad->GetUymax());
-             lin_ref_k->SetLineColor(kRed);
-             lin_ref_k->Draw();
-             
-             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
-             glx_canvasGet("r_pmt_correction")->Update();
-             glx_waitPrimitive("r_pmt_correction");
-             //hsigma_test->Fill(sigma_cherenkov_cor*1000);
-             //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
-             //hmean_test->Fill(mean_cherenkov_cor);
-             */
-            // }
-            ++pmtCounter;
-        }
-        /*
-         glx_canvasAdd("r_pmt_shift",800,400);
-         TMultiGraph *mg = new TMultiGraph();
-         mg->Add(shifted_pi);
-         mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
-         mg->Draw("AP");
-         //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
-         
-         glx_canvasGet("r_pmt_shift")->Update();
-         
-         TLine *lin_ref_pi = new TLine(0,0,0,1000);
-         lin_ref_pi->SetX1(referance_angle_pi);
-         lin_ref_pi->SetX2(referance_angle_pi);
-         lin_ref_pi->SetY1(gPad->GetUymin());
-         lin_ref_pi->SetY2(gPad->GetUymax());
-         lin_ref_pi->SetLineColor(kBlue);
-         lin_ref_pi->Draw();
-         
-         glx_canvasGet("r_pmt_shift")->Update();
-         TLine *lin_ref_k = new TLine(0,0,0,1000);
-         lin_ref_k->SetX1(referance_angle_k);
-         lin_ref_k->SetX2(referance_angle_k);
-         lin_ref_k->SetY1(gPad->GetUymin());
-         lin_ref_k->SetY2(gPad->GetUymax());
-         lin_ref_k->SetLineColor(kRed);
-         lin_ref_k->Draw();
-         */
-    }
+    //    TGraph *shifted_pi = new TGraph();
+    //
+    //    shifted_pi->SetMarkerColor(kBlue);
+    //    shifted_pi->SetMarkerStyle(20);
+    //    shifted_pi->SetLineColor(kBlue);
+    //    shifted_pi->SetLineWidth(1);
+    //
+    //    TH1F*  fHistPMT_k[PMT_num], *fHistPMT_pi[PMT_num], *fHistPMT_read_k[PMT_num], *fHistPMT_read_pi[PMT_num];
+    //    TFile *ffile_cherenkov_correction;
+    //    TString cherenkov_correction_path;
+    //    // correction array
+    //    double array_correction[108]={0};
+    //    // creat histograms Cherenkov per PMT
+    //    for(Int_t i=0; i<PMT_num; i++) {
+    //        fHistPMT_k[i] = new TH1F(Form("fHistPMT_k_%d",i),Form("fHistPMT_k_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+    //        fHistPMT_pi[i] = new TH1F(Form("fHistPMT_pi_%d",i),Form("fHistPMT_pi_%d;#theta_{C} [rad];entries [#]",i), 250,0.6,1);
+    //    }
+    //    // Read Cherenkov per PMT
+    //    TF1 *fit_PMT = new TF1("fit_PMT","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
+    //    fit_PMT->SetLineColor(kBlue);
+    //    TH1F*  hdiff_test = new TH1F("hdiff_test",";mean diff ;entries [#]", 100,0,0.1);
+    //    TH1F*  hsigma_test = new TH1F("hsigma_test",";sigam ;entries [#]", 100,0,20);
+    //    TH1F*  hmean_test = new TH1F("hmean_test",";mean ;entries [#]", 250,0.6,1);
+    //    //gStyle->SetPalette(kLightTemperature);
+    //    //////////////////////////////////////////////////
+    //    //    glx_canvasAdd("r_pmt_correction",800,400);//
+    //    /////////////////////////////////////////////////
+    //    if (gCherenkov_Correction==2) {
+    //        cherenkov_correction_path ="/lustre/nyx/panda/aali/gluex/gluex_top/hdgeant4/hdgeant4-2.1.0/macro/dirc/cherenkov_correction.root";//outFile_separation_PDF_pmt.root //cherenkov_correction.root
+    //        cout<<"cherenkov_correction_path= " <<cherenkov_correction_path<<endl;
+    //        ffile_cherenkov_correction  = new TFile(cherenkov_correction_path, "READ");
+    //        int pmtCounter =0;
+    //        for(Int_t PMT=0; PMT<PMT_num; PMT++) {
+    //            TString pmt_counter=Form("_%d",pmtCounter);
+    //            if(PMT<=10 || (PMT>=90 && PMT<=96)) continue; // dummy pmts
+    //            if((PMT ==13 || PMT==14 || PMT==31 || PMT==32 || PMT==33 || PMT==12  || PMT==15 || PMT==34  || PMT==35 || PMT==35 || PMT==16 || PMT==17 || PMT==11 || PMT==102)) continue;
+    //            //if(! (PMT==102)) continue; // custmization
+    //            ////////////////////////////////////////////////////////////////////////
+    //            //            glx_canvasAdd("r_pmt_correction"+pmt_counter,800,400);//
+    //            ////////////////////////////////////////////////////////////////////////
+    //            fHistPMT_read_k[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_k_%d",PMT));
+    //            fHistPMT_read_pi[PMT] = (TH1F*)ffile_cherenkov_correction->Get(Form("fHistPMT_pi_%d",PMT));
+    //            fit_PMT->SetParameters(100,0.82,0.010,10);
+    //            fit_PMT->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+    //            fit_PMT->SetParLimits(0,0.1,1E6);
+    //            //fit_PMT->SetParLimits(1,0.82-2*cut_cangle,0.82+2*cut_cangle);
+    //            fit_PMT->SetParLimits(1,0.809,0.835);
+    //            fit_PMT->SetParLimits(2,0.005,0.030); // width
+    //
+    //            double  rang_min= 0.82-cut_cangle;
+    //            double  rang_max= 0.82+cut_cangle;
+    //
+    //            //////////////////////////////////
+    //            /// custumize fitting function ///
+    //            //////////////////////////////////
+    //
+    //            if(PMT==42) rang_min=0.81;
+    //            if(PMT==24 || PMT==26 ||PMT==18 ||PMT==11){
+    //                rang_min= 0.82-cut_cangle/2;
+    //                rang_max= 0.82+cut_cangle/2;
+    //            }
+    //            if(PMT==107){
+    //                rang_min= 0.82-cut_cangle/2;
+    //                rang_max= 0.82+cut_cangle;
+    //
+    //            }
+    //            if(PMT==40 || PMT==41){
+    //                rang_min= 0.814;
+    //                rang_max= 0.84;
+    //            }
+    //
+    //            fHistPMT_read_pi[PMT]->Fit("fit_PMT","M","",rang_min,rang_max);
+    //            double histo_cor_entries = fHistPMT_read_pi[PMT]->GetEntries();
+    //            double mean_cherenkov_cor=  fit_PMT->GetParameter(1);
+    //            double sigma_cherenkov_cor= fit_PMT->GetParameter(2);
+    //            double delta_cherenkov_cor= referance_angle - mean_cherenkov_cor;
+    //            double val_1 = (delta_cherenkov_cor)*1000.0 ;
+    //            shifted_pi->SetPoint(pmtCounter, mean_cherenkov_cor, PMT);
+    //
+    //            cout<<"##########"<<"PMT= "<<PMT<< "    delta_cherenkov_cor= " << delta_cherenkov_cor<<endl;
+    //            //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+    //            //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+    //            //hmean_test->Fill(mean_cherenkov_cor);
+    //            // correction condition
+    //            // if( ( fabs(delta_cherenkov_cor) <0.016 && (sigma_cherenkov_cor*1000<16 && sigma_cherenkov_cor*1000> 5.5) && histo_cor_entries>0 )) {//0.01  12  7
+    //            array_correction[PMT]= delta_cherenkov_cor;
+    //            cout<<"##########"<< "shift "<<val_1<<endl;
+    //
+    //
+    //            /*
+    //             // Fill PMT
+    //             for(Int_t m=0; m<64; m++)
+    //             for(Int_t n=0; n<64; n++){
+    //             glx_hdigi[PMT]->SetBinContent(m, n,val_1);
+    //             }
+    //
+    //             // default correction
+    //             //array_correction[PMT]= -0.004;
+    //             fHistPMT_read_pi[PMT]->Draw();
+    //             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+    //             glx_canvasGet("r_pmt_correction")->Update();
+    //             TLine *lin_ref = new TLine(0,0,0,1000);
+    //             lin_ref->SetX1(referance_angle);
+    //             lin_ref->SetX2(referance_angle);
+    //             lin_ref->SetY1(gPad->GetUymin());
+    //             lin_ref->SetY2(gPad->GetUymax());
+    //             lin_ref->SetLineColor(kBlue);
+    //             lin_ref->Draw();
+    //
+    //             TLine *lin_ref_k = new TLine(0,0,0,1000);
+    //             lin_ref_k->SetX1(referance_angle_k);
+    //             lin_ref_k->SetX2(referance_angle_k);
+    //             lin_ref_k->SetY1(gPad->GetUymin());
+    //             lin_ref_k->SetY2(gPad->GetUymax());
+    //             lin_ref_k->SetLineColor(kRed);
+    //             lin_ref_k->Draw();
+    //
+    //             //glx_canvasGet("r_pmt_correction"+pmt_counter)->Update();
+    //             glx_canvasGet("r_pmt_correction")->Update();
+    //             glx_waitPrimitive("r_pmt_correction");
+    //             //hsigma_test->Fill(sigma_cherenkov_cor*1000);
+    //             //hdiff_test->Fill(fabs(mean_cherenkov_cor-referance_angle));
+    //             //hmean_test->Fill(mean_cherenkov_cor);
+    //             */
+    //            // }
+    //            ++pmtCounter;
+    //        }
+    //        /*
+    //         glx_canvasAdd("r_pmt_shift",800,400);
+    //         TMultiGraph *mg = new TMultiGraph();
+    //         mg->Add(shifted_pi);
+    //         mg->SetTitle(" Shift ; Mean [rad]; PMT ID [#]");
+    //         mg->Draw("AP");
+    //         //mg->GetHistogram()->GetYaxis()->SetRangeUser(6800,7050);
+    //
+    //         glx_canvasGet("r_pmt_shift")->Update();
+    //
+    //         TLine *lin_ref_pi = new TLine(0,0,0,1000);
+    //         lin_ref_pi->SetX1(referance_angle_pi);
+    //         lin_ref_pi->SetX2(referance_angle_pi);
+    //         lin_ref_pi->SetY1(gPad->GetUymin());
+    //         lin_ref_pi->SetY2(gPad->GetUymax());
+    //         lin_ref_pi->SetLineColor(kBlue);
+    //         lin_ref_pi->Draw();
+    //
+    //         glx_canvasGet("r_pmt_shift")->Update();
+    //         TLine *lin_ref_k = new TLine(0,0,0,1000);
+    //         lin_ref_k->SetX1(referance_angle_k);
+    //         lin_ref_k->SetX2(referance_angle_k);
+    //         lin_ref_k->SetY1(gPad->GetUymin());
+    //         lin_ref_k->SetY2(gPad->GetUymax());
+    //         lin_ref_k->SetLineColor(kRed);
+    //         lin_ref_k->Draw();
+    //         */
+    //    }
     
     
     
@@ -446,8 +454,11 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     }
     cout<<"####"<<outFile<<endl;
     double cop[]= {62,62,62,62,62,62,62,62,60,58,56,54,53,52,52,51,50,49,47,46,46,45,45,44,44,43,43,42,41,41,40,40,38,37.5,37,37.5,37,36.5,36,36};
-    double shift_tdiff[24][40]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0484555,-0.0354493,0.35056,0.099063,0.106277,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.128436,0.0400649,0.105171,0.0283179,0.136207,0.129174,0.0509148,0.0244918,-0.0016855,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.219853,-0.0737354,0.159231,0.146284,0.123299,0.0353285,0.057264,0.0669868,-0.0431749,0.124274,0.11793,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0443389,-0.010351,0.144584,0.167535,0.129673,0.0894336,0.0149637,0.0334035,0.0312673,0.134101,0.157287,0.163244,0,0,0,0,0,0,0,0,0,0,0,0,-0.0109966,-0.220774,0.169731,0.212142,0.16085,0.126701,0.135627,0.121442,0.0499737,0.122402,0.128811,0.15737,0.11934,0,0,0,0,0,0,0,0,0,0,0,-0.00782742,-0.150989,0.186154,0.21918,0.178342,0.136228,0.123202,0.154193,0.133912,0.163065,0.181085,0.171055,0.0391149,0.0889785,0,0,0,0,0,0,0,0,0,0,0.0835393,0.150198,0.177662,0.183543,0.137075,0.153928,0.181749,0.15866,0.154047,0.19948,0.232563,0.226626,0.0704589,0.086086,0.121518,0.0662947,0,0,0,0,0,0,0,0,0.0841535,0.145702,0.206464,0.169638,0.141065,0.172967,0.174205,0.144694,0.184069,0.199037,0.244997,0.210197,0.0292002,0.0355092,0.0290452,0.0534557,-0.0351165,0,0,0,0,0,0,0,0.085724,0.164682,0.2165,0.167911,0.150495,0.183209,0.169329,0.166109,0.177069,0.227666,0.241485,0.184138,0.0027776,0.0243227,0.00654651,-0.0541308,-0.00404641,0,0,0,0,0,0,0,0.107842,0.19749,0.252776,0.219025,0.185657,0.190596,0.204788,0.17564,0.167063,0.233824,0.253876,0.208454,-0.0317229,0.0565071,-0.00870096,-0.032719,0.00610309,-0.0738033,0,0,0,0,0,0,0.107041,0.252879,0.311105,0.280969,0.215917,0.247506,0.221,0.20466,0.186726,0.234477,0.237015,0.170027,-0.0439488,0.0759515,0.0869067,-0.0135607,0.116568,0.0471306,0.0723177,0,0,0,0,0,0.141757,0.261828,0.319707,0.302958,0.257017,0.256147,0.200369,0.161661,0.125224,0.160671,0.196845,0.14449,-0.0520265,0.11576,0.121756,0.122954,0.163013,0.111975,0.0484454,0.194809,0,0,0,0,0.171518,0.275187,0.307965,0.291526,0.266654,0.230735,0.172033,0.114582,0.0966193,0.137031,0.183111,0.0891136,0.012301,0.127834,0.183852,0.179489,0.204186,0.164188,0.192083,0.106122,0,0,0,0,0.256979,0.337382,0.367115,0.34409,0.244315,0.199646,0.16355,0.116371,0.121487,0.169231,0.175652,0.149268,0.0205011,0.166876,0.222973,0.21423,0.235252,0.180907,0.227778,0.177711,0.292843,0,0,0,0.423643,0.465037,0.479693,0.410611,0.263701,0.242166,0.21457,0.166087,0.16705,0.192644,0.204521,0.191679,0.0869033,0.206789,0.250065,0.272298,0.241632,0.222175,0.268539,0.293759,0.33817,0,0,0,0.725575,0.740799,0.715482,0.621035,0.40466,0.354143,0.324878,0.299437,0.260641,0.279625,0.307112,0.265067,0.163861,0.280992,0.321935,0.355474,0.301971,0.283339,0.373811,0.457592,0.417735,0,0,0,0.950818,0.951673,0.890637,0.745973,0.596449,0.601227,0.465558,0.411163,0.345117,0.368678,0.366612,0.303725,0.196065,0.314516,0.358048,0.329245,0.294593,0.297833,0.345911,0.403051,0.513864,0.38563,0,0,1.36867,1.12123,0.94363,0.839209,0.652887,0.628982,0.540399,0.452434,0.36597,0.411794,0.384593,0.309495,0.148578,0.281512,0.263998,0.229866,0.226089,0.222082,0.343845,0.420341,0.442428,0,0,0,1.92236,1.36569,1.09846,0.887148,0.712891,0.64572,0.545014,0.42746,0.319841,0.378124,0.372523,0.284111,0.128976,0.207101,0.194574,0.16628,0.2005,0.155013,0.259195,0.375682,0.470856,0.407513,0,0,2.01906,1.41681,1.13046,0.896505,0.709332,0.648193,0.517753,0.406326,0.304463,0.345361,0.373136,0.294617,0.0993746,0.188603,0.173755,0.179623,0.195836,0.191101,0.287064,0.400992,0.466,0.361539,0,0,1.4621,1.29693,1.09323,0.831755,0.644312,0.597216,0.490958,0.364789,0.270081,0.315619,0.353508,0.290061,0.11985,0.182116,0.199869,0.160848,0.202368,0.23682,0.322385,0.382495,0.434683,0.405445,0,0,1.14012,1.14301,0.976661,0.79192,0.616518,0.539383,0.474992,0.352494,0.266265,0.309797,0.33003,0.280832,0.145202,0.187874,0.18328,0.196861,0.213956,0.177515,0.273324,0.352289,0.397228,0.37937,0,0,0.827087,0.890285,0.786642,0.664625,0.510495,0.470278,0.404346,0.290087,0.211788,0.268287,0.312761,0.246882,0.126446,0.230824,0.225923,0.179073,0.214367,0.193096,0.261107,0.345096,0.330653,0,0,0,0.515694,0.644616,0.632142,0.542591,0.403364,0.381829,0.294817,0.202702,0.137065,0.221989,0.252789,0.199705,0.105985,0.190114,0.218622,0.212496,0.19969,0.142444,0.220413,0.236997,0.324881,0,0,0,0.312724,0.473409,0.442828,0.412404,0.309941,0.284752,0.220669,0.060527,0.0779171,0.164957,0.215385,0.137745,0.00932066,0.150187,0.191998,0.161405,0.191306,0.0578354,0.224053,0.27969,0.293328,0,0,0,0.177287,0.348568,0.358936,0.307365,0.233995,0.221168,0.204349,0.0965681,0.0239412,0.177434,0.251703,0.125934,0.0330784,0.179473,0.153984,0.167659,0.183589,0.116312,0.237547,0.201601,0,0,0,0,-0.0669073,0.137761,0.171553,0.174695,0.144268,0.159986,0.136592,0.0128444,-0.00955643,0.145326,0.21197,0.149466,-0.0294701,0.101494,0.0940754,0.0808618,0.0282518,0.00325814,0.173595,0.208221,0,0,0,0,-0.231522,-0.179675,-0.0590653,0.0142431,0.0257128,0.0939398,0.105458,-0.0330371,-0.0311701,0.0289467,0.173189,0.0227273,-0.101745,-0.0506557,-0.0609564,-0.0104289,0.0358258,-0.048497,0.189429,0,0,0,0,0,-0.319261,-0.288284,-0.175551,-0.106451,-0.134527,0.00727297,0.0393707,-0.00510716,-0.00323208,0.117724,0.171612,-0.0613118,-0.165411,-0.0928218,-0.140565,-0.110293,-0.0336569,-0.0909058,0,0,0,0,0,0,-0.432025,-0.369398,-0.275893,-0.232665,-0.324574,-0.197646,-0.052544,0.0754222,0.0867731,0.134527,0.0342633,-0.0946818,-0.255951,-0.0927508,-0.0671486,-0.043222,-0.0636675,0,0,0,0,0,0,0,-0.575479,-0.480157,-0.332118,-0.337863,-0.495491,-0.28086,-0.0680482,0.0643614,0.0254752,0.163175,0.109449,-0.196485,-0.257506,-0.0974613,0.00714947,0.0879513,-0.0235813,0,0,0,0,0,0,0,-0.71696,-0.546338,-0.49057,-0.476121,-0.52483,-0.288839,-0.124298,-0.0956534,-0.091014,0.108539,0.183561,-0.225335,-0.330447,-0.00225432,-0.0179166,0,0,0,0,0,0,0,0,0,-0.818417,-0.736128,-0.737093,-0.723545,-0.53314,-0.330092,-0.403355,-0.293202,-0.24218,-0.128041,0.116102,-0.261308,-0.457386,-0.0902638,0,0,0,0,0,0,0,0,0,0,-0.894983,-0.863325,-1.0398,-0.75881,-0.516174,-0.331565,-0.447565,-0.439813,-0.412139,-0.117445,0.148536,-0.251335,0,0,0,0,0,0,0,0,0,0,0,0,-0.71129,-1.09435,-1.02932,-0.753744,-0.490395,-0.364743,-0.44317,-0.60414,-0.586372,-0.197612,0.0720365,-0.288913,0,0,0,0,0,0,0,0,0,0,0,0,-0.184685,-1.10635,-0.780496,-0.584552,-0.534895,-0.210287,-0.255855,-0.509604,-0.509893,-0.41877,0.14744,0,0,0,0,0,0,0,0,0,0,0,0,0,6.54575,0.0786484,-0.380539,-0.503242,-0.477557,-0.0942726,-0.109767,-0.542088,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.5,-0.5,-0.5,-0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    //double shift_tdiff[24][40]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.206375,-0.120977,-0.0632259,-0.0429772,0.00747347,-0.0146532,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.182306,-0.232246,-0.176029,0.0152093,-0.0418729,-0.0245196,-0.0133792,-0.0537889,-0.11011,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.105011,-0.0782876,0.00766007,0.0348279,-0.0191352,0.0217075,-0.044096,-0.0512151,-0.0294671,0.0567046,0.0841607,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0951189,0.0165561,-0.0559123,0.144276,0.00961639,-0.0119877,-0.0032614,-0.00882342,-0.0275106,-0.00472598,-0.00213266,0.073259,0,0,0,0,0,0,0,0,0,0,0,0,-0.070211,-0.0293339,0.129513,0.145992,0.0456247,0.0120037,-0.0105453,0.0260046,0.00662134,0.0349205,0.109562,0.109924,0,0,0,0,0,0,0,0,0,0,0,0,-0.022451,0.0817875,0.113035,0.120863,0.0210432,0.0835056,0.116326,0.0861171,0.0819289,0.124119,0.161047,0.164751,-0.0700882,-0.0365541,0,0,0,0,0,0,0,0,0,0,-0.0233332,0.0862023,0.141587,0.105897,0.0236786,0.108331,0.104791,0.0906122,0.114128,0.127726,0.181853,0.141345,-0.0873594,-0.0414573,-0.0924231,0,0,0,0,0,0,0,0,0,0.0176569,0.105414,0.155845,0.102785,0.0827252,0.108978,0.10364,0.100162,0.118493,0.15658,0.17382,0.113746,-0.104513,-0.0361405,-0.0468388,-0.116422,0,0,0,0,0,0,0,0,0.0470503,0.136206,0.189396,0.15627,0.12275,0.132528,0.140132,0.114471,0.103533,0.17471,0.186681,0.149281,-0.0975165,-0.0622213,-0.0758128,-0.106883,-0.0906574,0,0,0,0,0,0,0,0.0350743,0.185329,0.250495,0.21582,0.155364,0.187518,0.153889,0.139597,0.122184,0.174551,0.173563,0.0997633,-0.114964,-0.028553,-0.0386911,-0.0835532,0.0464993,-0.0853314,0,0,0,0,0,0,0.0682792,0.199881,0.258163,0.239962,0.19224,0.196294,0.145619,0.102063,0.00399847,0.0957003,0.130271,0.0843635,-0.111692,-0.000247798,0.0055788,0.0144015,0.037596,0.003136,0,0,0,0,0,0,0.101523,0.209164,0.248916,0.233186,0.196796,0.169061,0.106062,-0.0123911,-0.0273042,0.077524,0.118173,0.0296335,-0.0570873,0.00240015,0.126288,0.119882,0.137874,0.0978324,0.133246,0,0,0,0,0,0.192402,0.275101,0.30872,0.280945,0.185974,0.140566,0.100579,-0.00243232,-0.000675846,0.10292,0.108936,0.0247199,-0.0420769,0.101744,0.151405,0.146548,0.168609,0.0509927,0.160777,0,0,0,0,0,0.357617,0.40312,0.417512,0.34748,0.201496,0.177813,0.153136,0.105488,0.101254,0.128386,0.136196,0.126364,-0.0250021,0.145194,0.185316,0.137221,0.126271,0.0980243,0.204516,0.217792,0,0,0,0,0.656715,0.680235,0.652814,0.500618,0.339135,0.291788,0.25842,0.238501,0.195156,0.217345,0.246385,0.19604,0.0348437,0.223829,0.26325,0.281999,0.23499,0.210771,0.298814,0.379574,0,0,0,0,0.883868,0.886061,0.821912,0.681943,0.474418,0.468443,0.402174,0.34882,0.284041,0.308701,0.307586,0.24706,0.138672,0.255879,0.294335,0.267102,0.239704,0.231805,0.274282,0.368345,0,0,0,0,1.30366,1.0509,0.878242,0.775212,0.587467,0.510003,0.47769,0.389596,0.305923,0.347708,0.320987,0.250304,0.0825788,0.218644,0.198415,0.168737,0.157952,0.0736943,0.281943,0.372571,0,0,0,0,1.85218,1.2975,0.992593,0.820532,0.645445,0.528325,0.476375,0.366335,0.257308,0.312215,0.307261,0.217868,0.0628457,0.145219,0.125537,0.102688,0.132491,0.0805325,0.192931,0.29885,0,0,0,0,1.95276,1.3382,1.02442,0.829505,0.640167,0.530475,0.454082,0.3424,0.237855,0.282463,0.307611,0.229658,-0.0183328,0.125308,0.109486,0.112934,0.130076,0.0515368,0.227634,0.332633,0.406381,0,0,0,1.38598,1.2341,0.98184,0.767929,0.534755,0.481209,0.425954,0.298727,0.206334,0.252278,0.284897,0.222402,0.0517366,0.12054,0.129048,0.0951738,0.0827893,0.161261,0.255696,0.322637,0.386345,0,0,0,1.04886,1.07806,0.902163,0.725041,0.50761,0.470327,0.407936,0.288444,0.200643,0.242038,0.265568,0.216087,0.028602,0.12573,0.116091,0.121369,0.14353,0.0554943,0.216787,0.2889,0.323208,0,0,0,0.759166,0.824731,0.717299,0.599859,0.438278,0.399089,0.334255,0.226427,0.145044,0.197248,0.244311,0.177303,0.0625023,0.172256,0.159303,0.11263,0.141516,0.053383,0.113653,0.282784,0,0,0,0,0.442804,0.571157,0.519125,0.438746,0.337019,0.314312,0.228918,0.0853099,0.0241698,0.155896,0.189898,0.133067,-0.0067844,0.084858,0.156968,0.149541,0.131152,0.00874533,0.0963787,0.169875,0,0,0,0,0.242857,0.404417,0.370217,0.344157,0.240356,0.217933,0.152823,-0.00255466,-0.0300135,0.0514462,0.152049,0.042377,-0.0555858,0.0918079,0.0837694,0.106264,0.0690981,-0.0122815,0.0840268,0.131297,0,0,0,0,0.0983326,0.277509,0.281437,0.238535,0.167504,0.153848,0.135528,-0.00984144,-0.0434906,0.109989,0.184929,0.0576361,-0.0676725,0.111528,0.0839548,0.105897,0.0729967,-0.0294737,0.169866,0,0,0,0,0,-0.137766,0.067839,0.0993935,0.103282,0.0775381,0.0943456,0.0272432,-0.0575783,-0.0799284,0.0295568,0.156486,0.0393061,-0.0969438,-0.0138838,-0.0203956,-0.0310712,-0.0375451,-0.0529255,0.115933,0,0,0,0,0,-0.293959,-0.241706,-0.132339,-0.0577204,-0.0772528,-0.0114359,-0.00884542,-0.10428,-0.0928766,-0.030287,0.105486,-0.0439717,-0.172406,-0.116128,-0.13064,-0.125332,-0.0374852,-0.113614,0,0,0,0,0,0,-0.382473,-0.362927,-0.234509,-0.167022,-0.199928,-0.10027,-0.0288441,-0.0762747,-0.0624127,0.00566043,0.0470891,-0.113922,-0.240428,-0.159455,-0.197585,-0.187921,-0.1187,0,0,0,0,0,0,0,-0.543142,-0.485574,-0.33891,-0.290941,-0.390789,-0.270084,-0.108127,-0.0296511,-0.0154228,0.0207321,-0.0235342,-0.163968,-0.332387,-0.172064,-0.139598,-0.120121,0,0,0,0,0,0,0,0,-0.63883,-0.551125,-0.392767,-0.386559,-0.614114,-0.358374,-0.141736,-0.00555223,-0.033874,0.0415662,0.0300131,-0.267633,-0.342674,-0.162464,-0.0725263,0,0,0,0,0,0,0,0,0,-0.766841,-0.600636,-0.556217,-0.546904,-0.592107,-0.353903,-0.242189,-0.169991,-0.15218,0.0356908,0.112256,-0.305968,-0.410471,-0.13413,0,0,0,0,0,0,0,0,0,0,-0.864668,-0.805071,-0.784181,-0.797985,-0.590788,-0.408068,-0.498623,-0.4176,-0.318743,-0.171815,0.0551932,-0.344196,0,0,0,0,0,0,0,0,0,0,0,0,-0.911755,-0.929319,-1.13094,-0.809612,-0.575254,-0.383256,-0.505917,-0.497968,-0.479322,-0.228721,0.0510376,-0.310328,0,0,0,0,0,0,0,0,0,0,0,0,-0.574165,-1.10109,-1.11278,-0.791123,-0.569908,-0.416169,-0.509241,-0.679135,-0.647672,-0.255733,-0.0209098,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.22699,-1.19949,-0.853074,-0.611401,-0.672023,-0.275643,-0.337414,-0.575414,-0.58357,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5.58213,0.0936823,-0.434353,-0.553283,-0.581149,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+    
+    double shiftD_tdiff[24][40]={ 0,0,0,0,0,0,-0.212497,-0.168497,-0.131315,-0.120108,-0.115487,-0.0974607,-0.121494,-0.0912085,-0.0507834,0.0781914,0.245025,0.544255,0.750692,1.18085,1.71303,1.79146,1.24404,0.877314,0.602609,0.276667,0.0681443,-0.128882,-0.379789,-0.548475,-0.634345,-0.757345,-0.874287,-0.947678,-1.0129,0,0,0,0,0,0,0,0,0,0,0,-0.124542,-0.0886363,-0.0466412,-0.045753,0.0133786,0.0404589,0.0828445,0.0976572,0.103918,0.179398,0.325307,0.60341,0.8109,0.933208,1.18353,1.22501,1.1194,0.920326,0.689237,0.382306,0.237853,0.111665,-0.11591,-0.319721,-0.397971,-0.517027,-0.647768,-0.609641,0,0,0,0,0,0,0,0,0,0,0,0,-0.050176,-0.0435546,-0.0271583,0.0379114,-0.00836784,0.0727276,0.138301,0.124994,0.122776,0.198836,0.318348,0.517275,0.773196,0.809877,0.89285,0.921646,0.875704,0.807228,0.591924,0.372603,0.216679,0.137514,-0.0471617,-0.165383,-0.260127,-0.340788,-0.394445,-0.58131,0,0,0,0,0,0,0,0,0,0,0,0,-0.0353932,-0.0318091,-0.046814,-0.0643999,-0.0876217,-0.022806,0.0741525,0.104005,0.09392,0.142027,0.212933,0.388194,0.592119,0.664085,0.69806,0.702764,0.635391,0.60563,0.42235,0.276258,0.16021,0.0280315,-0.0709147,-0.124245,-0.221172,-0.334673,-0.344158,-0.431136,0,0,0,0,0,0,0,0,0,0,0,0,-0.135951,-0.117562,-0.124928,-0.131315,-0.122391,-0.0783247,-0.00842946,-0.0175169,-0.00531461,-0.0110562,0.0627202,0.236342,0.395865,0.438967,0.478636,0.481237,0.410696,0.38114,0.298232,0.168116,0.0185137,-0.0376193,-0.0811981,-0.1695,-0.262101,-0.405857,-0.452009,-0.39605,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.106184,-0.0930739,-0.0948498,-0.0973551,-0.0751308,-0.0157032,0.0064228,-0.0167574,-0.0401675,0.0488597,0.186276,0.369384,0.396924,0.405641,0.40356,0.348608,0.345339,0.244302,0.137854,0.00994912,-0.029286,-0.0672536,-0.0787963,-0.175779,-0.25277,-0.291674,-0.237686,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.121473,-0.0457286,-0.0574831,-0.059427,-0.0297513,-0.00759922,-0.0174272,-0.0552326,-0.0457817,0.0584857,0.178635,0.318815,0.363596,0.353752,0.336481,0.305996,0.277141,0.188933,0.074431,-0.0205597,-0.0264286,-0.0882313,-0.108045,-0.116541,-0.146015,-0.175727,-0.202849,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0297215,-0.0298446,-0.0192065,-0.00883032,-0.00343533,0.0140206,-0.0445895,-0.089882,-0.0625097,0.0466929,0.190052,0.288683,0.314223,0.28853,0.275963,0.233441,0.20829,0.147475,0.0271816,-0.0247789,-0.00918168,-0.0736942,-0.100536,-0.10446,-0.0480655,-0.0339893,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0376528,-0.0085324,-0.0201655,-0.0307386,-0.0181594,-0.0962811,-0.111502,-0.0871813,-0.030972,0.129332,0.224974,0.233403,0.178783,0.174591,0.145225,0.149318,0.0805856,-0.0124332,-0.030286,-0.0552115,-0.102939,-0.121996,-0.0974656,-0.0849368,-0.029955,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0212187,-0.0426328,-0.0196482,-0.00426026,0.0525694,-0.0533956,-0.0645615,-0.0303608,0.0127104,0.153931,0.242974,0.272539,0.233415,0.185906,0.161315,0.158384,0.114722,0.0760059,-0.00179772,0.00177117,-0.055545,-0.103146,-0.0846749,-0.0532756,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0265657,-0.0244398,-0.00667925,-0.0153027,-0.0494108,-0.0599105,-0.0386066,-0.00836632,0.169426,0.23827,0.238785,0.228106,0.205007,0.177146,0.156961,0.140241,0.0602354,0.0611113,0.0471731,0.0238059,-0.0386623,-0.0471459,-0.0861525,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.102169,-0.0759268,-0.106632,-0.128279,-0.100222,-0.0663984,-0.0229217,0.123481,0.204289,0.207343,0.180538,0.172402,0.171432,0.164627,0.121178,0.0371667,0.0049031,0.00457614,0.0515949,-0.0478936,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.220337,-0.175774,-0.148908,-0.0299439,0.0536656,0.0411358,0.026935,-0.0075003,0.00220719,0.0135967,-0.00426324,-0.00879467,-0.0518067,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.160375,-0.104351,-0.0398385,0.112564,0.182259,0.18584,0.0612845,0.0685847,0.0265474,0.07112,0.120471,0.046869,0.0444415,0.0526628,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0115343,0.151956,0.160157,0.170822,0.0302506,0.0151447,0.0848597,0.0263626,0.0996271,0.0571817,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0275436,0.0649307,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+    
+    double shiftR_tdiff[24][40]={ 0,0,0,0,0,0,-0.581964,-0.664308,-0.652945,-0.534984,-0.510857,-0.302394,-0.416157,-0.28187,0.0186578,0.126143,0.255395,0.555315,0.774699,1.25938,1.80409,1.77441,1.28966,1.02125,0.802201,0.563475,0.319484,0.152015,-0.00706454,-0.150087,-0.223669,-0.25439,-0.318416,-0.45389,-0.482179,0,0,0,0,0,0,0,0,0,0,0,-1.09325,-0.749646,-0.50478,-0.355006,-0.383651,-0.216663,-0.185276,-0.0278354,0.151185,0.304574,0.462995,0.71319,0.921894,1.10713,1.30609,1.35047,1.24878,1.08459,0.844757,0.604089,0.428763,0.328786,0.221729,0.0584101,-0.00166835,-0.125871,-0.221795,-0.270271,0,0,0,0,0,0,0,0,0,0,0,0,-0.351929,-0.657451,-0.280183,-0.162935,-0.157293,-0.174671,-0.0985791,-0.0793121,0.0585537,0.25064,0.386326,0.664939,0.847615,0.896619,1.05586,1.07643,1.0456,0.951191,0.717313,0.564453,0.401,0.372185,0.287688,0.176245,0.0776931,-0.0234355,-0.107355,-0.16243,0,0,0,0,0,0,0,0,0,0,0,0,0.186884,0.346454,0.233309,0.0620987,-0.16476,-0.0556778,0.02804,-0.00272601,0.0978376,0.250333,0.370768,0.622158,0.758156,0.810971,0.906285,0.918509,0.865927,0.826387,0.646789,0.537723,0.418315,0.365248,0.276698,0.245276,0.153009,0.0462721,0.00368508,-0.0769824,0,0,0,0,0,0,0,0,0,0,0,0,0.0243746,0.10191,0.000871238,-0.186645,-0.236495,-0.168105,-0.0836931,-0.0392987,0.0180929,0.110715,0.194889,0.420275,0.588097,0.610185,0.673065,0.700161,0.669483,0.601534,0.431978,0.339815,0.271006,0.285635,0.230478,0.153938,0.0885552,-0.0284336,0.00823109,-0.0853845,0,0,0,0,0,0,0,0,0,0,0,0,0,0.152089,0.0701478,-0.0485647,-0.114893,-0.0384545,0.0565695,0.054406,0.0578533,0.0819917,0.17356,0.388854,0.571162,0.592309,0.637545,0.654218,0.639932,0.618113,0.447969,0.366449,0.325117,0.290085,0.260138,0.210951,0.155837,0.112023,0.100376,-0.00893973,0,0,0,0,0,0,0,0,0,0,0,0,0,0.350998,0.471647,0.406919,0.246531,0.149684,0.161659,0.116077,0.116356,0.128173,0.206709,0.369228,0.53044,0.590443,0.623112,0.62634,0.629609,0.608003,0.505345,0.413999,0.34944,0.320103,0.268243,0.226914,0.188386,0.146957,0.156163,0.107816,0,0,0,0,0,0,0,0,0,0,0,0,0,0.325289,0.142475,0.230344,0.247083,0.0686047,0.0580396,0.0386985,0.0129045,0.0392193,0.0942243,0.280547,0.37676,0.415877,0.439063,0.441126,0.435359,0.408119,0.369388,0.364975,0.30189,0.291175,0.237647,0.191658,0.161091,0.17956,0.14481,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.290689,0.212513,0.170077,0.0875794,-0.00199978,-0.104823,-0.0745239,0.0275235,0.0420727,0.215527,0.31249,0.33236,0.321457,0.348461,0.339956,0.348369,0.301067,0.313453,0.27424,0.26608,0.221358,0.180576,0.165817,0.128184,0.115419,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.418682,0.34355,0.286488,0.170779,0.101755,0.0633065,0.0700362,0.150909,0.196778,0.316952,0.394009,0.436356,0.442196,0.444018,0.439615,0.422846,0.402918,0.404907,0.361663,0.353314,0.302624,0.272173,0.238751,0.200676,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.422634,0.384061,0.33505,0.253009,0.259315,0.197915,0.247598,0.296218,0.447647,0.531396,0.563429,0.589411,0.581974,0.584494,0.577116,0.540153,0.483452,0.456252,0.511952,0.487791,0.396934,0.337398,0.26956,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.0481874,0.0766456,0.0909551,0.0958395,0.0320431,0.0533661,0.135747,0.25381,0.357743,0.359198,0.346693,0.337905,0.333841,0.305407,0.299968,0.266037,0.231725,0.258377,0.244533,0.170873,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.013011,0.0363971,0.0675664,0.140749,0.265944,0.237025,0.204179,0.169915,0.148941,0.149919,0.165732,0.14353,0.141517,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.148677,0.197085,0.250668,0.327356,0.40475,0.38439,0.315532,0.301604,0.26037,0.268657,0.306959,0.323411,0.293989,0.293496,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.208064,0.303278,0.378298,0.324918,0.23574,0.186843,0.19051,0.204916,0.280738,0.342376,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.293563,0.243974,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
     
     /////////////////////////////////
     //////// Creat file and trees ///
@@ -456,48 +467,51 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     TFile file(outFile,"recreate");
     //TTree *tree_cut = glx_ch->CloneTree(0);
     
+    
+    //bool btree= false; // for histo not tree
+    bool btree= true; //for tree not histo
+    
     TTree tree_variables("tree_variables","tree for cherenkov track resolution");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
-    int track_pid(-1), track_nbar(-1);
-
+    int track_pid(-1), track_nbar(-1), track_x_pos_bin(-1);
     TString track_file="noname";
-
     std::vector<int> vpx;
     std::vector<int> vpy;
     std::vector<int> vpz;
-
     std::vector<double> vtdiff;
-    //    std::vector<double> vtime;
+    std::vector<double> vtime;
     std::vector<double> vtangle;
-
+    std::vector<bool> vreflected;
+    
     double track_inv_mass(-1),track_missing_mass(-1),track_chi_square(-1),track_TofTrackDist(-1);
-
-    tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
-    tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
-    tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
-    tree_variables.Branch("track_yield",&track_yield,"track_yield/D");
-    tree_variables.Branch("track_mom",&track_mom,"track_mom/D");
-    tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
-    tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
-    tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
-    tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
-    tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
-    tree_variables.Branch("track_file",&track_file,"track_file/C");
-
-    tree_variables.Branch("vpx",&vpx);
-    tree_variables.Branch("vpy",&vpy);
-    tree_variables.Branch("vpz",&vpz);
-
-    tree_variables.Branch("vtdiff",&vtdiff);
-    //    tree_variables.Branch("vtime",&vtime);
-    tree_variables.Branch("vtangle",&vtangle);
-
-
-    tree_variables.Branch("track_inv_mass",&track_inv_mass,"track_inv_mass/D");
-    tree_variables.Branch("track_missing_mass",&track_missing_mass,"track_missing_mass/D");
-    tree_variables.Branch("track_chi_square",&track_chi_square,"track_chi_square/D");
-    tree_variables.Branch("track_TofTrackDist",&track_TofTrackDist,"track_TofTrackDist/D");
-
+    
+    if(btree){
+        tree_variables.Branch("track_pid",&track_pid,"track_pid/I");
+        tree_variables.Branch("track_spr",&track_spr,"track_spr/D");
+        tree_variables.Branch("track_mean",&track_mean,"track_mean/D");
+        tree_variables.Branch("track_yield",&track_yield,"track_yield/D");
+        tree_variables.Branch("track_mom",&track_mom,"track_mom/D");
+        tree_variables.Branch("track_xbar",&track_xbar,"track_xbar/D");
+        tree_variables.Branch("track_ybar",&track_ybar,"track_ybar/D");
+        tree_variables.Branch("track_nbar",&track_nbar,"track_nbar/I");
+        tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
+        tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
+        tree_variables.Branch("track_file",&track_file,"track_file/C");
+        tree_variables.Branch("vpx",&vpx);
+        tree_variables.Branch("vpy",&vpy);
+        tree_variables.Branch("vpz",&vpz);
+        tree_variables.Branch("vtdiff",&vtdiff);
+        tree_variables.Branch("vtime",&vtime);
+        tree_variables.Branch("vtangle",&vtangle);
+        tree_variables.Branch("vreflected",&vreflected);
+        
+        tree_variables.Branch("track_inv_mass",&track_inv_mass,"track_inv_mass/D");
+        tree_variables.Branch("track_missing_mass",&track_missing_mass,"track_missing_mass/D");
+        tree_variables.Branch("track_chi_square",&track_chi_square,"track_chi_square/D");
+        tree_variables.Branch("track_TofTrackDist",&track_TofTrackDist,"track_TofTrackDist/D");
+        tree_variables.Branch("track_x_pos_bin",&track_x_pos_bin,"track_x_pos_bin/I");
+    }
+    
     
     
     double pion_counter =0;
@@ -532,13 +546,13 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
             if (!(pdgId ==2 || pdgId ==3)) continue;
             
             // pion =2  ,kaon=3
-            //            if(true){
-            //                if (pdgId == 2 && chi_square> 10) continue;
-            //                if (pdgId == 3 && chi_square> 20)continue;
-            //                if (pdgId == 2 && (inv_mass< 0.66  || inv_mass> 0.82 )  ) continue;
-            //                if (pdgId == 3 && (inv_mass< 1.015 || inv_mass> 1.025) ) continue;
-            //                if(missing_mass< -0.01 || missing_mass> 0.01 )continue;
-            //            }
+            if(!btree){ 
+                if (pdgId == 2 && chi_square> 10) continue;
+                if (pdgId == 3 && chi_square> 20)continue;
+                if (pdgId == 2 && (inv_mass< 0.66  || inv_mass> 0.82 )  ) continue;
+                if (pdgId == 3 && (inv_mass< 1.015 || inv_mass> 1.025) ) continue;
+                if(missing_mass< -0.01 || missing_mass> 0.01 )continue;
+            }
             
             //            momInBar_unit=momInBar.Unit();
             //            double dir_x =momInBar_unit.X();
@@ -705,17 +719,20 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
             int nphc=0;
             //      hNphC->Fill(glx_event->GetHitSize());
             bool goodevt=0;
+            
             // reset variables
-            track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
-            track_pid=-1; track_nbar=-1;
-            histo_cherenkov_track->Reset();
-            vpx.clear();
-            vpy.clear();
-            vpz.clear();
-
-            vtdiff.clear();
-            //vtime.clear();
-            vtangle.clear();
+            if(btree){
+                track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
+                track_pid=-1; track_nbar=-1;
+                histo_cherenkov_track->Reset();
+                vpx.clear();
+                vpy.clear();
+                vpz.clear();
+                vtdiff.clear();
+                vtime.clear();
+                vtangle.clear();
+                vreflected.clear();
+            }
             
             
             for(int h = 0; h < glx_event->GetHitSize(); h++){
@@ -724,7 +741,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                 int pmt = hit.GetPmtId();
                 int pix = hit.GetPixelId();
                 double hitTime = hit.GetLeadTime()-glx_event->GetTime();
-                hitTime=hitTime+shift_tdiff[bar][x_pos_bin];
+                
                 if(ch>glx_nch) continue;
                 //histo_time_bar_pos[bar][x_pos_bin]->Fill(hitTime);
                 //if(hitTime>40) continue;
@@ -735,7 +752,13 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                 /////////////////////////////////////
                 //bool reflected = hitTime>40;
                 bool reflected = true;
-                if(hitTime < cop[x_pos_bin]) reflected = false;
+                if(hitTime < cop[x_pos_bin]){
+                    reflected = false;
+                    //if (x_pos_bin==20 && (bar==1 || bar==0)) cout<<"bar= "<<bar<<" seg= "<<x_pos_bin <<" shiftD="<<shiftD_tdiff[bar][x_pos_bin]<<" hitTime= "<<hitTime<<endl;
+                    hitTime=hitTime + shiftD_tdiff[bar][x_pos_bin];
+                    //cout<<" hitTime= "<<hitTime<<endl;
+                    
+                }else hitTime=hitTime + shiftR_tdiff[bar][x_pos_bin];
                 
                 
                 
@@ -784,8 +807,9 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             ////////////////////
                             
                             //if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir)+ referance_angle - 0.8257;
-                            if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
-                            if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction[pmt];
+                            //if(gCherenkov_Correction != 2) tangle = momInBar.Angle(dir);
+                            //if(gCherenkov_Correction == 2) tangle = momInBar.Angle(dir) + array_correction[pmt];
+                            tangle = momInBar.Angle(dir);
                             
                             //double bartime = lenz/cos(luttheta)/20.4; //198 //203.767 for 1.47125
                             double bartime = lenz/cos(luttheta)/19.6; //203.767 for 1.47125
@@ -793,18 +817,18 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // hTime->Fill(hitTime);
                             // hCalc->Fill(totalTime);
                             
-                            if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<0.01){
-                                hDiff->Fill(totalTime-hitTime);
+                            if(!btree && (fabs(tangle-0.5*(mAngle[2]+mAngle[3]))<0.001 )){
+                                //hDiff->Fill(totalTime-hitTime);
                                 //if(samepath)
                                 {
-                                    hDiffT->Fill(totalTime-hitTime);
+                                    //hDiffT->Fill(totalTime-hitTime);
                                     if(r) {
-                                        hDiffR->Fill(totalTime-hitTime);
+                                        //hDiffR->Fill(totalTime-hitTime);
                                         histo_tdiffR_bar_pos[bar][x_pos_bin]->Fill(totalTime-hitTime);
                                         
                                     }
                                     else {
-                                        hDiffD->Fill(totalTime-hitTime);
+                                        //hDiffD->Fill(totalTime-hitTime);
                                         histo_tdiffD_bar_pos[bar][x_pos_bin]->Fill(totalTime-hitTime);
                                         
                                     }
@@ -817,11 +841,13 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // skim
                             if(fabs(totalTime-hitTime)> 10) continue;
                             if(tangle > 1.0) continue;
-                            if(tangle > 1.0) continue;
                             
-                            vtdiff.push_back(totalTime-hitTime);
-                            //vtime.push_back(hitTime);
-                            vtangle.push_back(tangle);
+                            if (btree){
+                                vtdiff.push_back(totalTime-hitTime);
+                                vtime.push_back(hitTime);
+                                vtangle.push_back(tangle);
+                                vreflected.push_back(reflected);
+                            }
                             
                             ///////////////
                             // Time Cut  //
@@ -833,29 +859,29 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // Cherenkov track  //
                             //////////////////////
                             
-                            histo_cherenkov_track->Fill(tangle);
+                            if (!btree) histo_cherenkov_track->Fill(tangle);
                             
-                            ////////////////
-                            // Fill PDF   //
-                            ////////////////
-                            // cherenkove PDF per PIX
-                            if(gPDF_pix ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
-                            if(gPDF_pix ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
-                            
-                            // cherenkove PDF per PMT
-                            if(gPDF_pmt ==1 && pdgId == 3) fHistPMT_PDF_k[pmt]->Fill(tangle); // good after time cut
-                            if(gPDF_pmt ==1 && pdgId == 2) fHistPMT_PDF_pi[pmt]->Fill(tangle); // good after time cut
-                            
-                            ////////////////////////////
-                            // Fill PMT coorrection   //
-                            ////////////////////////////
-                            // cherenkove correction per PMT
-                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistPMT_k[pmt]->Fill(tangle);
-                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistPMT_pi[pmt]->Fill(tangle);
-                            
-                            // fill cherenkove histo
-                            hAngle[pdgId]->Fill(tangle);
-                            
+                            //                            ////////////////
+                            //                            // Fill PDF   //
+                            //                            ////////////////
+                            //                            // cherenkove PDF per PIX
+                            //                            if(gPDF_pix ==1 && pdgId == 3) fHistCh_k[ch]->Fill(tangle); // good after time cut
+                            //                            if(gPDF_pix ==1 && pdgId == 2) fHistCh_pi[ch]->Fill(tangle); // good after time cut
+                            //
+                            //                            // cherenkove PDF per PMT
+                            //                            if(gPDF_pmt ==1 && pdgId == 3) fHistPMT_PDF_k[pmt]->Fill(tangle); // good after time cut
+                            //                            if(gPDF_pmt ==1 && pdgId == 2) fHistPMT_PDF_pi[pmt]->Fill(tangle); // good after time cut
+                            //
+                            //                            ////////////////////////////
+                            //                            // Fill PMT coorrection   //
+                            //                            ////////////////////////////
+                            //                            // cherenkove correction per PMT
+                            //                            if(gCherenkov_Correction ==1 && pdgId == 3) fHistPMT_k[pmt]->Fill(tangle);
+                            //                            if(gCherenkov_Correction ==1 && pdgId == 2) fHistPMT_pi[pmt]->Fill(tangle);
+                            //
+                            //                            // fill cherenkove histo
+                            //                            hAngle[pdgId]->Fill(tangle);
+                            //
                             ////////////////////
                             // Cherenkov Cut  //
                             ////////////////////
@@ -864,55 +890,55 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             //if(tangle> 0.844 ||tangle < 0.798)  continue;
                             
                             isGood=true;
-                            hTime->Fill(hitTime);
-                            hCalc->Fill(totalTime);
-                            
-                            
-                            if(!(gPDF_pix==2||gPDF_pmt==2 )){ // fixed
-                                sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
-                                sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
-                            }
-                            
-                            if(gPDF_pix ==2){
-                                // use histograms
-                                Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
-                                Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
-                                if (fHistCh_read_pi[ch]->GetBinContent(kpi) > 0 )sum1 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
-                                if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum2 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
-                                
-                                //if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
-                                //std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
-                            }
-                            
-                            if(gPDF_pmt ==2){
-                                // use histograms
-                                Int_t k_bin = fHistPMT_PDF_read_k[pmt]->GetXaxis()->FindBin(tangle);
-                                Int_t pi_bin = fHistPMT_PDF_read_pi[pmt]->GetXaxis()->FindBin(tangle);
-                                if (fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin) > 0 )sum1 += TMath::Log(fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin));
-                                if (fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin) > 0 )sum2 += TMath::Log(fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin));
-                                
-                                
-                            }
-                            
-                            
-                            if(0){
-                                TString x=(sum1>sum2)? " <====== PION" : "";
-                                std::cout<<Form("%1.6f  %1.6f | %1.6f  %1.6f        pid %d",TMath::Log(fAngle[2]->Eval(tangle)+noise),TMath::Log(fAngle[3]->Eval(tangle)+noise), sum1, sum2,pdgId)<<"  " <<std::endl;
-                                
-                                cc->cd();
-                                fAngle[2]->Draw("");
-                                fAngle[3]->Draw("same");
-                                
-                                cc->Update();
-                                gLine->SetLineWidth(2);
-                                gLine->SetX1(tangle);
-                                gLine->SetX2(tangle);
-                                gLine->SetY1(cc->GetUymin());
-                                gLine->SetY2(cc->GetUymax());
-                                gLine->Draw();
-                                cc->Update();
-                                cc->WaitPrimitive();
-                            }
+                            //                            hTime->Fill(hitTime);
+                            //                            hCalc->Fill(totalTime);
+                            //
+                            //
+                            //                            if(!(gPDF_pix==2||gPDF_pmt==2 )){ // fixed
+                            //                                sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
+                            //                                sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
+                            //                            }
+                            //
+                            //                            if(gPDF_pix ==2){
+                            //                                // use histograms
+                            //                                Int_t kk = fHistCh_read_k[ch]->GetXaxis()->FindBin(tangle);
+                            //                                Int_t kpi = fHistCh_read_pi[ch]->GetXaxis()->FindBin(tangle);
+                            //                                if (fHistCh_read_pi[ch]->GetBinContent(kpi) > 0 )sum1 += TMath::Log(fHistCh_read_pi[ch]->GetBinContent(kpi));
+                            //                                if (fHistCh_read_k[ch]->GetBinContent(kk) > 0 )sum2 += TMath::Log(fHistCh_read_k[ch]->GetBinContent(kk));
+                            //
+                            //                                //if (sum1 != 0 || sum2!=0 )std::cout<<"No Problem  separation  " <<kpi<<" "<<kk<<"  sum "<<sum1 <<"  "<< sum2<<std::endl;
+                            //                                //std::cout<<"###### No Problem  separation  " << fHistCh_read_k[ch]->GetBinContent(kk) <<"  "<< fHistCh_read_pi[ch]->GetBinContent(kpi)<<std::endl;
+                            //                            }
+                            //
+                            //                            if(gPDF_pmt ==2){
+                            //                                // use histograms
+                            //                                Int_t k_bin = fHistPMT_PDF_read_k[pmt]->GetXaxis()->FindBin(tangle);
+                            //                                Int_t pi_bin = fHistPMT_PDF_read_pi[pmt]->GetXaxis()->FindBin(tangle);
+                            //                                if (fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin) > 0 )sum1 += TMath::Log(fHistPMT_PDF_read_pi[pmt]->GetBinContent(pi_bin));
+                            //                                if (fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin) > 0 )sum2 += TMath::Log(fHistPMT_PDF_read_k[pmt]->GetBinContent(k_bin));
+                            //
+                            //
+                            //                            }
+                            //
+                            //
+                            //                            if(0){
+                            //                                TString x=(sum1>sum2)? " <====== PION" : "";
+                            //                                std::cout<<Form("%1.6f  %1.6f | %1.6f  %1.6f        pid %d",TMath::Log(fAngle[2]->Eval(tangle)+noise),TMath::Log(fAngle[3]->Eval(tangle)+noise), sum1, sum2,pdgId)<<"  " <<std::endl;
+                            //
+                            //                                cc->cd();
+                            //                                fAngle[2]->Draw("");
+                            //                                fAngle[3]->Draw("same");
+                            //
+                            //                                cc->Update();
+                            //                                gLine->SetLineWidth(2);
+                            //                                gLine->SetX1(tangle);
+                            //                                gLine->SetX2(tangle);
+                            //                                gLine->SetY1(cc->GetUymin());
+                            //                                gLine->SetY2(cc->GetUymax());
+                            //                                gLine->Draw();
+                            //                                cc->Update();
+                            //                                cc->WaitPrimitive();
+                            //                            }
                             
                         } // bar ambiguities
                     } // reflection loop
@@ -923,11 +949,12 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                     //if (glx_event->GetPdg() > 0 ) nph_p++;
                     //if (glx_event->GetPdg() < 0 ) nph_n++;
                     if(pmt<108) {
-                        glx_hdigi[pmt]->Fill(pix%8, pix/8);
-                        
-                        vpx.push_back(pmt);
-                        vpy.push_back(pix%8);
-                        vpz.push_back(pix/8);
+                        //glx_hdigi[pmt]->Fill(pix%8, pix/8);
+                        if (btree){
+                            vpx.push_back(pmt);
+                            vpy.push_back(pix%8);
+                            vpz.push_back(pix/8);
+                        }
                         
                         goodevt=1;
                     }
@@ -936,59 +963,59 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
             
             if(goodevt) evtcount++;
             if(nph<5) continue;
-            hNph[pdgId]->Fill(nph);
+            //hNph[pdgId]->Fill(nph);
             
             //hNph_p[pdgId]->Fill(nph_p);
             //hNph_n[pdgId]->Fill(nph_n);
             
-            hNphC->Fill(nphc);
+            //hNphC->Fill(nphc);
             
             double sum = sum1-sum2;
             //cout<<"########### sum  "<<sum <<"  sum1  "<<sum1<<"  sum2  "<<sum2<<endl;
-            hLnDiff[pdgId]->Fill(sum);
+            //hLnDiff[pdgId]->Fill(sum);
             
             count[pdgId]++;
             
-            if(0 && pdgId==3){
-                //	if(!cc)
-                TString x=(sum1>sum2)? " <====== Pion" : "";
-                // std::cout<<Form("f %1.6f s %1.6f PMT %d pix %d   pid %d",aminf,amins,PMT,pix  ,prt_particle)<<"  "<<x <<std::endl;
-                
-                std::cout<<"PID "<< glx_event->GetPdg() <<" sum1 "<<sum1<<" sum2 "<<sum2<<" sum "<<sum<<" "<<x<<std::endl;
-                
-                cc->cd();
-                
-                if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
-                if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
-                
-                hAngle[2]->Draw("hist");
-                hAngle[3]->Draw("hist same");
-                fAngle[2]->Draw("same");
-                fAngle[3]->Draw("same");
-                
-                // hAngle[2]->GetYaxis()->SetRangeUser(0,20);
-                // hAngle[3]->GetYaxis()->SetRangeUser(0,20);
-                
-                cc->Update();
-                TLine *line = new TLine(0,0,0,1000);
-                line->SetX1(mAngle[3]);
-                line->SetX2(mAngle[3]);
-                line->SetY1(cc->GetUymin());
-                line->SetY2(cc->GetUymax());
-                line->SetLineColor(kRed);
-                line->Draw();
-                
-                TLine *line2 = new TLine(0,0,0,1000);
-                line2->SetX1(mAngle[2]);
-                line2->SetX2(mAngle[2]);
-                line2->SetY1(cc->GetUymin());
-                line2->SetY2(cc->GetUymax());
-                line2->SetLineColor(kBlue);
-                line2->Draw();
-                
-                cc->Update();
-                cc->WaitPrimitive();
-            }
+            //            if(0 && pdgId==3){
+            //                //    if(!cc)
+            //                TString x=(sum1>sum2)? " <====== Pion" : "";
+            //                // std::cout<<Form("f %1.6f s %1.6f PMT %d pix %d   pid %d",aminf,amins,PMT,pix  ,prt_particle)<<"  "<<x <<std::endl;
+            //
+            //                std::cout<<"PID "<< glx_event->GetPdg() <<" sum1 "<<sum1<<" sum2 "<<sum2<<" sum "<<sum<<" "<<x<<std::endl;
+            //
+            //                cc->cd();
+            //
+            //                if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
+            //                if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
+            //
+            //                hAngle[2]->Draw("hist");
+            //                hAngle[3]->Draw("hist same");
+            //                fAngle[2]->Draw("same");
+            //                fAngle[3]->Draw("same");
+            //
+            //                // hAngle[2]->GetYaxis()->SetRangeUser(0,20);
+            //                // hAngle[3]->GetYaxis()->SetRangeUser(0,20);
+            //
+            //                cc->Update();
+            //                TLine *line = new TLine(0,0,0,1000);
+            //                line->SetX1(mAngle[3]);
+            //                line->SetX2(mAngle[3]);
+            //                line->SetY1(cc->GetUymin());
+            //                line->SetY2(cc->GetUymax());
+            //                line->SetLineColor(kRed);
+            //                line->Draw();
+            //
+            //                TLine *line2 = new TLine(0,0,0,1000);
+            //                line2->SetX1(mAngle[2]);
+            //                line2->SetX2(mAngle[2]);
+            //                line2->SetY1(cc->GetUymin());
+            //                line2->SetY2(cc->GetUymax());
+            //                line2->SetLineColor(kBlue);
+            //                line2->Draw();
+            //
+            //                cc->Update();
+            //                cc->WaitPrimitive();
+            //            }
             
             // hAngle[2]->Reset();
             // hAngle[3]->Reset();
@@ -996,41 +1023,44 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
             /////////////////////
             // fill tree here////
             /////////////////////
+            if (btree){
+                fit_track->SetParameters(100,0.82,0.010,10);
+                fit_track->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+                fit_track->SetParLimits(0,0.1,1E6);
+                fit_track->SetParLimits(1,0.809,0.835);
+                fit_track->SetParLimits(2,0.005,0.030);
+                if (pdgId==3)fit_track->SetLineColor(kRed);
+                else fit_track->SetLineColor(kBlue);
+                histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(mAngle[2]+mAngle[3])-cut_cangle, 0.5*(mAngle[2]+mAngle[3])-cut_cangle) ;
+                
+                //cc->cd();
+                //histo_cherenkov_track->Draw();
+                //cc->Update();
+                //cc->WaitPrimitive();
+                
+                track_mean=  fit_track->GetParameter(1);
+                track_spr= fit_track->GetParameter(2);
+                track_yield = nph;
+                track_mom = momInBar.Mag();
+                track_xbar = posInBar.X();
+                track_ybar = posInBar.Y();
+                track_pid = pdgId;
+                track_nbar = bar;
+                track_fit_chisqu = fit_track->GetChisquare();
+                track_fit_NDF = fit_track->GetNDF();
+                track_file= justName;
+                
+                track_inv_mass= inv_mass;
+                track_missing_mass= missing_mass;
+                track_chi_square= chi_square;
+                track_TofTrackDist= TofTrackDist;
+                
+                track_x_pos_bin=  x_pos_bin;
+                //cout<<"#### mom "<<track_mom<<endl;
+                tree_variables.Fill();
+            }
             
-            fit_track->SetParameters(100,0.82,0.010,10);
-            fit_track->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
-            fit_track->SetParLimits(0,0.1,1E6);
-            fit_track->SetParLimits(1,0.809,0.835);
-            fit_track->SetParLimits(2,0.005,0.030);
-            if (pdgId==3)fit_track->SetLineColor(kRed);
-            else fit_track->SetLineColor(kBlue);
-            histo_cherenkov_track->Fit("fit_track","MQ0","", 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle, 0.5*(referance_angle_k+referance_angle_pi)-cut_cangle) ;
-
-            //cc->cd();
-            //histo_cherenkov_track->Draw();
-            //cc->Update();
-            //cc->WaitPrimitive();
-
-            track_mean=  fit_track->GetParameter(1);
-            track_spr= fit_track->GetParameter(2);
-            track_yield = nph;
-            track_mom = momInBar.Mag();
-            track_xbar = posInBar.X();
-            track_ybar = posInBar.Y();
-            track_pid = pdgId;
-            track_nbar = bar;
-            track_fit_chisqu = fit_track->GetChisquare();
-            track_fit_NDF = fit_track->GetNDF();
-            track_file= justName;
-
-            track_inv_mass= inv_mass;
-            track_missing_mass= missing_mass;
-            track_chi_square= chi_square;
-            track_TofTrackDist= TofTrackDist;
-
-            tree_variables.Fill();
-
-
+            
             ///////////////////////////////////
             //////// reduce pions number //////
             ///////////////////////////////////
@@ -1042,239 +1072,239 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
         }
     } // Event Loop
     
-    if(evtcount>0){
-        for(int i=0; i<glx_nch; i++){
-            int pmt=i/64;
-            int pix=i%64;
-            double rel = glx_hdigi[pmt]->GetBinContent(pix%8+1,pix/8+1)/(double)evtcount;
-            glx_hdigi[pmt]->SetBinContent(pix%8+1, pix/8+1,rel);
-        }
-    }
-    
-    //TString nid=Form("_%2.2f_%2.2f",theta,phi);
-    TString nid=Form("_%d_%d",xbar,ybar);
-    
-    glx_drawDigi("m,p,v\n",0);
-    glx_cdigi->SetName("hp"+nid);
-    glx_canvasAdd(glx_cdigi);
-    
-    glx_canvasAdd("hAngle"+nid,800,400);
-    
-    //scal
-    if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
-    if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
-    
-    for(int i=0; i<5; i++){
-        if(hAngle[i]->GetEntries()<20) continue;
-        
-        int nfound = spect->Search(hAngle[i],1,"goff",0.9);
-        if(nfound>0) cherenkovreco[i] = spect->GetPositionX()[0];
-        else cherenkovreco[i] =  hAngle[i]->GetXaxis()->GetBinCenter(hAngle[i]->GetMaximumBin());
-        if(cherenkovreco[i]>0.85) cherenkovreco[i]=0.82;
-        
-        if(i==2)  fit->SetLineColor(kBlue);
-        if(i==3)  fit->SetLineColor(kRed);
-        fit->SetParameters(100,cherenkovreco[i],0.010,10);
-        fit->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
-        fit->SetParLimits(0,0.1,1E6);
-        fit->SetParLimits(1,cherenkovreco[i]-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
-        fit->SetParLimits(2,0.005,0.030); // width
-        hAngle[i]->Fit("fgaus","I","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
-        hAngle[i]->Fit("fgaus","M","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
-        
-        cherenkovreco[i] = fit->GetParameter(1);
-        spr[i] = fit->GetParameter(2);
-    }
-    
-    gStyle->SetOptTitle(0);
-    gStyle->SetOptStat(0);
-    gStyle->SetOptFit(0);
-    
-    
-    
-    
-    TF1 *ff;
-    double sep=0,esep=0, m1=0,m2=0,s1=0,s2=0;
-    if(hLnDiff[3]->GetEntries()>100){
-        hLnDiff[3]->Fit("gaus","S");
-        ff = hLnDiff[3]->GetFunction("gaus");
-        ff->SetLineColor(1);
-        m1=ff->GetParameter(1);
-        s1=ff->GetParameter(2);
-    }
-    if(hLnDiff[2]->GetEntries()>100){
-        hLnDiff[2]->Fit("gaus","S");
-        ff = hLnDiff[2]->GetFunction("gaus");
-        ff->SetLineColor(1);
-        m2=ff->GetParameter(1);
-        s2=ff->GetParameter(2);
-    }
-    if(s1>0 && s2>0) sep = (fabs(m2-m1))/(0.5*(s1+s2));
-    
-    hAngle[2]->GetXaxis()->SetRangeUser(0.7,0.9);
-    hAngle[2]->GetYaxis()->SetRangeUser(0,1.2);
-    hAngle[2]->Draw();
-    hAngle[3]->Draw("same");
-    // fAngle[3]->Draw("same");
-    // fAngle[2]->Draw("same");
-    
-    
-    TLine *line = new TLine(0,0,0,1000);
-    //line->SetX1(mAngle[3]);
-    //line->SetX2(mAngle[3]);
-    line->SetX1(referance_angle_k);
-    line->SetX2(referance_angle_k);
-    line->SetY1(0);
-    line->SetY2(1.2);
-    line->SetLineColor(kRed);
-    line->Draw();
-    
-    TLine *line2 = new TLine(0,0,0,1000);
-    //line2->SetX1(mAngle[2]);
-    //line2->SetX2(mAngle[2]);
-    line2->SetX1(referance_angle_pi);
-    line2->SetX2(referance_angle_pi);
-    line2->SetY1(0);
-    line2->SetY2(1.2);
-    line2->SetLineColor(kBlue);
-    line2->Draw();
-    
-    TLine *line3 = new TLine(0,0,0,1000);
-    line3->SetLineStyle(2);
-    //line3->SetX1(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
-    //line3->SetX2(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
-    line3->SetX1(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
-    line3->SetX2(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
-    line3->SetY1(0);
-    line3->SetY2(1.2);
-    line3->SetLineColor(1);
-    line3->Draw();
-    
-    TLine *line4 = new TLine(0,0,0,1000);
-    line4->SetLineStyle(2);
-    //line4->SetX1(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
-    //line4->SetX2(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
-    line4->SetX1(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
-    line4->SetX2(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
-    line4->SetY1(0);
-    line4->SetY2(1.2);
-    line4->SetLineColor(1);
-    line4->Draw();
-    
-    
-    TLegend *leg = new TLegend(0.1,0.5,0.4,0.85);
-    leg->SetFillColor(0);
-    leg->SetFillStyle(0);
-    leg->SetBorderSize(0);
-    leg->SetFillStyle(0);
-    leg->AddEntry(hAngle[2],Form("#theta_{c}^{#pi} = %2.4f rad",cherenkovreco[2]),"");
-    leg->AddEntry(hAngle[3],Form("#theta_{c}^{K} = %2.4f rad",cherenkovreco[3]),"");
-    leg->AddEntry(hAngle[2],Form("#sigma_{c}^{#pi} = %2.1f mrad",spr[2]*1000),"");
-    leg->AddEntry(hAngle[3],Form("#sigma_{c}^{K} = %2.1f mrad",spr[3]*1000),"");
-    leg->Draw();
-    
-    TLegend *lnpa = new TLegend(0.7,0.67,0.9,0.85);
-    lnpa->SetFillColor(0);
-    lnpa->SetFillStyle(0);
-    lnpa->SetBorderSize(0);
-    lnpa->SetFillStyle(0);
-    lnpa->AddEntry(hAngle[2],"pions","lp");
-    lnpa->AddEntry(hAngle[3],"kaons","lp");
-    lnpa->Draw();
-    
-    // fAngle[2]->Draw("same");
-    // fAngle[3]->Draw("same");
-    
-    glx_canvasAdd("hTime"+nid,800,400);
-    
-    hTime->Draw();
-    hCalc->SetLineColor(2);
-    hCalc->Draw("same");
-    TLegend *leg1 = new TLegend(0.5,0.6,0.85,0.80);
-    leg1->SetFillColor(0);
-    leg1->SetFillStyle(0);
-    leg1->SetBorderSize(0);
-    leg1->SetFillStyle(0);
-    leg1->AddEntry(hTime,"measured in geant","lp");
-    leg1->AddEntry(hCalc,"calculated","lp");
-    leg1->Draw();
-    
-    glx_canvasAdd("hDiff"+nid,800,400);
-    hDiff->SetLineColor(kBlack);
-    hDiff->Draw();
-    
-    // hDiffT->SetLineColor(kRed+1);
-    // hDiffT->Draw("same");
-    hDiffD->SetLineColor(kGreen+2);
-    hDiffD->Draw("same");
-    hDiffR->SetLineColor(kBlue+1);
-    hDiffR->Draw("same");
-    
-    double maxTD= hDiffD->GetXaxis()->GetBinCenter(hDiffD->GetMaximumBin());
-    double maxTR= hDiffR->GetXaxis()->GetBinCenter(hDiffR->GetMaximumBin());
-    double maxTT= hTime->GetXaxis()->GetBinCenter(hTime->GetMaximumBin());
-    
-    line = new TLine(0,0,0,1000);
-    line->SetLineStyle(2);
-    line->SetX1(-cut_tdiffd);
-    line->SetX2(-cut_tdiffd);
-    line->SetY1(0);
-    line->SetY2(hDiff->GetMaximum()+0.05*hDiff->GetMaximum());
-    line->SetLineColor(1);
-    line->Draw();
-    
-    line2 = new TLine(0,0,0,1000);
-    line2->SetLineStyle(2);
-    line2->SetX1(cut_tdiffd);
-    line2->SetX2(cut_tdiffd);
-    line2->SetY1(0);
-    line2->SetY2(hDiff->GetMaximum()+0.05*hDiff->GetMaximum());
-    line2->SetLineColor(1);
-    line2->Draw();
-    
-    TLegend *leg2 = new TLegend(0.6,0.57,0.9,0.85);
-    leg2->SetFillColor(0);
-    leg2->SetFillStyle(0);
-    leg2->SetBorderSize(0);
-    leg2->SetFillStyle(0);
-    leg2->AddEntry(hDiff,"all","lp");
-    // leg2->AddEntry(hDiffT,"MC path in EV","lp");
-    // leg2->AddEntry(hDiffD,"MC path in EV for direct photons","lp");
-    // leg2->AddEntry(hDiffR,"MC path in EV for reflected photons","lp");
-    leg2->AddEntry(hDiffD,"direct photons","lp");
-    leg2->AddEntry(hDiffR,"reflected photons","lp");
-    
-    leg2->Draw();
-    
-    glx_canvasAdd("hLnDiff"+nid,800,400);
-    hLnDiff[2]->SetTitle(Form("sep = %2.2f s.d.",sep));
-    hLnDiff[3]->SetTitle(Form("sep = %2.2f s.d.",sep));
-    hLnDiff[2]->Draw();
-    hLnDiff[3]->Draw("same");
-    
-    TLegend *lnpl = new TLegend(0.7,0.67,0.9,0.85);
-    lnpl->SetFillColor(0);
-    lnpl->SetFillStyle(0);
-    lnpl->SetBorderSize(0);
-    lnpl->SetFillStyle(0);
-    lnpl->AddEntry(hLnDiff[2],"pions","lp");
-    lnpl->AddEntry(hLnDiff[3],"kaons","lp");
-    lnpl->Draw();
-    
-    glx_canvasAdd("hNph"+nid,800,400);
-    
-    double nph = 0;
-    if(hNph[2]->GetEntries()>50){
-        nph = glx_fit(hNph[2],40,100,40).X();
-        auto rfit = hNph[2]->GetFunction("glx_gaust");
-        if(rfit) rfit->SetLineColor(kBlue);
-        hNph[2]->SetLineColor(kBlue);
-        hNph[2]->Draw();
-        //glx_fit(hNph[3],40,100,40).X();
-        //hNph[3]->GetFunction("glx_gaust")->SetLineColor(kRed);
-        hNph[3]->SetLineColor(kRed);
-        hNph[3]->Draw("same");
-    }
+    //    if(evtcount>0){
+    //        for(int i=0; i<glx_nch; i++){
+    //            int pmt=i/64;
+    //            int pix=i%64;
+    //            double rel = glx_hdigi[pmt]->GetBinContent(pix%8+1,pix/8+1)/(double)evtcount;
+    //            glx_hdigi[pmt]->SetBinContent(pix%8+1, pix/8+1,rel);
+    //        }
+    //    }
+    //
+    //    //TString nid=Form("_%2.2f_%2.2f",theta,phi);
+    //    TString nid=Form("_%d_%d",xbar,ybar);
+    //
+    //    glx_drawDigi("m,p,v\n",0);
+    //    glx_cdigi->SetName("hp"+nid);
+    //    glx_canvasAdd(glx_cdigi);
+    //
+    //    glx_canvasAdd("hAngle"+nid,800,400);
+    //
+    //    //scal
+    //    if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
+    //    if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
+    //
+    //    for(int i=0; i<5; i++){
+    //        if(hAngle[i]->GetEntries()<20) continue;
+    //
+    //        int nfound = spect->Search(hAngle[i],1,"goff",0.9);
+    //        if(nfound>0) cherenkovreco[i] = spect->GetPositionX()[0];
+    //        else cherenkovreco[i] =  hAngle[i]->GetXaxis()->GetBinCenter(hAngle[i]->GetMaximumBin());
+    //        if(cherenkovreco[i]>0.85) cherenkovreco[i]=0.82;
+    //
+    //        if(i==2)  fit->SetLineColor(kBlue);
+    //        if(i==3)  fit->SetLineColor(kRed);
+    //        fit->SetParameters(100,cherenkovreco[i],0.010,10);
+    //        fit->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+    //        fit->SetParLimits(0,0.1,1E6);
+    //        fit->SetParLimits(1,cherenkovreco[i]-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
+    //        fit->SetParLimits(2,0.005,0.030); // width
+    //        hAngle[i]->Fit("fgaus","I","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
+    //        hAngle[i]->Fit("fgaus","M","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
+    //
+    //        cherenkovreco[i] = fit->GetParameter(1);
+    //        spr[i] = fit->GetParameter(2);
+    //    }
+    //
+    //    gStyle->SetOptTitle(0);
+    //    gStyle->SetOptStat(0);
+    //    gStyle->SetOptFit(0);
+    //
+    //
+    //
+    //
+    //    TF1 *ff;
+    //    double sep=0,esep=0, m1=0,m2=0,s1=0,s2=0;
+    //    if(hLnDiff[3]->GetEntries()>100){
+    //        hLnDiff[3]->Fit("gaus","S");
+    //        ff = hLnDiff[3]->GetFunction("gaus");
+    //        ff->SetLineColor(1);
+    //        m1=ff->GetParameter(1);
+    //        s1=ff->GetParameter(2);
+    //    }
+    //    if(hLnDiff[2]->GetEntries()>100){
+    //        hLnDiff[2]->Fit("gaus","S");
+    //        ff = hLnDiff[2]->GetFunction("gaus");
+    //        ff->SetLineColor(1);
+    //        m2=ff->GetParameter(1);
+    //        s2=ff->GetParameter(2);
+    //    }
+    //    if(s1>0 && s2>0) sep = (fabs(m2-m1))/(0.5*(s1+s2));
+    //
+    //    hAngle[2]->GetXaxis()->SetRangeUser(0.7,0.9);
+    //    hAngle[2]->GetYaxis()->SetRangeUser(0,1.2);
+    //    hAngle[2]->Draw();
+    //    hAngle[3]->Draw("same");
+    //    // fAngle[3]->Draw("same");
+    //    // fAngle[2]->Draw("same");
+    //
+    //
+    //    TLine *line = new TLine(0,0,0,1000);
+    //    //line->SetX1(mAngle[3]);
+    //    //line->SetX2(mAngle[3]);
+    //    line->SetX1(referance_angle_k);
+    //    line->SetX2(referance_angle_k);
+    //    line->SetY1(0);
+    //    line->SetY2(1.2);
+    //    line->SetLineColor(kRed);
+    //    line->Draw();
+    //
+    //    TLine *line2 = new TLine(0,0,0,1000);
+    //    //line2->SetX1(mAngle[2]);
+    //    //line2->SetX2(mAngle[2]);
+    //    line2->SetX1(referance_angle_pi);
+    //    line2->SetX2(referance_angle_pi);
+    //    line2->SetY1(0);
+    //    line2->SetY2(1.2);
+    //    line2->SetLineColor(kBlue);
+    //    line2->Draw();
+    //
+    //    TLine *line3 = new TLine(0,0,0,1000);
+    //    line3->SetLineStyle(2);
+    //    //line3->SetX1(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+    //    //line3->SetX2(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+    //    line3->SetX1(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
+    //    line3->SetX2(0.5*(referance_angle_k+referance_angle_pi)-cut_cangle);
+    //    line3->SetY1(0);
+    //    line3->SetY2(1.2);
+    //    line3->SetLineColor(1);
+    //    line3->Draw();
+    //
+    //    TLine *line4 = new TLine(0,0,0,1000);
+    //    line4->SetLineStyle(2);
+    //    //line4->SetX1(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+    //    //line4->SetX2(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+    //    line4->SetX1(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
+    //    line4->SetX2(0.5*(referance_angle_k+referance_angle_pi)+cut_cangle);
+    //    line4->SetY1(0);
+    //    line4->SetY2(1.2);
+    //    line4->SetLineColor(1);
+    //    line4->Draw();
+    //
+    //
+    //    TLegend *leg = new TLegend(0.1,0.5,0.4,0.85);
+    //    leg->SetFillColor(0);
+    //    leg->SetFillStyle(0);
+    //    leg->SetBorderSize(0);
+    //    leg->SetFillStyle(0);
+    //    leg->AddEntry(hAngle[2],Form("#theta_{c}^{#pi} = %2.4f rad",cherenkovreco[2]),"");
+    //    leg->AddEntry(hAngle[3],Form("#theta_{c}^{K} = %2.4f rad",cherenkovreco[3]),"");
+    //    leg->AddEntry(hAngle[2],Form("#sigma_{c}^{#pi} = %2.1f mrad",spr[2]*1000),"");
+    //    leg->AddEntry(hAngle[3],Form("#sigma_{c}^{K} = %2.1f mrad",spr[3]*1000),"");
+    //    leg->Draw();
+    //
+    //    TLegend *lnpa = new TLegend(0.7,0.67,0.9,0.85);
+    //    lnpa->SetFillColor(0);
+    //    lnpa->SetFillStyle(0);
+    //    lnpa->SetBorderSize(0);
+    //    lnpa->SetFillStyle(0);
+    //    lnpa->AddEntry(hAngle[2],"pions","lp");
+    //    lnpa->AddEntry(hAngle[3],"kaons","lp");
+    //    lnpa->Draw();
+    //
+    //    // fAngle[2]->Draw("same");
+    //    // fAngle[3]->Draw("same");
+    //
+    //    glx_canvasAdd("hTime"+nid,800,400);
+    //
+    //    hTime->Draw();
+    //    hCalc->SetLineColor(2);
+    //    hCalc->Draw("same");
+    //    TLegend *leg1 = new TLegend(0.5,0.6,0.85,0.80);
+    //    leg1->SetFillColor(0);
+    //    leg1->SetFillStyle(0);
+    //    leg1->SetBorderSize(0);
+    //    leg1->SetFillStyle(0);
+    //    leg1->AddEntry(hTime,"measured in geant","lp");
+    //    leg1->AddEntry(hCalc,"calculated","lp");
+    //    leg1->Draw();
+    //
+    //    glx_canvasAdd("hDiff"+nid,800,400);
+    //    hDiff->SetLineColor(kBlack);
+    //    hDiff->Draw();
+    //
+    //    // hDiffT->SetLineColor(kRed+1);
+    //    // hDiffT->Draw("same");
+    //    hDiffD->SetLineColor(kGreen+2);
+    //    hDiffD->Draw("same");
+    //    hDiffR->SetLineColor(kBlue+1);
+    //    hDiffR->Draw("same");
+    //
+    //    double maxTD= hDiffD->GetXaxis()->GetBinCenter(hDiffD->GetMaximumBin());
+    //    double maxTR= hDiffR->GetXaxis()->GetBinCenter(hDiffR->GetMaximumBin());
+    //    double maxTT= hTime->GetXaxis()->GetBinCenter(hTime->GetMaximumBin());
+    //
+    //    line = new TLine(0,0,0,1000);
+    //    line->SetLineStyle(2);
+    //    line->SetX1(-cut_tdiffd);
+    //    line->SetX2(-cut_tdiffd);
+    //    line->SetY1(0);
+    //    line->SetY2(hDiff->GetMaximum()+0.05*hDiff->GetMaximum());
+    //    line->SetLineColor(1);
+    //    line->Draw();
+    //
+    //    line2 = new TLine(0,0,0,1000);
+    //    line2->SetLineStyle(2);
+    //    line2->SetX1(cut_tdiffd);
+    //    line2->SetX2(cut_tdiffd);
+    //    line2->SetY1(0);
+    //    line2->SetY2(hDiff->GetMaximum()+0.05*hDiff->GetMaximum());
+    //    line2->SetLineColor(1);
+    //    line2->Draw();
+    //
+    //    TLegend *leg2 = new TLegend(0.6,0.57,0.9,0.85);
+    //    leg2->SetFillColor(0);
+    //    leg2->SetFillStyle(0);
+    //    leg2->SetBorderSize(0);
+    //    leg2->SetFillStyle(0);
+    //    leg2->AddEntry(hDiff,"all","lp");
+    //    // leg2->AddEntry(hDiffT,"MC path in EV","lp");
+    //    // leg2->AddEntry(hDiffD,"MC path in EV for direct photons","lp");
+    //    // leg2->AddEntry(hDiffR,"MC path in EV for reflected photons","lp");
+    //    leg2->AddEntry(hDiffD,"direct photons","lp");
+    //    leg2->AddEntry(hDiffR,"reflected photons","lp");
+    //
+    //    leg2->Draw();
+    //
+    //    glx_canvasAdd("hLnDiff"+nid,800,400);
+    //    hLnDiff[2]->SetTitle(Form("sep = %2.2f s.d.",sep));
+    //    hLnDiff[3]->SetTitle(Form("sep = %2.2f s.d.",sep));
+    //    hLnDiff[2]->Draw();
+    //    hLnDiff[3]->Draw("same");
+    //
+    //    TLegend *lnpl = new TLegend(0.7,0.67,0.9,0.85);
+    //    lnpl->SetFillColor(0);
+    //    lnpl->SetFillStyle(0);
+    //    lnpl->SetBorderSize(0);
+    //    lnpl->SetFillStyle(0);
+    //    lnpl->AddEntry(hLnDiff[2],"pions","lp");
+    //    lnpl->AddEntry(hLnDiff[3],"kaons","lp");
+    //    lnpl->Draw();
+    //
+    //    glx_canvasAdd("hNph"+nid,800,400);
+    //
+    //    double nph = 0;
+    //    if(hNph[2]->GetEntries()>50){
+    //        nph = glx_fit(hNph[2],40,100,40).X();
+    //        auto rfit = hNph[2]->GetFunction("glx_gaust");
+    //        if(rfit) rfit->SetLineColor(kBlue);
+    //        hNph[2]->SetLineColor(kBlue);
+    //        hNph[2]->Draw();
+    //        //glx_fit(hNph[3],40,100,40).X();
+    //        //hNph[3]->GetFunction("glx_gaust")->SetLineColor(kRed);
+    //        hNph[3]->SetLineColor(kRed);
+    //        hNph[3]->Draw("same");
+    //    }
     
     
     
@@ -1320,26 +1350,26 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     // hNphC->Draw("same");
     
     
-    TLegend *lnph = new TLegend(0.6,0.65,0.9,0.85);
-    lnph->SetFillColor(0);
-    lnph->SetFillStyle(0);
-    lnph->SetBorderSize(0);
-    lnph->SetFillStyle(0);
-    // lnph->AddEntry(hNphC,"simulated","lp");
-    lnph->AddEntry(hNph[2],"pions","lp");
-    lnph->AddEntry(hNph[3],"kaons","lp");
-    
-    
-    //lnph->AddEntry(hNph_p[2],"pions","lp");
-    //lnph->AddEntry(hNph_p[3],"kaons","lp");
-    
-    //lnph->AddEntry(hNph_n[2],"pions","lp");
-    //lnph->AddEntry(hNph_n[3],"kaons","lp");
-    
-    lnph->Draw();
-    
-    std::cout<<" ###### separation = "<< sep << "  nph = "<<nph <<std::endl;
-    std::cout<<"maxTD "<<maxTD<<"  maxTR "<<maxTR<<std::endl;
+    //    TLegend *lnph = new TLegend(0.6,0.65,0.9,0.85);
+    //    lnph->SetFillColor(0);
+    //    lnph->SetFillStyle(0);
+    //    lnph->SetBorderSize(0);
+    //    lnph->SetFillStyle(0);
+    //    // lnph->AddEntry(hNphC,"simulated","lp");
+    //    lnph->AddEntry(hNph[2],"pions","lp");
+    //    lnph->AddEntry(hNph[3],"kaons","lp");
+    //
+    //
+    //    //lnph->AddEntry(hNph_p[2],"pions","lp");
+    //    //lnph->AddEntry(hNph_p[3],"kaons","lp");
+    //
+    //    //lnph->AddEntry(hNph_n[2],"pions","lp");
+    //    //lnph->AddEntry(hNph_n[3],"kaons","lp");
+    //
+    //    lnph->Draw();
+    //
+    //    std::cout<<" ###### separation = "<< sep << "  nph = "<<nph <<std::endl;
+    //    std::cout<<"maxTD "<<maxTD<<"  maxTR "<<maxTR<<std::endl;
     
     
     
@@ -1499,43 +1529,44 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
      hExtrapolatedBarHitXY_cut->Draw("colz");
      */
     
-    glx_canvasSave(0);
+    //    glx_canvasSave(0);
+    //
+    //
+    //    if(gPDF_pix ==1) {
+    //        for(Int_t i=0; i<glx_nch; i++) {
+    //            fHistCh_k[i]->Write();
+    //            fHistCh_pi[i]->Write();
+    //        }
+    //    }
+    //    if(gCherenkov_Correction==1) {
+    //        for(Int_t i=0; i<PMT_num; i++) {
+    //            fHistPMT_k[i]->Write();
+    //            fHistPMT_pi[i]->Write();
+    //        }
+    //    }
+    //
+    //
+    //    if(gPDF_pmt==1) {
+    //        for(Int_t i=0; i<PMT_num; i++) {
+    //            fHistPMT_PDF_k[i]->Write();
+    //            fHistPMT_PDF_pi[i]->Write();
+    //        }
+    //    }
     
-    
-    if(gPDF_pix ==1) {
-        for(Int_t i=0; i<glx_nch; i++) {
-            fHistCh_k[i]->Write();
-            fHistCh_pi[i]->Write();
-        }
+    if (!btree){
+        for(Int_t i=0; i<24; i++)
+            for(Int_t j=0; j<40; j++)  {
+                histo_time_bar_pos[i][j]->Write();
+            }
+        for(Int_t i=0; i<24; i++)
+            for(Int_t j=0; j<40; j++)  {
+                histo_tdiffD_bar_pos[i][j]->Write();
+            }
+        for(Int_t i=0; i<24; i++)
+            for(Int_t j=0; j<40; j++)  {
+                histo_tdiffR_bar_pos[i][j]->Write();
+            }
     }
-    if(gCherenkov_Correction==1) {
-        for(Int_t i=0; i<PMT_num; i++) {
-            fHistPMT_k[i]->Write();
-            fHistPMT_pi[i]->Write();
-        }
-    }
-    
-    
-    if(gPDF_pmt==1) {
-        for(Int_t i=0; i<PMT_num; i++) {
-            fHistPMT_PDF_k[i]->Write();
-            fHistPMT_PDF_pi[i]->Write();
-        }
-    }
-    
-   
-    for(Int_t i=0; i<24; i++)
-        for(Int_t j=0; j<40; j++)  {
-            histo_time_bar_pos[i][j]->Write();
-        }
-    for(Int_t i=0; i<24; i++)
-        for(Int_t j=0; j<40; j++)  {
-            histo_tdiffD_bar_pos[i][j]->Write();
-        }
-    for(Int_t i=0; i<24; i++)
-        for(Int_t j=0; j<40; j++)  {
-            histo_tdiffR_bar_pos[i][j]->Write();
-        }
     
     
     //mom_theta_phi->Write();
