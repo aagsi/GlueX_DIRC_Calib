@@ -7,9 +7,12 @@
 //#include "TH3D.h"
 #include "TNtuple.h"
 
-int analyses(){
+
+int analyses(TString infile="outFile_v3.root"){
     
-    gStyle->SetOptStat(0);
+    
+    
+    //gStyle->SetOptStat(0);
     gStyle->SetPalette(55);
     glx_initDigi();
     
@@ -17,7 +20,7 @@ int analyses(){
     // Double_t momentum=3.5;
     Int_t pdg[]= {11,13,211,321,2212};
     Double_t mass[] = {0.000511,0.1056584,0.139570,0.49368,0.9382723};
-    Double_t angle1(0), angle2(0),sum1(0),sum2(0), sigma(0.009),range(5*sigma),noise(0.3);
+    //Double_t angle1(0), angle2(0),sum1(0),sum2(0), sigma(0.009),range(5*sigma),noise(0.3);
     
     Double_t fAngleK[10]={0};
     Double_t fAnglePi[10]={0};
@@ -31,20 +34,33 @@ int analyses(){
     
     // histograms
     
+    TH1F * histo_cherenkov = new TH1F("histo_cherenkov","histo_cherenkov", 100,0.6,1);
+    TH1F * histo_tdiff= new TH1F("histo_tdiff","histo_tdiff", 500,-10,10);
+    
+    TH1F *hist_ev_rho_mass = new TH1F("hist_ev_rho_mass","; #pi^{#plus}#pi^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.3, 1.2);
+    TH1F *hist_ev_phi_mass = new TH1F("hist_ev_phi_mass","; k^{#plus}k^{#minus} Invariant Mass [GeV/c^{2}];entries [#]", 900, 0.9, 1.2);
+    TH1F *hist_ev_missing_mass_phi = new TH1F("hist_ev_missing_mass_phi",";#phi Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.03, 0.03);
+    TH1F *hist_ev_missing_mass_rho = new TH1F("hist_ev_missing_mass_rho",";#rho Missing Mass Squared (GeV/c^{2})^{2};entries [#]", 1000, -0.03, 0.03);
+    TH1F *hist_ev_chi_phi = new TH1F("hist_ev_chi_phi","; #phi Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
+    TH1F *hist_ev_chi_rho = new TH1F("hist_ev_chi_rho","; #rho Kinematic Fit #chi^{2} ;entries [#]", 100, 0, 45);
+    
+    hist_ev_rho_mass->SetTitle("#rho Invariant Mass");
+    hist_ev_phi_mass->SetTitle("#phi Invariant Mass");
+    
     //TH1F*  histo_chiNDF = new TH1F("histo_chiNDF",";ChiSquare/NDF; entries [#]",200 ,0,10);
     //TH1F*  histo_chiNDF_cut = new TH1F("histo_chiNDF_cut",";ChiSquare/NDF; entries [#]",200 ,0,10);
     
     const int pos_bin(100), pos_min(-100), pos_max(100);
     
-    TH2F * histo_pos_xy = new TH2F( "histo_pos_xy" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
-    TH2F * histo_pos_xy_yield_tmp = new TH2F( "histo_pos_xy_yield_tmp" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
-    TH2F * histo_pos_xy_yield = new TH2F( "histo_pos_xy_yield" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy = new TH2F( "histo_pos_xy" , "; Bar Hit X [cm] ; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_yield_tmp = new TH2F( "histo_pos_xy_yield_tmp" , "; Bar Hit X [cm] ; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_yield = new TH2F( "histo_pos_xy_yield" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
-    TH2F * histo_pos_xy_spr_tmp = new TH2F( "histo_pos_xy_spr_tmp" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
-    TH2F * histo_pos_xy_spr = new TH2F( "histo_pos_xy_spr" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_spr_tmp = new TH2F( "histo_pos_xy_spr_tmp" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_spr = new TH2F( "histo_pos_xy_spr" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
-    TH2F * histo_pos_xy_reso_tmp = new TH2F( "histo_pos_xy_reso_tmp" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
-    TH2F * histo_pos_xy_reso = new TH2F( "histo_pos_xy_reso" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_reso_tmp = new TH2F( "histo_pos_xy_reso_tmp" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_reso = new TH2F( "histo_pos_xy_reso" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
     //TH3D * histo_pos_xy_reso_4d = new TH3D( "histo_pos_xy_reso_4d" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max,100,0,10);
     
@@ -150,7 +166,7 @@ int analyses(){
     graph_pos_reso->SetMarkerColor(4);
     graph_pos_reso->SetMarkerStyle(21);
     graph_pos_reso->SetLineStyle(0);
-
+    
     
     // variables
     double diff(-1);
@@ -171,12 +187,38 @@ int analyses(){
     
     int mom_bin_flag(-1);
     
+    double mass_phi_mini(1.01),mass_phi_max(1.028);
+    double chisq_phi_mini(0),chisq_phi_max(20);
+    double miss_mass_phi_mini(-0.005),miss_mass_phi_max(0.005);
+    
+    double mass_rho_mini(0.66),mass_rho_max(0.82);
+    double chisq_rho_mini(0),chisq_rho_max(10);
+    double miss_mass_rho_mini(-0.005),miss_mass_rho_max(0.005);
+    
+    
+    
     // read tree
-    TFile *f = new TFile("outFile_v2.root");
+    
+    TFile *f = new TFile(infile);
     TTree *tree_variables = (TTree*)f->Get("tree_variables");
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0);
     double track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1);
+    
+    double track_inv_mass(-1),track_missing_mass(-1),track_chi_square(-1),track_TofTrackDist(-1);
+    /*
+     std::vector<int> *vpx = 0;
+     std::vector<int> *vpy = 0;
+     std::vector<int> *vpz = 0;
+     std::vector<double> *vtdiff = 0;
+     std::vector<double> *vtangle = 0;
+     
+     TBranch *bvpx = 0;
+     TBranch *bvpy = 0;
+     TBranch *bvpz = 0;
+     TBranch *bvtdiff = 0;
+     TBranch *bvtangle = 0;
+     */
     
     tree_variables->SetBranchAddress("track_pid",&track_pid);
     tree_variables->SetBranchAddress("track_spr",&track_spr);
@@ -186,31 +228,149 @@ int analyses(){
     tree_variables->SetBranchAddress("track_xbar",&track_xbar);
     tree_variables->SetBranchAddress("track_ybar",&track_ybar);
     tree_variables->SetBranchAddress("track_nbar",&track_nbar);
-    tree_variables->SetBranchAddress("track_fit_chisqu",&track_fit_chisqu);
-    tree_variables->SetBranchAddress("track_fit_NDF",&track_fit_NDF);
+    //tree_variables->SetBranchAddress("track_fit_chisqu",&track_fit_chisqu);
+    //tree_variables->SetBranchAddress("track_fit_NDF",&track_fit_NDF);
     
-    std::vector<int> *vpx = 0;
-    std::vector<int> *vpy = 0;
-    std::vector<int> *vpz = 0;
+    tree_variables->SetBranchAddress("track_inv_mass",&track_inv_mass);
+    tree_variables->SetBranchAddress("track_missing_mass",&track_missing_mass);
+    tree_variables->SetBranchAddress("track_chi_square",&track_chi_square);
+    //tree_variables->SetBranchAddress("track_TofTrackDist",&track_TofTrackDist);
     
-    TBranch *bvpx = 0;
-    TBranch *bvpy = 0;
-    TBranch *bvpz = 0;
+    /*
+     tree_variables->SetBranchAddress("vpx",&vpx,&bvpx);
+     tree_variables->SetBranchAddress("vpy",&vpy,&bvpy);
+     tree_variables->SetBranchAddress("vpz",&vpz,&bvpz);
+     
+     tree_variables->SetBranchAddress("vtdiff",&vtdiff,&bvtdiff);
+     tree_variables->SetBranchAddress("vtangle",&vtangle,&bvtangle);
+     */
     
-    tree_variables->SetBranchAddress("vpx",&vpx,&bvpx);
-    tree_variables->SetBranchAddress("vpy",&vpy,&bvpy);
-    tree_variables->SetBranchAddress("vpz",&vpz,&bvpz);
+
     
+    
+    
+    /*
+     ///////////////////////////////////////
+     ///////////////////////////////////////
+     ///////////////////////////////////////
+     double pion_counter(1),kaon_counter(1);
+     double sum1,sum2,noise = 0.5;
+     TSpectrum *spect = new TSpectrum(10);
+     double minChangle = 0.6;
+     double maxChangle = 0.9;
+     TF1 *fit = new TF1("fgaus","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2]) +x*[3]+[4]",minChangle,maxChangle);
+     double cut_cangle=0.04;
+     double cherenkovreco[5],spr[5];
+     
+     TGaxis::SetMaxDigits(3);
+     double sigma[]={0.01,0.01,0.01,0.010,0.01,0.01};
+     double mAngle[5];
+     TF1  *fAngle[5];
+     TH1F *hAngle[5], *hLnDiff[5];
+     double init_mon=3.5;
+     for(int i=0; i<5; i++){
+     hAngle[i]= new TH1F(Form("hAngle_%d",i),  "cherenkov angle;#theta_{C} [rad];entries/N_{max} [#]", 250,0.6,1);
+     //hNph[i] = new TH1F(Form("hNph_%d",i),";detected photons [#];entries [#]", 150,0,150);
+     
+     mAngle[i] = acos(sqrt(init_mon * init_mon + glx_mass[i]*glx_mass[i])/init_mon/1.473);
+     fAngle[i] = new TF1(Form("fAngle_%d",i),"[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0.7,0.9);
+     fAngle[i]->SetParameter(0,1);        // const
+     fAngle[i]->SetParameter(1,mAngle[i]);// mean
+     fAngle[i]->SetParameter(2,sigma[i]); // sigma
+     hAngle[i]->SetMarkerStyle(20);
+     hAngle[i]->SetMarkerSize(0.8);
+     hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",110,-120,120); //,80,-150,150);
+     //hLnDiff[i] = new TH1F(Form("hLnDiff_%d",i),";ln L(#pi) - ln L(K);entries [#]",80,-150,150);
+     }
+     hAngle[2]->SetLineColor(4);
+     hAngle[3]->SetLineColor(2);
+     hAngle[2]->SetMarkerColor(kBlue+1);
+     hAngle[3]->SetMarkerColor(kRed+1);
+     fAngle[2]->SetLineColor(4);
+     fAngle[3]->SetLineColor(2);
+     hLnDiff[2]->SetLineColor(4);
+     hLnDiff[3]->SetLineColor(2);
+     ///////////////////////////////////////
+     ///////////////////////////////////////
+     ///////////////////////////////////////
+     */
     Long64_t nentries = tree_variables->GetEntries();
     Double_t mean_array[]={0.824512,0.825366,0.826363,0.826648,0.826861,0.826576 ,0.826149};
-    //Double_t mean_array[]={0.824202, 0.826007, 0.82663, 0.826798,  0.826776, 0.826793, 0.826775 };
-    
+    //Double_t mean_array[]={0.8245,0.826,0.8265,0.82685,0.8269,0.8269,0.8269};
     for (Long64_t i=0;i<nentries;i++) {
         tree_variables->GetEntry(i);
-        bvpx->GetEntry(i);
-        bvpy->GetEntry(i);
-        bvpz->GetEntry(i);
+        /*
+         bvpx->GetEntry(i);
+         bvpy->GetEntry(i);
+         bvpz->GetEntry(i);
+         bvtdiff->GetEntry(i);
+         bvtangle->GetEntry(i);
+         */
         
+        if(track_pid==2){
+            hist_ev_rho_mass->Fill(track_inv_mass);
+            hist_ev_missing_mass_rho->Fill(track_missing_mass);
+            hist_ev_chi_rho->Fill(track_chi_square);
+            if(track_inv_mass<mass_rho_mini || track_inv_mass> mass_rho_max)continue;
+            if(track_missing_mass < miss_mass_rho_mini || track_missing_mass > miss_mass_rho_max)continue;
+            if(track_chi_square<chisq_rho_mini || track_chi_square> chisq_rho_max)continue;
+        }
+        
+        if(track_pid==3){
+            hist_ev_phi_mass->Fill(track_inv_mass);
+            hist_ev_missing_mass_phi->Fill(track_missing_mass);
+            hist_ev_chi_phi->Fill(track_chi_square);
+            if(track_inv_mass<mass_phi_mini || track_inv_mass> mass_phi_max)continue;
+            if(track_missing_mass < miss_mass_phi_mini || track_missing_mass > miss_mass_phi_max)continue;
+            if(track_chi_square<chisq_phi_mini || track_chi_square> chisq_phi_max)continue;
+        }
+        
+        /*
+         // wall cut
+         if(track_nbar<4 || track_nbar>8 ) continue;
+         if(track_xbar>10 || track_xbar < -10 ) continue;
+         
+         // momentum cut
+         if(track_mom<3.5 || track_mom>4.0 )continue;
+         
+         //////////////////////////////////////////
+         //////// calculate separation power //////
+         //////////////////////////////////////////
+         double percentage = kaon_counter/pion_counter*100.0;
+         //cout<<"##### percentage  "<<percentage<<endl;
+         if (!(percentage <100 && track_pid==2) || track_pid==3){
+         sum1=0;
+         sum2=0;
+         for (UInt_t j = 0; j < vtangle->size(); ++j){
+         double time_diff = vtdiff->at(j);
+         if(fabs(time_diff)>3)continue;
+         double tangle = vtangle->at(j);
+         
+         for(int p=0; p<5; p++){
+         mAngle[p] = acos(sqrt(track_mom * track_mom + glx_mass[p]*glx_mass[p])/track_mom/1.473);
+         fAngle[p]->SetParameter(1,mAngle[p]);
+         }
+         hAngle[track_pid]->Fill(tangle);
+         if(fabs(tangle-0.5*(mAngle[2]+mAngle[3]))>cut_cangle)continue;
+         
+         sum1 += TMath::Log(fAngle[2]->Eval(tangle)+noise);
+         sum2 += TMath::Log(fAngle[3]->Eval(tangle)+noise);
+         }
+         
+         double sum = sum1-sum2;
+         //cout<<"##### sum  "<<sum<<endl;
+         hLnDiff[track_pid]->Fill(sum);
+         
+         if(track_pid==3) kaon_counter++;
+         if(track_pid==2) pion_counter++;
+         
+         
+         }
+         
+         continue;
+         */
+        
+        //if(track_nbar>5) continue;
         if(track_pid !=2 ) continue; // select pion !=2
         //fit_quality=track_fit_chisqu/track_fit_NDF;
         //histo_chiNDF->Fill(fit_quality);
@@ -222,6 +382,7 @@ int analyses(){
         histo_track_spr->Fill(track_spr*1000);
         // momentum cut
         //if(track_mom> 4.5   || track_mom<3.5) continue;
+        //if(track_mom<3.5 || track_mom>4.0 )continue;
         // mean SPR cut
         if(track_mean> mean_max   || track_mean<mean_min) continue;
         if(track_spr*1000> spr_max || track_spr*1000<spr_min ) continue;
@@ -236,9 +397,21 @@ int analyses(){
         // mean tail study
         //if(track_mean< mean_max) continue;
         //if(track_spr*1000< spr_max) continue;
-        for (UInt_t j = 0; j < vpx->size(); ++j) {
-            glx_hdigi[vpx->at(j)]->Fill(vpy->at(j),vpz->at(j));
-        }
+        
+        //        ////////////////////////////////
+        //        ////// New Implimentation //////
+        //        ////////////////////////////////
+        //
+        //        for (UInt_t j = 0; j < vpx->size(); ++j) {
+        //            glx_hdigi[vpx->at(j)]->Fill(vpy->at(j),vpz->at(j));
+        //        }
+        //        for (UInt_t j = 0; j < vtangle->size(); ++j) {
+        //            double time_diff = vtdiff->at(j);
+        //            if(fabs(time_diff)>3)continue;
+        //            histo_tdiff->Fill(time_diff);
+        //            histo_cherenkov->Fill(vtangle->at(j));
+        //        }
+        
         
         //diff = fAnglePi-track_mean; // not used because there are systematic shifts
         diff = track_mean-   0.82608; // default value will be changed
@@ -311,10 +484,13 @@ int analyses(){
         histo_track_pos_mom_bin[xbin_pos][ybin_pos]->Fill(track_mom);
         //histo_track_pos_spr_bin[xbin_pos][ybin_pos]->Fill(track_spr*1000);
         //histo_track_pos_mean_bin[xbin_pos][ybin_pos]->Fill(track_mean);
+        
     }
     
+    
+    
     Double_t spr_array[10]={0};
-    if(true){
+    if(true){ // shold be true search for spr_array
         TCanvas *cctest = new TCanvas("cctest","cctest",800,500);
         for(int i=0;i<nbin_mom;i++){
             //cout<<"####### i= "<<i<<"  "<<histo_track_yield[i]->GetEntries()<<endl;
@@ -338,17 +514,28 @@ int analyses(){
             
             fit_gause->SetParLimits(1,0.80,0.84);
             fit_gause->SetParLimits(2,0.0001,500);
-            histo_track_mean_mom[i]->Fit("fit_gause","MQ","", 0, 30) ;
+            histo_track_mean_mom[i]->Fit("fit_gause","MQ0","", 0, 30) ;
             
             cctest2->cd();
             cctest2->Update();
             histo_track_mean_mom[i]->Draw();
             cctest2->Update();
+            TLine *lineEX= new TLine(0,0,0,1000);
+            lineEX->SetX1(mean_array[i]);
+            lineEX->SetX2(mean_array[i]);
+            lineEX->SetY1(gPad->GetUymin());
+            lineEX->SetY2(gPad->GetUymax());
+            lineEX->SetLineColor(kBlack);
+            lineEX->Draw();
+            cctest2->Update();
+            
             cctest2->WaitPrimitive();
-            //int binmax = histo_track_mean_mom[i]->GetMaximumBin();
-            //double x = histo_track_mean_mom[i]->GetXaxis()->GetBinCenter(binmax);
-            //cout<<"###### i  "<<i<< " x  "<<x<<endl;
-            cout<<"#############  "<< fit_gause->GetParameter(1)<<endl;
+            
+            int binmax = histo_track_mean_mom[i]->GetMaximumBin();
+            double x = histo_track_mean_mom[i]->GetXaxis()->GetBinCenter(binmax);
+            cout<<"#############  Copy #############"<<endl;
+            cout<<x<<",";
+            //cout<<"#############  "<< fit_gause->GetParameter(1)<<endl;
         }
         
         TCanvas *cctest3 = new TCanvas("cctest3","cctest3",800,500);
@@ -367,6 +554,7 @@ int analyses(){
     }
     
     //return 0;
+    
     
     TCanvas *cc = new TCanvas("cc","cc",800,500);
     
@@ -407,6 +595,8 @@ int analyses(){
     fit_trk_reso->SetParLimits(2,1,5);
     fit_trk_reso->SetNpx(1000);
     
+    
+    
     int couter[nbin_mom]={0};
     for(int f=0;f<nbin_mom;f++){
         fit_track_resolution->SetLineColor(f+1);
@@ -425,7 +615,6 @@ int analyses(){
                 cc->Update();
                 cc->WaitPrimitive();
             }
-            
             if(false){
                 cc->cd();
                 cc->Update();
@@ -481,89 +670,86 @@ int analyses(){
             g_pi[f]->SetPoint(couter[f], yield_BinCenter, fAnglePi[f]);
             g_k[f]->SetPoint(couter[f], yield_BinCenter, fAngleK[f]);
             /////////
-            
-            
             ++couter[f];
         }
     }
     
-    ////////////
-    glx_canvasAdd("r_resolution_bin",800,400);
-    TMultiGraph *mg = new TMultiGraph();
-    TGraphAsymmErrors *graph_tracker_reso = new TGraphAsymmErrors();
-    graph_tracker_reso->SetMarkerColor(kBlack);
-    graph_tracker_reso->SetMarkerStyle(21);
-    
-    TLegend * legend_reso= new TLegend(0.630326, 0.466667,0.889724,0.872);
-    //legend_reso->SetHeader("Pions","C");
-    int counter2=0;
-    double tracker_reso(-1),tracker_reso_error(-1);
-    for(int i=0;i<nbin_mom;i++){
-        fit_trk_reso->SetLineColor(i+1);
-        if(graph_reso[i]->GetN()<1)continue;
-        legend_reso->AddEntry(graph_reso[i],Form("%d : %d GeV/c",i+2,i+3) ,"l");
-        cout<<"########## i= "<<i<<" spr_array[i]= "<< spr_array[i]<<endl;
-        fit_trk_reso->SetParameter(1,spr_array[i]); // 9
-        graph_reso[i]->Fit("fit_trk_reso","M","", 7, 48) ;
-        tracker_reso=fit_trk_reso->GetParameter(2);
-        tracker_reso_error=fit_trk_reso->GetParError(2);
-        
-        graph_tracker_reso->SetPoint(counter2,i+2+0.5, tracker_reso);
-        graph_tracker_reso->SetPointError(counter2, 1/2, 1/2,tracker_reso_error/2,tracker_reso_error/2);
-        mg->Add(graph_reso[i]);
-        ++counter2;
-    }
-    mg->SetTitle(" Cherenkov Resolution per Track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
-    mg->Draw("APL");
-    legend_reso->Draw();
-    
-    
-    
-    ////////////
-    glx_canvasAdd("r_resolution_bin_fit",800,400);
-    TMultiGraph *mg_reo_fit = new TMultiGraph();
-    mg_reo_fit->Add(graph_tracker_reso);
-    mg_reo_fit->SetTitle(" Tracker Resolution ; Pion Momentum [GeV/c]; #sigma_{tracker} [m rad]");
-    mg_reo_fit->Draw("APL");
-    mg_reo_fit->GetHistogram()->GetYaxis()->SetRangeUser(0,5);
-    mg_reo_fit->GetHistogram()->GetXaxis()->SetRangeUser(0,10);
-    glx_canvasGet("r_resolution_bin_fit")->Update();
-    TLine *test2= new TLine(0,0,0,1000);
-    test2->Draw();
-    
-    ////////////
-    glx_canvasAdd("r_spr_bin",800,400);
-    TMultiGraph *mg2 = new TMultiGraph();
-    for(int i=0;i<nbin_mom;i++){
-        fit_track_spr->SetLineColor(i+1);
-        if(graph_spr[i]->GetN()<1)continue;
-        mg2->Add(graph_spr[i]);
-    }
-    mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
-    mg2->Draw("APL");
-    mg2->GetHistogram()->GetYaxis()->SetRangeUser(0,15);
-    glx_canvasGet("r_spr_bin")->Update();
-    legend_reso->Draw();
-    
-    
-    /////////////
-    glx_canvasAdd("r_mean_bin",800,400);
-    TMultiGraph *mg3 = new TMultiGraph();
-    for(int i=0;i<nbin_mom;i++){
-        fit_track_mean->SetLineColor(i+1);
-        if(graph_mean[i]->GetN()<1)continue;
-        mg3->Add(graph_mean[i]);
-        mg3->Add(g_pi[i]);
-        mg3->Add(g_k[i]);
-    }
-    mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
-    mg3->Draw("APL");
-    mg3->GetHistogram()->GetYaxis()->SetRangeUser(0.8,0.84);
-    legend_reso->Draw();
     
     
     if(true){
+        ////////////
+        glx_canvasAdd("r_resolution_bin",800,400);
+        TMultiGraph *mg = new TMultiGraph();
+        TGraphAsymmErrors *graph_tracker_reso = new TGraphAsymmErrors();
+        graph_tracker_reso->SetMarkerColor(kBlack);
+        graph_tracker_reso->SetMarkerStyle(21);
         
+        TLegend * legend_reso= new TLegend(0.630326, 0.466667,0.889724,0.872);
+        //legend_reso->SetHeader("Pions","C");
+        int counter2=0;
+        double tracker_reso(-1),tracker_reso_error(-1);
+        for(int i=0;i<nbin_mom;i++){
+            fit_trk_reso->SetLineColor(i+1);
+            if(graph_reso[i]->GetN()<1)continue;
+            legend_reso->AddEntry(graph_reso[i],Form("%d : %d GeV/c",i+2,i+3) ,"l");
+            cout<<"########## i= "<<i<<" spr_array[i]= "<< spr_array[i]<<endl;
+            fit_trk_reso->SetParameter(1,spr_array[i]); // 9
+            graph_reso[i]->Fit("fit_trk_reso","M","", 7, 48) ;
+            tracker_reso=fit_trk_reso->GetParameter(2);
+            tracker_reso_error=fit_trk_reso->GetParError(2);
+            
+            graph_tracker_reso->SetPoint(counter2,i+2+0.5, tracker_reso);
+            graph_tracker_reso->SetPointError(counter2, 1/2, 1/2,tracker_reso_error/2,tracker_reso_error/2);
+            mg->Add(graph_reso[i]);
+            ++counter2;
+        }
+        mg->SetTitle(" Cherenkov Resolution per Track ; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
+        mg->Draw("APL");
+        legend_reso->Draw();
+        
+        ////////////
+        glx_canvasAdd("r_resolution_bin_fit",800,400);
+        TMultiGraph *mg_reo_fit = new TMultiGraph();
+        mg_reo_fit->Add(graph_tracker_reso);
+        mg_reo_fit->SetTitle(" Tracker Resolution ; Pion Momentum [GeV/c]; #sigma_{tracker} [m rad]");
+        mg_reo_fit->Draw("APL");
+        mg_reo_fit->GetHistogram()->GetYaxis()->SetRangeUser(0,5);
+        mg_reo_fit->GetHistogram()->GetXaxis()->SetRangeUser(0,10);
+        glx_canvasGet("r_resolution_bin_fit")->Update();
+        TLine *test2= new TLine(0,0,0,1000);
+        test2->Draw();
+        
+        ////////////
+        glx_canvasAdd("r_spr_bin",800,400);
+        TMultiGraph *mg2 = new TMultiGraph();
+        for(int i=0;i<nbin_mom;i++){
+            fit_track_spr->SetLineColor(i+1);
+            if(graph_spr[i]->GetN()<1)continue;
+            mg2->Add(graph_spr[i]);
+        }
+        mg2->SetTitle(" SPR per Track ; Photon Yield [#]; SPR [m rad]");
+        mg2->Draw("APL");
+        mg2->GetHistogram()->GetYaxis()->SetRangeUser(0,15);
+        glx_canvasGet("r_spr_bin")->Update();
+        legend_reso->Draw();
+        
+        
+        /////////////
+        glx_canvasAdd("r_mean_bin",800,400);
+        TMultiGraph *mg3 = new TMultiGraph();
+        for(int i=0;i<nbin_mom;i++){
+            fit_track_mean->SetLineColor(i+1);
+            if(graph_mean[i]->GetN()<1)continue;
+            mg3->Add(graph_mean[i]);
+            if (i==1)mg3->Add(g_pi[i]);
+            if (i==1)mg3->Add(g_k[i]);
+        }
+        mg3->SetTitle(" #theta_{c}^{tr} per Track ; Photon Yield [#]; #theta_{c}^{tr} [rad]");
+        mg3->Draw("APL");
+        mg3->GetHistogram()->GetYaxis()->SetRangeUser(0.8,0.84);
+        legend_reso->Draw();
+        
+        /////////////
         glx_canvasAdd("r_yield",800,400);
         THStack *hs = new THStack("hs","Stacked 1D histograms");
         hs->SetTitle("Photon Yield");
@@ -651,83 +837,353 @@ int analyses(){
         //glx_canvasAdd("r_chiNDF",800,400);
         //histo_chiNDF->Draw();
         //histo_chiNDF_cut->Draw("same");
+        
     }
-    
     
     // resolution map
     
-    
-    // 4D resolution moentum position
-    Float_t xpos,ypos,mom_pos,reso_pos;
-    auto f2 = TFile::Open("reso_pos_mom.root","RECREATE");
-    TNtuple ntuple("ntuple","data from ascii file","xpos:ypos:mom_pos:reso_pos");
-    
-    
-    double mom_avr(-1);
-    TCanvas *cc2 = new TCanvas("cc2","cc2",800,500);
-    int couter2(0);
-    for (int x=0;x<pos_bin;x++){
-        for (int y=0;y<pos_bin;y++){
-            double hentry =histo_track_pos_resolution_bin[x][y]->GetEntries();
-            if (hentry <100)continue; //100
-            histo_track_pos_resolution_bin[x][y]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
-            mom_avr = histo_track_pos_mom_bin[x][y]->GetMean();
-            if(false){
-                cc2->cd();
-                cc2->Update();
-                histo_track_pos_resolution_bin[x][y]->Draw();
-                cc2->Update();
-                cc2->WaitPrimitive();
+    if(true){
+        // 4D resolution moentum position
+        Float_t xpos,ypos,mom_pos,reso_pos;
+        auto f2 = TFile::Open("reso_pos_mom.root","RECREATE");
+        TNtuple ntuple("ntuple","data from ascii file","xpos:ypos:mom_pos:reso_pos");
+        
+        
+        double mom_avr(-1);
+        TCanvas *cc2 = new TCanvas("cc2","cc2",800,500);
+        int couter2(0);
+        for (int x=0;x<pos_bin;x++){
+            for (int y=0;y<pos_bin;y++){
+                double hentry =histo_track_pos_resolution_bin[x][y]->GetEntries();
+                if (hentry <100)continue; //100
+                histo_track_pos_resolution_bin[x][y]->Fit("fit_track_resolution","MQ0","", -50, 50) ;
+                mom_avr = histo_track_pos_mom_bin[x][y]->GetMean();
+                if(false){
+                    cc2->cd();
+                    cc2->Update();
+                    histo_track_pos_resolution_bin[x][y]->Draw();
+                    cc2->Update();
+                    cc2->WaitPrimitive();
+                }
+                pos_BinCenter = histo_pos_xy->GetBinContent(x,y);
+                
+                track_pos_resolution= fit_track_resolution->GetParameter(2);
+                track_pos_resolution_error= fit_track_resolution->GetParError(2);
+                
+                histo_pos_xy_reso->SetBinContent(x,y,track_pos_resolution);
+                //histo_pos_xy_reso_4d->SetBinContent(x,y,mom_avr,track_pos_resolution);
+                
+                double  xpos = histo_pos_xy_reso->GetXaxis()->GetBinCenter(x);
+                double  ypos = histo_pos_xy_reso->GetYaxis()->GetBinCenter(y);
+                double  mom_pos = mom_avr;
+                double  reso_pos = track_pos_resolution;
+                if (track_pos_resolution<5 && track_pos_resolution>1 )ntuple.Fill(xpos,ypos,mom_pos,reso_pos);
+                
+                graph_pos_reso->SetPoint(couter2, mom_pos, track_pos_resolution); // pos_BinCenter
+                //graph_pos_reso->SetPointError(couter2, 1/2, 1/2,track_pos_resolution_error/2,track_pos_resolution_error/2);
+                
+                ++couter2;
             }
-            pos_BinCenter = histo_pos_xy->GetBinContent(x,y);
-            
-            track_pos_resolution= fit_track_resolution->GetParameter(2);
-            track_pos_resolution_error= fit_track_resolution->GetParError(2);
-            
-            histo_pos_xy_reso->SetBinContent(x,y,track_pos_resolution);
-            //histo_pos_xy_reso_4d->SetBinContent(x,y,mom_avr,track_pos_resolution);
-            
-            double  xpos = histo_pos_xy_reso->GetXaxis()->GetBinCenter(x);
-            double  ypos = histo_pos_xy_reso->GetYaxis()->GetBinCenter(y);
-            double  mom_pos = mom_avr;
-            double  reso_pos = track_pos_resolution;
-            if (track_pos_resolution<5 && track_pos_resolution>1 )ntuple.Fill(xpos,ypos,mom_pos,reso_pos);
-            
-            graph_pos_reso->SetPoint(couter2, mom_pos, track_pos_resolution); // pos_BinCenter
-            //graph_pos_reso->SetPointError(couter2, 1/2, 1/2,track_pos_resolution_error/2,track_pos_resolution_error/2);
-            
-            ++couter2;
         }
+        f2->Write();
+        //f2->Close();
+        
+        glx_canvasAdd("r_pos_resolution_map",800,400);
+        histo_pos_xy_reso->SetMinimum(1);
+        histo_pos_xy_reso->SetMaximum(5);
+        histo_pos_xy_reso->GetYaxis()->SetRangeUser(-100,0);
+        histo_pos_xy_reso->Draw("colz");
+        
+        glx_canvasAdd("r_pos_resolution_map_4d",800,400);
+        ntuple.SetMarkerStyle(20);
+        ntuple.SetMarkerSize(2);
+        ntuple.Draw("ypos:xpos:mom_pos:reso_pos","","COLZ");
+        // to run with relavent axis title use root d3_reso.C
+        
+        glx_canvasAdd("r_graph_pos_reso",800,400);
+        TMultiGraph *mg_4d = new TMultiGraph();
+        mg_4d->Add(graph_pos_reso);
+        mg_4d->SetTitle(" Averaged Cherenkov Resolution per Track all DIRC wall all Photon yield; Momentum [GeV/c]; #sigma( #theta_{c}^{tr} ) [m rad]");
+        mg_4d->Draw("AP");
+        mg_4d->GetHistogram()->GetYaxis()->SetRangeUser(1,6);
+        glx_canvasGet("r_graph_pos_reso")->Update();
+        TLine *tet= new TLine(0,0,0,0);
+        tet->Draw();
     }
-    f2->Write();
-    
-    glx_canvasAdd("r_pos_resolution_map",800,400);
-    histo_pos_xy_reso->SetMinimum(1);
-    histo_pos_xy_reso->SetMaximum(5);
-    histo_pos_xy_reso->GetYaxis()->SetRangeUser(-100,0);
-    histo_pos_xy_reso->Draw("colz");
-    
-    glx_canvasAdd("r_pos_resolution_map_4d",800,400);
-    ntuple.SetMarkerStyle(20);
-    ntuple.SetMarkerSize(2);
-    ntuple.Draw("ypos:xpos:mom_pos:reso_pos","","COLZ");
-    // to run with relavent axis title use root d3_reso.C
-    
-    glx_canvasAdd("r_graph_pos_reso",800,400);
-    TMultiGraph *mg_4d = new TMultiGraph();
-    mg_4d->Add(graph_pos_reso);
-    mg_4d->SetTitle(" Averaged Cherenkov Resolution per Track all DIRC wall all Photon yield; Momentum [GeV/c]; #sigma( #theta_{c}^{tr} ) [m rad]");
-    mg_4d->Draw("AP");
-    mg_4d->GetHistogram()->GetYaxis()->SetRangeUser(1,6);
-    glx_canvasGet("r_graph_pos_reso")->Update();
-    TLine *tet= new TLine(0,0,0,0);
-    tet->Draw();
     
     
+    // kinematics
+    if(true){
+//        glx_drawDigi("m,p,v\n",0);
+//        glx_canvasAdd("r_cherenkov",800,400);
+//        histo_cherenkov->Draw();
+//
+//        glx_canvasAdd("r_tdiff",800,400);
+//        histo_tdiff->Draw();
+        
+        glx_canvasAdd("r_rho_mass",800,400);
+        hist_ev_rho_mass->Draw();
+        glx_canvasGet("r_rho_mass")->Update();
+        TLine *lin_rho_mass_max= new TLine(0,0,0,1000);
+        lin_rho_mass_max->SetX1(mass_rho_max);
+        lin_rho_mass_max->SetX2(mass_rho_max);
+        lin_rho_mass_max->SetY1(gPad->GetUymin());
+        lin_rho_mass_max->SetY2(gPad->GetUymax());
+        lin_rho_mass_max->SetLineColor(kBlack);
+        lin_rho_mass_max->Draw();
+        TLine *lin_rho_mass_min= new TLine(0,0,0,1000);
+        lin_rho_mass_min->SetX1(mass_rho_mini);
+        lin_rho_mass_min->SetX2(mass_rho_mini);
+        lin_rho_mass_min->SetY1(gPad->GetUymin());
+        lin_rho_mass_min->SetY2(gPad->GetUymax());
+        lin_rho_mass_min->SetLineColor(kBlack);
+        lin_rho_mass_min->Draw();
+        glx_canvasGet("r_rho_mass")->Update();
+        
+        glx_canvasAdd("r_phi_mass",800,400);
+        hist_ev_phi_mass->Draw();
+        glx_canvasGet("r_phi_mass")->Update();
+        TLine *lin_phi_mass_max= new TLine(0,0,0,1000);
+        lin_phi_mass_max->SetX1(mass_phi_max);
+        lin_phi_mass_max->SetX2(mass_phi_max);
+        lin_phi_mass_max->SetY1(gPad->GetUymin());
+        lin_phi_mass_max->SetY2(gPad->GetUymax());
+        lin_phi_mass_max->SetLineColor(kBlack);
+        lin_phi_mass_max->Draw();
+        TLine *lin_phi_mass_min= new TLine(0,0,0,1000);
+        lin_phi_mass_min->SetX1(mass_phi_mini);
+        lin_phi_mass_min->SetX2(mass_phi_mini);
+        lin_phi_mass_min->SetY1(gPad->GetUymin());
+        lin_phi_mass_min->SetY2(gPad->GetUymax());
+        lin_phi_mass_min->SetLineColor(kBlack);
+        lin_phi_mass_min->Draw();
+        glx_canvasGet("r_phi_mass")->Update();
+        
+        glx_canvasAdd("r_missing_mass_phi",800,400);
+        hist_ev_missing_mass_phi->Draw();
+        glx_canvasGet("r_missing_mass_phi")->Update();
+        TLine *lin_phi_miss_mass_max= new TLine(0,0,0,1000);
+        lin_phi_miss_mass_max->SetX1(miss_mass_phi_max);
+        lin_phi_miss_mass_max->SetX2(miss_mass_phi_max);
+        lin_phi_miss_mass_max->SetY1(gPad->GetUymin());
+        lin_phi_miss_mass_max->SetY2(gPad->GetUymax());
+        lin_phi_miss_mass_max->SetLineColor(kBlack);
+        lin_phi_miss_mass_max->Draw();
+        TLine *lin_phi_miss_mass_min= new TLine(0,0,0,1000);
+        lin_phi_miss_mass_min->SetX1(miss_mass_phi_mini);
+        lin_phi_miss_mass_min->SetX2(miss_mass_phi_mini);
+        lin_phi_miss_mass_min->SetY1(gPad->GetUymin());
+        lin_phi_miss_mass_min->SetY2(gPad->GetUymax());
+        lin_phi_miss_mass_min->SetLineColor(kBlack);
+        lin_phi_miss_mass_min->Draw();
+        glx_canvasGet("r_missing_mass_phi")->Update();
+        
+        glx_canvasAdd("r_missing_mass_rho",800,400);
+        hist_ev_missing_mass_rho->Draw();
+        glx_canvasGet("r_missing_mass_rho")->Update();
+        TLine *lin_rho_miss_mass_max= new TLine(0,0,0,1000);
+        lin_rho_miss_mass_max->SetX1(miss_mass_rho_max);
+        lin_rho_miss_mass_max->SetX2(miss_mass_rho_max);
+        lin_rho_miss_mass_max->SetY1(gPad->GetUymin());
+        lin_rho_miss_mass_max->SetY2(gPad->GetUymax());
+        lin_rho_miss_mass_max->SetLineColor(kBlack);
+        lin_rho_miss_mass_max->Draw();
+        TLine *lin_rho_miss_mass_min= new TLine(0,0,0,1000);
+        lin_rho_miss_mass_min->SetX1(miss_mass_rho_mini);
+        lin_rho_miss_mass_min->SetX2(miss_mass_rho_mini);
+        lin_rho_miss_mass_min->SetY1(gPad->GetUymin());
+        lin_rho_miss_mass_min->SetY2(gPad->GetUymax());
+        lin_rho_miss_mass_min->SetLineColor(kBlack);
+        lin_rho_miss_mass_min->Draw();
+        glx_canvasGet("r_missing_mass_rho")->Update();
+        
+        glx_canvasAdd("r_chi_phi",800,400);
+        hist_ev_chi_phi->Draw();
+        glx_canvasGet("r_chi_phi")->Update();
+        TLine *lin_chi_phi_max= new TLine(0,0,0,1000);
+        lin_chi_phi_max->SetX1(chisq_phi_max);
+        lin_chi_phi_max->SetX2(chisq_phi_max);
+        lin_chi_phi_max->SetY1(gPad->GetUymin());
+        lin_chi_phi_max->SetY2(gPad->GetUymax());
+        lin_chi_phi_max->SetLineColor(kBlack);
+        lin_chi_phi_max->Draw();
+        TLine *lin_chi_phi_min= new TLine(0,0,0,1000);
+        lin_chi_phi_min->SetX1(chisq_phi_mini);
+        lin_chi_phi_min->SetX2(chisq_phi_mini);
+        lin_chi_phi_min->SetY1(gPad->GetUymin());
+        lin_chi_phi_min->SetY2(gPad->GetUymax());
+        lin_chi_phi_min->SetLineColor(kBlack);
+        lin_chi_phi_min->Draw();
+        glx_canvasGet("r_chi_phi")->Update();
+        
+        glx_canvasAdd("r_chi_rho",800,400);
+        hist_ev_chi_rho->Draw();
+        glx_canvasGet("r_chi_rho")->Update();
+        TLine *lin_chi_rho_max= new TLine(0,0,0,1000);
+        lin_chi_rho_max->SetX1(chisq_rho_max);
+        lin_chi_rho_max->SetX2(chisq_rho_max);
+        lin_chi_rho_max->SetY1(gPad->GetUymin());
+        lin_chi_rho_max->SetY2(gPad->GetUymax());
+        lin_chi_rho_max->SetLineColor(kBlack);
+        lin_chi_rho_max->Draw();
+        TLine *lin_chi_rho_min= new TLine(0,0,0,1000);
+        lin_chi_rho_min->SetX1(chisq_rho_mini);
+        lin_chi_rho_min->SetX2(chisq_rho_mini);
+        lin_chi_rho_min->SetY1(gPad->GetUymin());
+        lin_chi_rho_min->SetY2(gPad->GetUymax());
+        lin_chi_rho_min->SetLineColor(kBlack);
+        lin_chi_rho_min->Draw();
+        glx_canvasGet("r_chi_rho")->Update();
+    }
     
-    cout<<"####### @ 3.5 GeV/c fAngleK "<< fAngleK[1]<<"  fAnglePi "<<fAnglePi[1]<<endl;
-    glx_drawDigi("m,p,v\n",0);
-    glx_canvasSave(0);
+    
+    /*
+     ////////////////////////////////
+     //////// Cherenkove angle //////
+     ////////////////////////////////
+     
+     
+     glx_canvasAdd("hAngle",800,400);
+     
+     //scal
+     if(hAngle[2]->GetMaximum()>0) hAngle[2]->Scale(1/hAngle[2]->GetMaximum());
+     if(hAngle[3]->GetMaximum()>0) hAngle[3]->Scale(1/hAngle[3]->GetMaximum());
+     
+     for(int i=0; i<5; i++){
+     if(hAngle[i]->GetEntries()<20) continue;
+     
+     int nfound = spect->Search(hAngle[i],1,"goff",0.9);
+     if(nfound>0) cherenkovreco[i] = spect->GetPositionX()[0];
+     else cherenkovreco[i] =  hAngle[i]->GetXaxis()->GetBinCenter(hAngle[i]->GetMaximumBin());
+     if(cherenkovreco[i]>0.85) cherenkovreco[i]=0.82;
+     
+     if(i==2)  fit->SetLineColor(kBlue);
+     if(i==3)  fit->SetLineColor(kRed);
+     fit->SetParameters(100,cherenkovreco[i],0.010,10);
+     fit->SetParNames("p0","#theta_{c}","#sigma_{c}","p3","p4");
+     fit->SetParLimits(0,0.1,1E6);
+     fit->SetParLimits(1,cherenkovreco[i]-2*cut_cangle,cherenkovreco[i]+2*cut_cangle);
+     fit->SetParLimits(2,0.005,0.030); // width
+     hAngle[i]->Fit("fgaus","I","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
+     hAngle[i]->Fit("fgaus","M","",cherenkovreco[i]-cut_cangle,cherenkovreco[i]+cut_cangle);
+     
+     cherenkovreco[i] = fit->GetParameter(1);
+     spr[i] = fit->GetParameter(2);
+     }
+     
+     gStyle->SetOptTitle(0);
+     gStyle->SetOptStat(0);
+     gStyle->SetOptFit(0);
+     
+     hAngle[2]->GetXaxis()->SetRangeUser(0.7,0.9);
+     hAngle[2]->GetYaxis()->SetRangeUser(0,1.2);
+     hAngle[2]->Draw();
+     hAngle[3]->Draw("same");
+     // fAngle[3]->Draw("same");
+     // fAngle[2]->Draw("same");
+     
+     
+     TLine *line = new TLine(0,0,0,1000);
+     line->SetX1(mAngle[3]);
+     line->SetX2(mAngle[3]);
+     line->SetY1(0);
+     line->SetY2(1.2);
+     line->SetLineColor(kRed);
+     line->Draw();
+     
+     TLine *line2 = new TLine(0,0,0,1000);
+     line2->SetX1(mAngle[2]);
+     line2->SetX2(mAngle[2]);
+     line2->SetY1(0);
+     line2->SetY2(1.2);
+     line2->SetLineColor(kBlue);
+     line2->Draw();
+     
+     TLine *line3 = new TLine(0,0,0,1000);
+     line3->SetLineStyle(2);
+     line3->SetX1(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+     line3->SetX2(0.5*(mAngle[2]+mAngle[3])-cut_cangle);
+     line3->SetY1(0);
+     line3->SetY2(1.2);
+     line3->SetLineColor(1);
+     line3->Draw();
+     
+     TLine *line4 = new TLine(0,0,0,1000);
+     line4->SetLineStyle(2);
+     line4->SetX1(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+     line4->SetX2(0.5*(mAngle[2]+mAngle[3])+cut_cangle);
+     line4->SetY1(0);
+     line4->SetY2(1.2);
+     line4->SetLineColor(1);
+     line4->Draw();
+     
+     TLegend *leg = new TLegend(0.1,0.5,0.4,0.85);
+     leg->SetFillColor(0);
+     leg->SetFillStyle(0);
+     leg->SetBorderSize(0);
+     leg->SetFillStyle(0);
+     leg->AddEntry(hAngle[2],Form("#theta_{c}^{#pi} = %2.4f rad",cherenkovreco[2]),"");
+     leg->AddEntry(hAngle[3],Form("#theta_{c}^{K} = %2.4f rad",cherenkovreco[3]),"");
+     leg->AddEntry(hAngle[2],Form("#sigma_{c}^{#pi} = %2.1f mrad",spr[2]*1000),"");
+     leg->AddEntry(hAngle[3],Form("#sigma_{c}^{K} = %2.1f mrad",spr[3]*1000),"");
+     leg->Draw();
+     
+     TLegend *lnpa = new TLegend(0.7,0.67,0.9,0.85);
+     lnpa->SetFillColor(0);
+     lnpa->SetFillStyle(0);
+     lnpa->SetBorderSize(0);
+     lnpa->SetFillStyle(0);
+     lnpa->AddEntry(hAngle[2],"pions","lp");
+     lnpa->AddEntry(hAngle[3],"kaons","lp");
+     lnpa->Draw();
+     
+     gStyle->SetOptTitle(0);
+     gStyle->SetOptStat(0);
+     gStyle->SetOptFit(0);
+     
+     //////////////////////////////////////////
+     //////// calculate separation power //////
+     //////////////////////////////////////////
+     
+     glx_canvasAdd("r_separation",800,400);
+     
+     
+     TF1 *ff;
+     double sep=0,esep=0, m1=0,m2=0,s1=0,s2=0;
+     if(hLnDiff[3]->GetEntries()>100){
+     hLnDiff[3]->Fit("gaus","S");
+     ff = hLnDiff[3]->GetFunction("gaus");
+     ff->SetLineColor(1);
+     m1=ff->GetParameter(1);
+     s1=ff->GetParameter(2);
+     }
+     if(hLnDiff[2]->GetEntries()>100){
+     hLnDiff[2]->Fit("gaus","S");
+     ff = hLnDiff[2]->GetFunction("gaus");
+     ff->SetLineColor(1);
+     m2=ff->GetParameter(1);
+     s2=ff->GetParameter(2);
+     }
+     if(s1>0 && s2>0) sep = (fabs(m2-m1))/(0.5*(s1+s2));
+     
+     hLnDiff[2]->SetTitle(Form("sep = %2.2f s.d.",sep));
+     hLnDiff[3]->SetTitle(Form("sep = %2.2f s.d.",sep));
+     hLnDiff[2]->Draw();
+     hLnDiff[3]->Draw("same");
+     
+     TLegend *lnpl = new TLegend(0.7,0.67,0.9,0.85);
+     lnpl->SetFillColor(0);
+     lnpl->SetFillStyle(0);
+     lnpl->SetBorderSize(0);
+     lnpl->SetFillStyle(0);
+     lnpl->AddEntry(hLnDiff[2],"pions","lp");
+     lnpl->AddEntry(hLnDiff[3],"kaons","lp");
+     lnpl->Draw();
+     
+     */
+
+     glx_canvasSave(2,0);
+     glx_canvasDel("*");
     
     
     //delete histograms
@@ -736,6 +1192,9 @@ int analyses(){
             delete histo_track_pos_resolution_bin[x][y];
         }
     }
+    
+    cout<<"####### @ 3.5 GeV/c fAngleK "<< fAngleK[1]<<"  fAnglePi "<<fAnglePi[1]<<endl;
+    
     
     
     return 0;
