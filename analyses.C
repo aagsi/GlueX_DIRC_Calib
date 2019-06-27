@@ -10,9 +10,7 @@
 
 int analyses(TString infile="outFile_v3.root"){
     
-    
-    
-    //gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
     gStyle->SetPalette(55);
     glx_initDigi();
     
@@ -33,6 +31,19 @@ int analyses(TString infile="outFile_v3.root"){
     }
     
     // histograms
+    const int nbar =26;
+    
+    TH1F*  histo_track_yield_bar_allMom[26];
+    for(Int_t i=0; i<26; i++) {
+        histo_track_yield_bar_allMom[i] = new TH1F(Form("histo_track_yield_bar_allMom_%d",i),Form(";Photon Yield @ bar %d ; Photon Yield; Entries [#]",i) ,100 ,0,100);
+    }
+    
+    TH1F*  histo_track_resolution_bar_allMom[26][102];
+    for(Int_t i=0; i<26; i++) {
+        for(Int_t j=0; j<102; j++) {
+            histo_track_resolution_bar_allMom[i][j] = new TH1F(Form("histo_track_resolution_bar_allMom_%d_%d",i,j), Form("Cherenkov track resolution @ bar %d @ yield bin %d all mom;Expected #theta_{c}- Measured #theta_{c} [m rad]; Entries [#]",i,j) , 100, -50, 50 );
+        }
+    }
     
     TH1F * histo_cherenkov = new TH1F("histo_cherenkov","histo_cherenkov", 100,0.6,1);
     TH1F * histo_tdiff= new TH1F("histo_tdiff","histo_tdiff", 500,-10,10);
@@ -62,13 +73,32 @@ int analyses(TString infile="outFile_v3.root"){
     TH2F * histo_pos_xy_reso_tmp = new TH2F( "histo_pos_xy_reso_tmp" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     TH2F * histo_pos_xy_reso = new TH2F( "histo_pos_xy_reso" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
     
+    TH2F * histo_pos_xy_shift_tmp = new TH2F( "histo_pos_xy_shift_tmp" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_shift = new TH2F( "histo_pos_xy_shift" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    
+    TH2F * histo_pos_xy_shiftEx_tmp = new TH2F( "histo_pos_xy_shiftEx_tmp" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_shiftEx = new TH2F( "histo_pos_xy_shiftEx" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    
+    TH2F * histo_pos_xy_shiftEx_tmp_positive = new TH2F( "histo_pos_xy_shiftEx_tmp_positive" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_shiftEx_positive = new TH2F( "histo_pos_xy_shiftEx_positive" , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    
+    TH2F * histo_pos_xy_shiftEx_tmp_negative  = new TH2F( "histo_pos_xy_shiftEx_tmp_negative " , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_shiftEx_negative  = new TH2F( "histo_pos_xy_shiftEx_negative " , "; Bar Hit X [cm]; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    
+    TH2F * histo_pos_xy_occupancy_postiveShift = new TH2F( "histo_pos_xy_occupancy_postiveShift" , "; Bar Hit X [cm] ; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    TH2F * histo_pos_xy_occupancy_negativeShift = new TH2F( "histo_pos_xy_occupancy_negativeShift" , "; Bar Hit X [cm] ; Bar Hit Y [cm]", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max);
+    
+    
+    
     //TH3D * histo_pos_xy_reso_4d = new TH3D( "histo_pos_xy_reso_4d" , "; Bar Hit X ; Bar Hit Y (cm)", pos_bin, pos_min, pos_max, pos_bin, pos_min, pos_max,100,0,10);
+    
     
     TH1F* histo_track_mean = new TH1F("histo_track_mean","; Mean per Track [rad]; entries [#]",250,0.817,0.8348);
     TH1F* histo_track_spr = new TH1F("histo_track_spr","; SPR per Track [m rad]; entries [#]",250,5.1,20);
     
     const int nbin_yield =100;
     const int nbin_mom =10;
+    
     
     TH1F*  histo_track_yield[10];
     TH1F*  histo_track_mean_mom[10];
@@ -77,6 +107,9 @@ int analyses(TString infile="outFile_v3.root"){
     TH1F*  histo_track_resolution_bin[10][100];
     TH1F*  histo_track_spr_bin[10][100];
     TH1F*  histo_track_mean_bin[10][100];
+    
+    
+    
     
     for(Int_t i=0; i<10; i++){
         int kk = i+2;
@@ -93,6 +126,24 @@ int analyses(TString infile="outFile_v3.root"){
             histo_track_mean_bin[i][j] = new TH1F(Form("histo_mean_resolution_%d_mom_%d",j,i), Form("#theta_{c}^{tr} @ yield bin %d momentum %d - %d GeV/c ;#theta_{c}^{tr}  [rad]; Entries [#]",j,k,l), 100,0.817,0.8348);
         }
     }
+    
+    TH1F*  histo_track_mean_bar[26];
+    for(Int_t i=0; i<26; i++){
+        histo_track_mean_bar[i] = new TH1F(Form("histo_track_mean_bar_%d",i), Form("Track Mean @ bar %d ; Mean [rad]; Entries [#]",i) ,150,0.817,0.8348);
+    }
+    
+    
+    TH1F*  histo_track_mean_bar_mom[26][10];
+    for(Int_t i=0; i<26; i++){
+        for(Int_t j=0; j<10; j++){
+            int k = j+2;
+            int l =j+3;
+            histo_track_mean_bar_mom[i][j] = new TH1F(Form("histo_track_mean_bar_mom_%d_%d_%d",i,k,l), Form("Track Mean @ bar %d mom %d - %d ; Mean [rad]; Entries [#]",i,k,l) ,50,0.817,0.8348);
+        }
+    }
+    
+    
+    
     
     TH1F * histo_track_pos_resolution_bin[pos_bin][pos_bin];
     TH1F * histo_track_pos_mom_bin[pos_bin][pos_bin];
@@ -123,6 +174,8 @@ int analyses(TString infile="outFile_v3.root"){
     TGraphAsymmErrors *graph_reso[nbin_mom];
     TGraphAsymmErrors *graph_spr[nbin_mom];
     TGraphAsymmErrors *graph_mean[nbin_mom];
+    
+    
     
     for(Int_t j=0; j<nbin_mom; j++){
         
@@ -167,6 +220,15 @@ int analyses(TString infile="outFile_v3.root"){
     graph_pos_reso->SetMarkerStyle(21);
     graph_pos_reso->SetLineStyle(0);
     
+    TGraphAsymmErrors *graph_reso_allMom[nbar];
+    for(Int_t j=0; j<nbar; j++){
+        graph_reso_allMom[j] = new TGraphAsymmErrors();
+        graph_reso_allMom[j]->SetTitle("Cherenkov track resolution vs Photon yield");
+        graph_reso_allMom[j]->SetMarkerColor(j+20);
+        graph_reso_allMom[j]->SetMarkerStyle(21);
+        graph_reso_allMom[j]->SetLineColor(1);
+    }
+    
     
     // variables
     double diff(-1);
@@ -191,7 +253,9 @@ int analyses(TString infile="outFile_v3.root"){
     double chisq_phi_mini(0),chisq_phi_max(20);
     double miss_mass_phi_mini(-0.005),miss_mass_phi_max(0.005);
     
-    double mass_rho_mini(0.66),mass_rho_max(0.82);
+    //double mass_rho_mini(0.66),mass_rho_max(0.82);
+    double mass_rho_mini(0.6),mass_rho_max(0.9);
+    
     double chisq_rho_mini(0),chisq_rho_max(10);
     double miss_mass_rho_mini(-0.005),miss_mass_rho_max(0.005);
     
@@ -245,7 +309,7 @@ int analyses(TString infile="outFile_v3.root"){
      tree_variables->SetBranchAddress("vtangle",&vtangle,&bvtangle);
      */
     
-
+    
     
     
     
@@ -295,8 +359,13 @@ int analyses(TString infile="outFile_v3.root"){
      ///////////////////////////////////////
      */
     Long64_t nentries = tree_variables->GetEntries();
-    Double_t mean_array[]={0.824512,0.825366,0.826363,0.826648,0.826861,0.826576 ,0.826149};
-    //Double_t mean_array[]={0.8245,0.826,0.8265,0.82685,0.8269,0.8269,0.8269};
+    Double_t mean_array[]={0.824512,0.825366,0.826363,0.826648,0.826861,0.826576 ,0.826149}; // 1st version
+    //Double_t mean_array[]={0.8245,0.826,0.8265,0.82685,0.8269,0.8269,0.8269}; // 2nd version
+    
+    // 3rd version
+    double diff_array_detailed[26][10]={0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165,0.827165};
+    
+
     for (Long64_t i=0;i<nentries;i++) {
         tree_variables->GetEntry(i);
         /*
@@ -324,6 +393,8 @@ int analyses(TString infile="outFile_v3.root"){
             if(track_missing_mass < miss_mass_phi_mini || track_missing_mass > miss_mass_phi_max)continue;
             if(track_chi_square<chisq_phi_mini || track_chi_square> chisq_phi_max)continue;
         }
+        
+        //if(track_nbar!=5) continue;
         
         /*
          // wall cut
@@ -416,43 +487,59 @@ int analyses(TString infile="outFile_v3.root"){
         //diff = fAnglePi-track_mean; // not used because there are systematic shifts
         diff = track_mean-   0.82608; // default value will be changed
         
+        // all momenta
+        histo_track_yield_bar_allMom[track_nbar]->Fill(track_yield);
+        int xbin_yield_allMom = histo_track_yield_bar_allMom[track_nbar]->GetXaxis()->FindBin(track_yield);
+        //cout<<"xbin_yield_allMom "<<xbin_yield_allMom<<endl;
+        histo_track_resolution_bar_allMom[track_nbar][xbin_yield_allMom]->Fill(diff*1000);
+        histo_track_mean_bar[track_nbar]->Fill(track_mean);
+        
         if(track_mom>1 && track_mom<2){
             mom_bin_flag=0;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>2 && track_mom<3){
             mom_bin_flag=1;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>3 && track_mom<4){
             mom_bin_flag=2;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>4 && track_mom<5){
             mom_bin_flag=3;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>5 && track_mom<6){
             mom_bin_flag=4;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>6 && track_mom<7){
             mom_bin_flag=5;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else if(track_mom>7 && track_mom<8){
             mom_bin_flag=6;
-            diff = track_mean - mean_array[mom_bin_flag];
+            diff = track_mean - diff_array_detailed[track_nbar][mom_bin_flag];
+            //diff = track_mean - mean_array[mom_bin_flag];
         }
         else{
             continue;
             
         }
         
+        histo_track_mean_bar_mom[track_nbar][mom_bin_flag]->Fill(track_mean);
+        
         histo_track_yield[mom_bin_flag]->Fill(track_yield);
         histo_track_mean_mom[mom_bin_flag]->Fill(track_mean);
         histo_track_spr_mom[mom_bin_flag]->Fill(track_spr*1000);
-        
+
         int xbin_yield = histo_track_yield[mom_bin_flag]->GetXaxis()->FindBin(track_yield);
         //cout<<xbin_yield<<endl;
         histo_track_resolution_bin[mom_bin_flag][xbin_yield]->Fill(diff*1000);
@@ -485,10 +572,120 @@ int analyses(TString infile="outFile_v3.root"){
         //histo_track_pos_spr_bin[xbin_pos][ybin_pos]->Fill(track_spr*1000);
         //histo_track_pos_mean_bin[xbin_pos][ybin_pos]->Fill(track_mean);
         
+        // shift map
+        histo_pos_xy_shift_tmp->Fill(track_xbar,track_ybar,diff*1000);
+        content_histo_pos_xy_tmp=histo_pos_xy_shift_tmp->GetBinContent(x_pos_bin,y_pos_bin);
+        average_bin= content_histo_pos_xy_tmp/content_histo_pos_xy;
+        histo_pos_xy_shift->SetBinContent(x_pos_bin,y_pos_bin,average_bin);
+        
+        
+        double ExAnglePi= acos(sqrt(track_mom*track_mom + mass[2]*mass[2])/track_mom/1.4738);
+        double ExMeandiff = track_mean - ExAnglePi;
+        histo_pos_xy_shiftEx_tmp->Fill(track_xbar,track_ybar,ExMeandiff*1000);
+        content_histo_pos_xy_tmp=histo_pos_xy_shiftEx_tmp->GetBinContent(x_pos_bin,y_pos_bin);
+        average_bin= content_histo_pos_xy_tmp/content_histo_pos_xy;
+        histo_pos_xy_shiftEx->SetBinContent(x_pos_bin,y_pos_bin,average_bin);
+        
+        if (ExMeandiff > 0) {
+            
+            histo_pos_xy_occupancy_postiveShift->Fill(track_xbar,track_ybar);
+            x_pos_bin = histo_pos_xy_occupancy_postiveShift->GetXaxis()->FindBin(track_xbar);
+            y_pos_bin = histo_pos_xy_occupancy_postiveShift->GetYaxis()->FindBin(track_ybar);
+            content_histo_pos_xy=histo_pos_xy_occupancy_postiveShift->GetBinContent(x_pos_bin,y_pos_bin);
+            
+            histo_pos_xy_shiftEx_tmp_positive->Fill(track_xbar,track_ybar,ExMeandiff*1000);
+            content_histo_pos_xy_tmp=histo_pos_xy_shiftEx_tmp_positive->GetBinContent(x_pos_bin,y_pos_bin);
+            average_bin= content_histo_pos_xy_tmp/content_histo_pos_xy;
+            histo_pos_xy_shiftEx_positive->SetBinContent(x_pos_bin,y_pos_bin,average_bin);
+            
+        }else{
+            histo_pos_xy_occupancy_negativeShift->Fill(track_xbar,track_ybar);
+            x_pos_bin = histo_pos_xy_occupancy_negativeShift->GetXaxis()->FindBin(track_xbar);
+            y_pos_bin = histo_pos_xy_occupancy_negativeShift->GetYaxis()->FindBin(track_ybar);
+            content_histo_pos_xy=histo_pos_xy_occupancy_negativeShift->GetBinContent(x_pos_bin,y_pos_bin);
+            
+            histo_pos_xy_shiftEx_tmp_negative ->Fill(track_xbar,track_ybar,ExMeandiff*1000);
+            content_histo_pos_xy_tmp=histo_pos_xy_shiftEx_tmp_negative ->GetBinContent(x_pos_bin,y_pos_bin);
+            average_bin= content_histo_pos_xy_tmp/content_histo_pos_xy;
+            histo_pos_xy_shiftEx_negative ->SetBinContent(x_pos_bin,y_pos_bin,average_bin);
+        }
+        
+        
     }
     
+    cout<<"##### commint 1 "<<endl;
+    if(false){
+        // per bar array not used
+    Double_t meanbar_array[26] {0.828,0.827,0.8277,0.826,0.8269,0.8254,0.8239,0.827,0.8275,0.8255,0.824,0.8285,0.829,0.8266,0.828,0.827,0.827,0.829,0.826,0.828,0.829,0.827,0.826,0.826};
+    TCanvas *cctest1 = new TCanvas("cctest1","cctest1",800,500);
+    for(int i=0;i<26;i++){
+        //cout<<"####### i= "<<i<<"  "<<histo_track_yield[i]->GetEntries()<<endl;
+        if(histo_track_mean_bar[i]->GetEntries()<1)continue;
+        cctest1->cd();
+        cctest1->Update();
+        histo_track_mean_bar[i]->Draw();
+        cctest1->Update();
+        TLine *lineEXm= new TLine(0,0,0,1000);
+        lineEXm->SetX1(meanbar_array[i]);
+        lineEXm->SetX2(meanbar_array[i]);
+        lineEXm->SetY1(gPad->GetUymin());
+        lineEXm->SetY2(gPad->GetUymax());
+        lineEXm->SetLineColor(kBlack);
+        lineEXm->Draw();
+        cctest1->Update();
+        cctest1->WaitPrimitive();
+        delete histo_track_mean_bar[i];
+    }
+    delete cctest1;
     
     
+    TCanvas *cctest2 = new TCanvas("cctest2","cctest2",800,500);
+    TF1 *fit_gause2 = new TF1("fit_gause2","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
+    fit_gause2->SetLineColor(kBlack);
+    fit_gause2->SetParameters(100,9,2);
+    fit_gause2->SetParNames("p0","mean ","sigma");
+    fit_gause2->SetParLimits(0,0.1,1E6);
+    fit_gause2->SetParLimits(1,0.818,0.834);
+    fit_gause2->SetParLimits(2,0.0001,0.005);
+    
+    //double diff_array_detailed[26][10]={0.82608};
+    for(int i=0;i<26;i++){
+        for(int j=0;j<10;j++){
+            //cout<<"####### i= "<<i<<"  "<<histo_track_yield[i]->GetEntries()<<endl;
+            if(histo_track_mean_bar_mom[i][j]->GetEntries()<100)continue;
+            histo_track_mean_bar_mom[i][j]->Fit("fit_gause2","M","", 0, 30);
+            diff_array_detailed[i][j]=fit_gause2->GetParameter(1);
+            cctest2->cd();
+            cctest2->Update();
+            histo_track_mean_bar_mom[i][j]->Draw();
+            cctest2->Update();
+            TLine *lineEXm1= new TLine(0,0,0,1000);
+            lineEXm1->SetX1(diff_array_detailed[i][j]);
+            lineEXm1->SetX2(diff_array_detailed[i][j]);
+            lineEXm1->SetY1(gPad->GetUymin());
+            lineEXm1->SetY2(gPad->GetUymax());
+            lineEXm1->SetLineColor(kRed);
+            lineEXm1->Draw();
+            cctest2->Update();
+            cctest2->WaitPrimitive();
+            delete histo_track_mean_bar_mom[i][j];
+        }
+    }
+    delete cctest2;
+    // printing array used
+    //    cout<<"diff_array_detailed[i][j]={";
+    //    for(int i=0;i<26;i++){
+    //        for(int j=0;j<10;j++){
+    //            cout<<","<<fit_gause2->GetParameter(1);
+    //        }
+    //    }
+    //    cout<<"};"<<endl;
+    
+    }
+    
+    //return 0;
+    
+    // warning should not be deleted histo_track_yield
     Double_t spr_array[10]={0};
     if(true){ // shold be true search for spr_array
         TCanvas *cctest = new TCanvas("cctest","cctest",800,500);
@@ -501,6 +698,7 @@ int analyses(TString infile="outFile_v3.root"){
             cctest->Update();
             cctest->WaitPrimitive();
         }
+        delete cctest;
         
         TF1 *fit_gause = new TF1("fit_gause","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",0,30);
         fit_gause->SetLineColor(kBlack);
@@ -536,7 +734,9 @@ int analyses(TString infile="outFile_v3.root"){
             cout<<"#############  Copy #############"<<endl;
             cout<<x<<",";
             //cout<<"#############  "<< fit_gause->GetParameter(1)<<endl;
+            delete histo_track_mean_mom[i];
         }
+        delete cctest2;
         
         TCanvas *cctest3 = new TCanvas("cctest3","cctest3",800,500);
         for(int i=0;i<nbin_mom;i++){
@@ -550,9 +750,11 @@ int analyses(TString infile="outFile_v3.root"){
             histo_track_spr_mom[i]->Draw();
             cctest3->Update();
             cctest3->WaitPrimitive();
+            delete histo_track_spr_mom[i];
         }
+        delete cctest3;
     }
-    
+    cout<<"##### commint 2 "<<endl;
     //return 0;
     
     
@@ -595,8 +797,6 @@ int analyses(TString infile="outFile_v3.root"){
     fit_trk_reso->SetParLimits(2,1,5);
     fit_trk_reso->SetNpx(1000);
     
-    
-    
     int couter[nbin_mom]={0};
     for(int f=0;f<nbin_mom;f++){
         fit_track_resolution->SetLineColor(f+1);
@@ -630,9 +830,7 @@ int analyses(TString infile="outFile_v3.root"){
                 cc->Update();
                 cc->WaitPrimitive();
             }
-            
-            yield_BinCenter = histo_track_yield[mom_bin_flag]->GetXaxis()->GetBinCenter(i);
-            
+            yield_BinCenter = histo_track_yield[f]->GetXaxis()->GetBinCenter(i);
             track_resolution= fit_track_resolution->GetParameter(2);
             track_resolution_error= fit_track_resolution->GetParError(2);
             
@@ -648,14 +846,14 @@ int analyses(TString infile="outFile_v3.root"){
             
             //track_spr_bin= histo_track_spr_bin[f][i]->GetStdDev();
             //track_spr_error= histo_track_spr_bin[f][i]->GetStdDevError();
-            
+
             track_spr_bin= histo_track_spr_bin[f][i]->GetMean();
             //track_spr_error= histo_track_spr_bin[f][i]->GetMeanError();
             track_spr_error= histo_track_spr_bin[f][i]->GetStdDev();
             
             //track_spr_bin= fit_track_spr->GetParameter(1);
             //track_spr_error= fit_track_spr->GetParameter(2);
-            
+
             graph_reso[f]->SetPoint(couter[f], yield_BinCenter, track_resolution);
             graph_reso[f]->SetPointError(couter[f], 1/2, 1/2,track_resolution_error/2,track_resolution_error/2);
             
@@ -665,18 +863,107 @@ int analyses(TString infile="outFile_v3.root"){
             graph_mean[f]->SetPoint(couter[f], yield_BinCenter, track_mean_bin);
             graph_mean[f]->SetPointError(couter[f], 1/2, 1/2,track_mean_error/2,track_mean_error/2);
             
-            /////////
-            // warning
             g_pi[f]->SetPoint(couter[f], yield_BinCenter, fAnglePi[f]);
             g_k[f]->SetPoint(couter[f], yield_BinCenter, fAngleK[f]);
-            /////////
+
             ++couter[f];
         }
     }
+    cout<<"##### commint 3 "<<endl;
+    
+    
+    /////////////////////////////////////////////////////////////
+    
+    int couter_all[nbar]={0};
+    
+    for (int i=0;i<nbar;i++){
+        fit_track_resolution->SetLineColor(i+1);
+        fit_track_spr->SetLineColor(i+1);
+        fit_track_mean->SetLineColor(i+1);
+        
+        for (int j=0;j<nbin_yield;j++){
+            if (histo_track_resolution_bar_allMom[i][j]->GetEntries() <1500)continue; //400 //175 // 200 // 500
+            histo_track_resolution_bar_allMom[i][j]->Fit("fit_track_resolution","M","", -50, 50) ;
+            //histo_track_spr_bin[i][j]->Fit("fit_track_spr","MQ0","", 0, 30) ;
+            //histo_track_mean_bin[i][j]->Fit("fit_track_mean","MQ0","", 0, 30) ;
+            if(false){
+                cc->cd();
+                cc->Update();
+                histo_track_resolution_bar_allMom[i][j]->Draw();
+                cc->Update();
+                cc->WaitPrimitive();
+            }
+            yield_BinCenter = histo_track_yield_bar_allMom[i]->GetXaxis()->GetBinCenter(j);
+            track_resolution= fit_track_resolution->GetParameter(2);
+            track_resolution_error= fit_track_resolution->GetParError(2);
+            graph_reso_allMom[i]->SetPoint(couter_all[i], yield_BinCenter, track_resolution);
+            graph_reso_allMom[i]->SetPointError(couter_all[i], 1/2, 1/2,track_resolution_error/2,track_resolution_error/2);
+            ++couter_all[i];
+        }
+    }
+    TLegend * legend_reso_bar= new TLegend(0.630326, 0.466667,0.889724,0.872);
+    glx_canvasAdd("r_resolution_bin_allMom",800,400);
+    TMultiGraph *mg_allMom = new TMultiGraph();
+    for(int i=0;i<nbar;i++){
+        mg_allMom->Add(graph_reso_allMom[i]);
+        legend_reso_bar->AddEntry(graph_reso_allMom[i],Form("Bar %d",i) ,"P");
+    }
+    mg_allMom->SetTitle(" Cherenkov Resolution per Track all Momenta; Photon Yield [#]; #sigma( #theta_{c}^{tr} ) [m rad]");
+    mg_allMom->Draw("APL");
+    legend_reso_bar->Draw();
     
     
     
-    if(true){
+
+    //////////////////////////////////////////////////////////////
+    
+    glx_canvasAdd("r_pos_shift",800,400);
+    //histo_pos_xy_shift->SetMinimum(5);
+    //histo_pos_xy_shift->SetMaximum(10);
+    histo_pos_xy_shift->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_shift->Draw("colz");
+    
+    
+    glx_canvasAdd("r_pos_shiftEx",800,400);
+    //histo_pos_xy_shiftEx->SetMinimum(5);
+    //histo_pos_xy_shiftEx->SetMaximum(10);
+    histo_pos_xy_shiftEx->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_shiftEx->Draw("colz");
+    
+    
+    glx_canvasAdd("r_pos_shiftEx_positive",800,400);
+    //histo_pos_xy_shiftEx_positive->SetMinimum(5);
+    //histo_pos_xy_shiftEx_positive->SetMaximum(10);
+    histo_pos_xy_shiftEx_positive->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_shiftEx_positive->Draw("colz");
+    
+    
+    glx_canvasAdd("r_pos_shiftEx_negative",800,400);
+    //histo_pos_xy_shiftEx_negative->SetMinimum(5);
+    //histo_pos_xy_shiftEx_negative->SetMaximum(10);
+    histo_pos_xy_shiftEx_negative->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_shiftEx_negative->Draw("colz");
+    
+    
+    glx_canvasAdd("r_pos_shiftEx_occu_positive",800,400);
+    //histo_pos_xy_occupancy_postiveShift->SetMinimum(5);
+    //histo_pos_xy_occupancy_postiveShift->SetMaximum(10);
+    histo_pos_xy_occupancy_postiveShift->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_occupancy_postiveShift->Draw("colz");
+    
+    glx_canvasAdd("r_pos_shiftEx_occu_negative",800,400);
+    //histo_pos_xy_occupancy_negativeShift->SetMinimum(5);
+    //histo_pos_xy_occupancy_negativeShift->SetMaximum(10);
+    histo_pos_xy_occupancy_negativeShift->GetYaxis()->SetRangeUser(-100,0);
+    histo_pos_xy_occupancy_negativeShift->Draw("colz");
+    
+    
+    
+    
+    
+    
+    
+    if(false){
         ////////////
         glx_canvasAdd("r_resolution_bin",800,400);
         TMultiGraph *mg = new TMultiGraph();
@@ -841,8 +1128,8 @@ int analyses(TString infile="outFile_v3.root"){
     }
     
     // resolution map
-    
-    if(true){
+    cout<<"##### commint 4 "<<endl;
+    if(false){
         // 4D resolution moentum position
         Float_t xpos,ypos,mom_pos,reso_pos;
         auto f2 = TFile::Open("reso_pos_mom.root","RECREATE");
@@ -911,15 +1198,15 @@ int analyses(TString infile="outFile_v3.root"){
         tet->Draw();
     }
     
-    
+    cout<<"##### commint 5 "<<endl;
     // kinematics
-    if(true){
-//        glx_drawDigi("m,p,v\n",0);
-//        glx_canvasAdd("r_cherenkov",800,400);
-//        histo_cherenkov->Draw();
-//
-//        glx_canvasAdd("r_tdiff",800,400);
-//        histo_tdiff->Draw();
+    if(false){
+        //        glx_drawDigi("m,p,v\n",0);
+        //        glx_canvasAdd("r_cherenkov",800,400);
+        //        histo_cherenkov->Draw();
+        //
+        //        glx_canvasAdd("r_tdiff",800,400);
+        //        histo_tdiff->Draw();
         
         glx_canvasAdd("r_rho_mass",800,400);
         hist_ev_rho_mass->Draw();
@@ -1036,7 +1323,7 @@ int analyses(TString infile="outFile_v3.root"){
         glx_canvasGet("r_chi_rho")->Update();
     }
     
-    
+    cout<<"##### commint 6 "<<endl;
     /*
      ////////////////////////////////
      //////// Cherenkove angle //////
@@ -1181,9 +1468,11 @@ int analyses(TString infile="outFile_v3.root"){
      lnpl->Draw();
      
      */
-
-     glx_canvasSave(2,0);
-     glx_canvasDel("*");
+    
+    //glx_canvasSave(2,0);
+    
+    glx_canvasDel("*");
+    cout<<"##### commint 7"<<endl;
     
     
     //delete histograms
@@ -1192,6 +1481,7 @@ int analyses(TString infile="outFile_v3.root"){
             delete histo_track_pos_resolution_bin[x][y];
         }
     }
+    cout<<"##### commint 8"<<endl;
     
     cout<<"####### @ 3.5 GeV/c fAngleK "<< fAngleK[1]<<"  fAnglePi "<<fAnglePi[1]<<endl;
     
