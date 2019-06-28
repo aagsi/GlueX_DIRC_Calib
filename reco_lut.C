@@ -449,7 +449,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     } else {
         //outFile= "outFile.root";
         //outFile= "out_"+infile;
-        outFile= "out2_"+justName;
+        outFile= "out3_"+justName;
         
     }
     cout<<"####"<<outFile<<endl;
@@ -475,6 +475,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     double track_spr(-1),track_mean(-1), track_yield(-1), track_mom(-1), track_xbar(0),track_ybar(0),track_fit_chisqu(-1),track_fit_NDF(-1);
     int track_pid(-1), track_nbar(-1), track_x_pos_bin(-1);
     TString track_file="noname";
+/*
     std::vector<int> vpx;
     std::vector<int> vpy;
     std::vector<int> vpz;
@@ -482,7 +483,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
     std::vector<double> vtime;
     std::vector<double> vtangle;
     std::vector<bool> vreflected;
-    
+*/    
     double track_inv_mass(-1),track_missing_mass(-1),track_chi_square(-1),track_TofTrackDist(-1);
     
     if(btree){
@@ -497,6 +498,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
         tree_variables.Branch("track_fit_chisqu",&track_fit_chisqu,"track_fit_chisqu/D");
         tree_variables.Branch("track_fit_NDF",&track_fit_NDF,"track_fit_NDF/D");
         tree_variables.Branch("track_file",&track_file,"track_file/C");
+/*
         tree_variables.Branch("vpx",&vpx);
         tree_variables.Branch("vpy",&vpy);
         tree_variables.Branch("vpz",&vpz);
@@ -504,12 +506,12 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
         tree_variables.Branch("vtime",&vtime);
         tree_variables.Branch("vtangle",&vtangle);
         tree_variables.Branch("vreflected",&vreflected);
-        
+*/        
         tree_variables.Branch("track_inv_mass",&track_inv_mass,"track_inv_mass/D");
         tree_variables.Branch("track_missing_mass",&track_missing_mass,"track_missing_mass/D");
         tree_variables.Branch("track_chi_square",&track_chi_square,"track_chi_square/D");
-        tree_variables.Branch("track_TofTrackDist",&track_TofTrackDist,"track_TofTrackDist/D");
-        tree_variables.Branch("track_x_pos_bin",&track_x_pos_bin,"track_x_pos_bin/I");
+        //tree_variables.Branch("track_TofTrackDist",&track_TofTrackDist,"track_TofTrackDist/D");
+        //tree_variables.Branch("track_x_pos_bin",&track_x_pos_bin,"track_x_pos_bin/I");
     }
     
     
@@ -725,6 +727,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                 track_spr=-1; track_mean=-1; track_yield=-1; track_mom=-1; track_xbar=0;track_ybar=0;
                 track_pid=-1; track_nbar=-1;
                 histo_cherenkov_track->Reset();
+/*
                 vpx.clear();
                 vpy.clear();
                 vpz.clear();
@@ -732,6 +735,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                 vtime.clear();
                 vtangle.clear();
                 vreflected.clear();
+*/
             }
             
             
@@ -841,13 +845,14 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // skim
                             if(fabs(totalTime-hitTime)> 10) continue;
                             if(tangle > 1.0) continue;
-                            
+                 /*
                             if (btree){
                                 vtdiff.push_back(totalTime-hitTime);
                                 vtime.push_back(hitTime);
                                 vtangle.push_back(tangle);
                                 vreflected.push_back(reflected);
                             }
+		 */
                             
                             ///////////////
                             // Time Cut  //
@@ -859,7 +864,7 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                             // Cherenkov track  //
                             //////////////////////
                             
-                            if (!btree) histo_cherenkov_track->Fill(tangle);
+                            if(btree) histo_cherenkov_track->Fill(tangle);
                             
                             //                            ////////////////
                             //                            // Fill PDF   //
@@ -950,11 +955,13 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                     //if (glx_event->GetPdg() < 0 ) nph_n++;
                     if(pmt<108) {
                         //glx_hdigi[pmt]->Fill(pix%8, pix/8);
+/*
                         if (btree){
                             vpx.push_back(pmt);
                             vpy.push_back(pix%8);
                             vpz.push_back(pix/8);
                         }
+*/
                         
                         goodevt=1;
                     }
@@ -1053,10 +1060,10 @@ void reco_lut(TString infile="vol/tree_060772.root", TString inlut="lut/lut_12/l
                 track_inv_mass= inv_mass;
                 track_missing_mass= missing_mass;
                 track_chi_square= chi_square;
-                track_TofTrackDist= TofTrackDist;
-                
-                track_x_pos_bin=  x_pos_bin;
-                //cout<<"#### mom "<<track_mom<<endl;
+
+                //track_TofTrackDist= TofTrackDist;
+                //track_x_pos_bin=  x_pos_bin;
+
                 tree_variables.Fill();
             }
             
