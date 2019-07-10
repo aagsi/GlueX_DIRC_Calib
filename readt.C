@@ -8,16 +8,16 @@
     TH1F*  histo_tdiffD_bar_pos[24][40];
     TH1F*  histo_tdiffR_bar_pos[24][40];
     
-    TString path ="/Users/ahmed/GlueX_DIRC_Calib/histo1.root";
+    TString path ="/Users/ahmed/GlueX_DIRC_Calib/histo_without_time_correction.root";//histo_with_time_correction.root
     cout<<"path= " <<path<<endl;
     TFile *f = new TFile(path, "READ");
     
-//    TH2F * histo_pos_xy_entries = new TH2F( "histo_pos_xy_entries" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
-//    TH2F * histo_pos_xy_meanD = new TH2F( "histo_pos_xy_meanD" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
-//    TH2F * histo_pos_xy_sigmaD = new TH2F( "histo_pos_xy_sigmaD" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
-//
-//    TH2F * histo_pos_xy_meanR = new TH2F( "histo_pos_xy_meanR" , "; Bar number ; Bar Hit X", 24, 0, 24, 40, 0, 40);
-//    TH2F * histo_pos_xy_sigmaR = new TH2F( "histo_pos_xy_sigmaR" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
+    //    TH2F * histo_pos_xy_entries = new TH2F( "histo_pos_xy_entries" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
+    //    TH2F * histo_pos_xy_meanD = new TH2F( "histo_pos_xy_meanD" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
+    //    TH2F * histo_pos_xy_sigmaD = new TH2F( "histo_pos_xy_sigmaD" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
+    //
+    //    TH2F * histo_pos_xy_meanR = new TH2F( "histo_pos_xy_meanR" , "; Bar number ; Bar Hit X", 24, 0, 24, 40, 0, 40);
+    //    TH2F * histo_pos_xy_sigmaR = new TH2F( "histo_pos_xy_sigmaR" , "; Bar number ; Bar Hit X ", 24, 0, 24, 40, 0, 40);
     
     
     TH2F * histo_pos_xy_entries = new TH2F( "histo_pos_xy_entries" , "; Bar Hit X [cm]; Bar number [#]  ", 40, 0, 40 ,24, 0, 24);
@@ -67,6 +67,10 @@
     double cop[]= {62,62,62,62,62,62,62,62,60,58,56,54,53,52,52,51,50,49,47,46,46,45,45,44,44,43,43,42,41,41,40,40,38,37.5,37,37.5,37,36.5,36,36};
     
     
+    int counter=0;
+    
+    TCanvas *cc9 = new TCanvas("cc9","cc9",800,500);
+    TCanvas *cc10 = new TCanvas("cc10","cc10",800,500);
     
     for(Int_t j=0; j<40; j++){
         for(Int_t i=0; i<24; i++){
@@ -85,28 +89,47 @@
             int entries = histo_time_bar_pos[i][j]->GetEntries();
             
             
-            if (entries<300000)continue; //300000 //8000
+            if (entries<300000){ //300000 //8000
+                histo_pos_xy_meanR->Fill(j,i,-1000);
+                histo_pos_xy_meanD->Fill(j,i,-1000);
+                continue;
+            }
+            
+            cc9->Clear();
+            cc9->cd();
+            histo_tdiffD_bar_pos[i][j]->Draw();
+            cc9->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffD_bar_pos_%d.png",counter));
+            cc9->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffD_bar_pos_%d.root",counter));
+            
+            cc10->Clear();
+            cc10->cd();
+            histo_tdiffR_bar_pos[i][j]->Draw();
+            cc10->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffR_bar_pos_%d.png",counter));
+            cc10->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffR_bar_pos_%d.root",counter));
+            ++counter;
+            
+            
             //if (entries<8000)continue;
             
-            histo_pos_xy_entries->Fill(j,23-i,entries);
+            //histo_pos_xy_entries->Fill(j,23-i,entries);
             
-            //histo_pos_xy_entries->Fill(i,j,entries);
+            histo_pos_xy_entries->Fill(j,i,entries);
             
             if(true){
                 cc1->cd();
                 cc1->Update();
                 histo_time_bar_pos[i][j]->SetTitle(Form("Bar %d X Bin %d",i,j));
                 histo_time_bar_pos[i][j]->Draw();
-                cc1->Update();
-                TLine *lin_mean_max= new TLine(0,0,0,1000);
-                lin_mean_max->SetX1(cop[j]);
-                lin_mean_max->SetX2(cop[j]);
-                lin_mean_max->SetY1(gPad->GetUymin());
-                lin_mean_max->SetY2(gPad->GetUymax());
-                lin_mean_max->SetLineColor(kRed);
-                lin_mean_max->Draw();
-                cc1->Update();
-                cc1->WaitPrimitive();
+                //                cc1->Update();
+                //                TLine *lin_mean_max= new TLine(0,0,0,1000);
+                //                lin_mean_max->SetX1(cop[j]);
+                //                lin_mean_max->SetX2(cop[j]);
+                //                lin_mean_max->SetY1(gPad->GetUymin());
+                //                lin_mean_max->SetY2(gPad->GetUymax());
+                //                lin_mean_max->SetLineColor(kRed);
+                //                lin_mean_max->Draw();
+                //                cc1->Update();
+                //                cc1->WaitPrimitive();
             }
             
             if(true){
@@ -124,17 +147,17 @@
                 
                 
                 ///////////////
-                //histo_pos_xy_meanD->Fill(i,j,meanD);
-                //histo_pos_xy_sigmaD->Fill(i,j,sigmaD);
+                histo_pos_xy_meanD->Fill(j,i,meanD);
+                histo_pos_xy_sigmaD->Fill(j,i,sigmaD);
                 
-                histo_pos_xy_meanD->Fill(j,23-i,meanD);
-                histo_pos_xy_sigmaD->Fill(j,23-i,sigmaD);
+                //histo_pos_xy_meanD->Fill(j,23-i,meanD);
+                //histo_pos_xy_sigmaD->Fill(j,23-i,sigmaD);
                 
-                                                                cc1->cd();
-                                                                cc1->Update();
-                                                                histo_tdiffD_bar_pos[i][j]->Draw();
-                                                                cc1->Update();
-                                                                cc1->WaitPrimitive();
+                //                                                                cc1->cd();
+                //                                                                cc1->Update();
+                //                                                                histo_tdiffD_bar_pos[i][j]->Draw();
+                //                                                                cc1->Update();
+                //                                                                cc1->WaitPrimitive();
             }
             
             if(true){
@@ -151,11 +174,15 @@
                 shiftR_array[i][j]=meanR;
                 
                 ///////////////
-                //histo_pos_xy_meanR->Fill(i,j,meanR);
-                //histo_pos_xy_sigmaR->Fill(i,j,sigmaR);
                 
-                histo_pos_xy_meanR->Fill(j,23-i,meanR);
-                histo_pos_xy_sigmaR->Fill(j,23-i,sigmaR);
+histo_pos_xy_meanR->Fill(j,i,meanR);
+                
+                histo_pos_xy_sigmaR->Fill(j,i,sigmaR);
+                
+                
+                
+                //histo_pos_xy_meanR->Fill(j,23-i,meanR);
+                //histo_pos_xy_sigmaR->Fill(j,23-i,sigmaR);
                 
                 //                                                cc1->cd();
                 //                                                cc1->Update();
@@ -168,6 +195,8 @@
     
     TCanvas *cc2 = new TCanvas("cc2","cc2",800,500);
     histo_pos_xy_entries->Draw("COLZ");
+    cc2->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_entries.png");
+    cc2->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_entries.root");
     //
     //    TCanvas *cc3 = new TCanvas("cc3","cc3",800,500);
     //    histo_shiftR_diff->SetLineColor(2);
@@ -183,43 +212,63 @@
     histo_pos_xy_meanD->SetMinimum(-1.5);
     histo_pos_xy_meanD->SetMaximum(1.5);
     histo_pos_xy_meanD->Draw("COLZ");
+    cc5->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_meanD.png");
+    cc5->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_meanD.root");
     
-        TCanvas *cc6 = new TCanvas("cc6","cc6",800,500);
-        histo_pos_xy_sigmaD->SetMinimum(0);
-        histo_pos_xy_sigmaD->SetMaximum(3);
-        histo_pos_xy_sigmaD->Draw("COLZ");
+    TCanvas *cc6 = new TCanvas("cc6","cc6",800,500);
+    histo_pos_xy_sigmaD->SetMinimum(0);
+    histo_pos_xy_sigmaD->SetMaximum(3);
+    histo_pos_xy_sigmaD->Draw("COLZ");
+    cc6->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_sigmaD.png");
+    cc6->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_sigmaD.root");
     //
     TCanvas *cc7 = new TCanvas("cc7","cc7",800,500);
     histo_pos_xy_meanR->SetMinimum(-1.5);
     histo_pos_xy_meanR->SetMaximum(1.5);
     histo_pos_xy_meanR->Draw("COLZ");
+    cc7->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_meanR.png");
+    cc7->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_meanR.root");
     //
-        TCanvas *cc8 = new TCanvas("cc8","cc8",800,500);
-        histo_pos_xy_sigmaR->SetMinimum(0);
-        histo_pos_xy_sigmaR->SetMaximum(3);
-        histo_pos_xy_sigmaR->Draw("COLZ");
+    TCanvas *cc8 = new TCanvas("cc8","cc8",800,500);
+    histo_pos_xy_sigmaR->SetMinimum(0);
+    histo_pos_xy_sigmaR->SetMaximum(3);
+    histo_pos_xy_sigmaR->Draw("COLZ");
+    cc8->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_sigmaR.png");
+    cc8->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_pos_xy_sigmaR.root");
     
     
-    
-    
-//    cout<<"double shiftD_tdiff[24][40]={"<<endl;
-//    for(Int_t i=0; i<24; i++){
-//        for(Int_t j=0; j<40; j++){
-//            cout<<shiftD_array[i][j] <<",";
-//        }
-//    }
-//    cout<<" } ##### end"<<endl;
+//    TCanvas *cc9 = new TCanvas("cc9","cc9",800,500);
+//    histo_tdiffD_bar_pos[6][20]->Draw();
+//    cc9->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffD_bar_pos.png");
+//    cc9->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffD_bar_pos.root");
 //
-//    cout<<"double shiftR_tdiff[24][40]={"<<endl;
-//    for(Int_t i=0; i<24; i++){
-//        for(Int_t j=0; j<40; j++){
-//            cout<<shiftR_array[i][j] <<",";
-//        }
-//    }
-//    cout<<" } ##### end"<<endl;
+//
+//    TCanvas *cc10 = new TCanvas("cc10","cc10",800,500);
+//    histo_tdiffR_bar_pos[6][20]->Draw();
+//    cc10->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffR_bar_pos.png");
+//    cc10->SaveAs("/Users/ahmed/GlueX_DIRC_Calib/withouttcorrection/histo_tdiffR_bar_pos.root");
     
     
-
+    
+    
+    //    cout<<"double shiftD_tdiff[24][40]={"<<endl;
+    //    for(Int_t i=0; i<24; i++){
+    //        for(Int_t j=0; j<40; j++){
+    //            cout<<shiftD_array[i][j] <<",";
+    //        }
+    //    }
+    //    cout<<" } ##### end"<<endl;
+    //
+    //    cout<<"double shiftR_tdiff[24][40]={"<<endl;
+    //    for(Int_t i=0; i<24; i++){
+    //        for(Int_t j=0; j<40; j++){
+    //            cout<<shiftR_array[i][j] <<",";
+    //        }
+    //    }
+    //    cout<<" } ##### end"<<endl;
+    
+    
+    
     
     
     //cout<<shiftD_array[0][20] <<endl;
