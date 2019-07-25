@@ -12,8 +12,10 @@
 #include "TStopwatch.h"
 TStopwatch timer;
 
-// momentum rotation small range 
-int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){// outFile_v3.root
+// momentum rotation big range 
+
+//int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){// outFile_v3.root
+int analyses3_1(TString infile="/Users/ahmed/GlueX_DIRC_Calib/rotat.root"){// outFile_v3.root
     
     timer.Start();
     
@@ -50,19 +52,19 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
     
     
     for(Int_t i=0; i<26; i++) {
-        histo_rotation_map_mean[i]= new TH2F( Form("histo_rotation_map_mean_%d",i) , Form("Cherenkov Shift Mean @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -10, 10, 20, -10, 10);
-        histo_rotation_map_sigma[i]= new TH2F( Form("histo_rotation_map_sigma_%d",i) , Form("Cherenkov Shift Sigma @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -10, 10, 20, -10, 10);
-        histo_rotation_map_occu[i]= new TH2F( Form("histo_rotation_map_occu_%d",i) , Form("Cherenkov Shift Occupancy @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -10, 10, 20, -10, 10);
+        histo_rotation_map_mean[i]= new TH2F( Form("histo_rotation_map_mean_%d",i) , Form("Cherenkov Shift Mean @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -20, 20, 20, -20, 20);
+        histo_rotation_map_sigma[i]= new TH2F( Form("histo_rotation_map_sigma_%d",i) , Form("Cherenkov Shift Sigma @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -20, 20, 20, -20, 20);
+        histo_rotation_map_occu[i]= new TH2F( Form("histo_rotation_map_occu_%d",i) , Form("Cherenkov Shift Occupancy @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i), 20, -20, 20, 20, -20, 20);
         
-        ratio_mean[i]= new TH2F( Form("ratio_mean_mom_%d",i) , Form("Cherenkov Shift Occupancy @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i),  20, -10, 10, 20, -10, 10);
+        ratio_mean[i]= new TH2F( Form("ratio_mean_mom_%d",i) , Form("Cherenkov Shift Occupancy @ Bar %d ; X rotation [mrad]; Y roation [mrad]",i),  20, -20, 20, 20, -20, 20);
     }
     
-    TH1F* histo_rotation_cell_shift[26][22][22];
-    TH1F* histo_rotation_cell_spr[26][22][22];
+    TH1F* histo_rotation_cell_shift[26][42][42];
+    TH1F* histo_rotation_cell_spr[26][42][42];
     
     for(Int_t i=0; i<26; i++) {
-        for(Int_t j=0; j<22; j++){
-            for(Int_t k=0; k<22; k++){
+        for(Int_t j=0; j<42; j++){
+            for(Int_t k=0; k<42; k++){
                 histo_rotation_cell_shift[i][j][k] = new TH1F(Form("histo_rotation_cell_shift_%d_%d_%d",i,j,k),Form("Bar %d X rotation %d Y rotation %d ; Measured - Expected [mrad]; Entries [#]",i,j,k) ,100,-20,20);
                 histo_rotation_cell_spr[i][j][k] = new TH1F(Form("histo_rotation_cell_spr_%d_%d_%d",i,j,k),Form("Bar %d X rotation %d Y rotation %d ; Measured - Expected [mrad]; Entries [#]",i,j,k) ,100,-20,20);
             }
@@ -161,19 +163,25 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
         int barnum = track_nbar;
         
         
-        int  xrotat_flag = (track_xrotate + 0.010)*1000 ;
-        int  yrotat_flag = (track_yrotate + 0.010)*1000 ;
+        //int  xrotat_flag = (track_xrotate + 0.010)*1000 ;
+        //int  yrotat_flag = (track_yrotate + 0.010)*1000 ;
+        
+        int  xrotat_flag = (track_xrotate + 0.020)*1000 ;
+        int  yrotat_flag = (track_yrotate + 0.020)*1000 ;
         
         
+        //cout<<"##### start analyses "<<barnum<<" "<<xrotat_flag<<" "<<yrotat_flag<<endl;
         
         histo_rotation_cell_shift[barnum][xrotat_flag][yrotat_flag]->Fill(ExMeandiff*1000);
         histo_rotation_cell_spr[barnum][xrotat_flag][yrotat_flag]->Fill(track_spr*1000);
         
+        
     }
     
     cout<<"##### start analyses "<<endl;
+    TCanvas *cc1 = new TCanvas("cc1","cc1",800,500);
     
-    if(true){
+    if(false){
         TF1 *fit_gause = new TF1("fit_gause","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",-20,20);
         fit_gause->SetLineColor(kBlack);
         fit_gause->SetParameters(100,9,2);
@@ -185,37 +193,44 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
         
         TCanvas *cc1 = new TCanvas("cc1","cc1",800,500);
         for(Int_t i=0; i<26; i++) {
-            for(Int_t j=0; j<22; j++){
-                for(Int_t k=0; k<22; k++){
+            for(Int_t j=0; j<42; j++){
+                for(Int_t k=0; k<42; k++){
                     
                     if(histo_rotation_cell_spr[i][j][k]->GetEntries()<100)continue;
                     histo_rotation_cell_spr[i][j][k]->Fit("fit_gause","M","", -20, 20);
                     double trck_mean_fit = fit_gause->GetParameter(1);
                     double trck_sigma_fit = fit_gause->GetParameter(2);
                     
+                    //double trck_mean_fit = histo_rotation_cell_shift[i][j][k]->GetMean();
+                    //double trck_sigma_fit = histo_rotation_cell_shift[i][j][k]->GetRMS();
+                    
                     if(histo_rotation_cell_spr[i][j][k]->GetEntries()<100){
                         trck_mean_fit = -1000;
                         trck_sigma_fit = 0;
                         
                     }
+                    //                    if(trck_mean_fit != -1000){
+                    //                        histo_rotation_map_mean[i]->Fill(j-10,k-10,trck_mean_fit);
+                    //                        histo_rotation_map_occu[i]->Fill(j-10,k-10);
+                    //                    }
                     if(trck_mean_fit != -1000){
-                        histo_rotation_map_mean[i]->Fill(j-10,k-10,trck_mean_fit);
-                        histo_rotation_map_occu[i]->Fill(j-10,k-10);
+                        histo_rotation_map_mean[i]->Fill(j-20,k-20,trck_mean_fit);
+                        histo_rotation_map_occu[i]->Fill(j-20,k-20);
                     }
-//                    cc1->cd();
-//                    cc1->Update();
-//                    histo_rotation_cell_spr[i][j][k]->Draw();
-//                    cc1->Update();
-//                    TLine *lineMeanSHift= new TLine(0,0,0,1000);
-//                    lineMeanSHift->SetX1(fit_gause->GetParameter(1));
-//                    lineMeanSHift->SetX2(fit_gause->GetParameter(1));
-//                    lineMeanSHift->SetY1(gPad->GetUymin());
-//                    lineMeanSHift->SetY2(gPad->GetUymax());
-//                    lineMeanSHift->SetLineColor(kRed);
-//                    lineMeanSHift->Draw();
-//                    cc1->Update();
-//                    cc1->WaitPrimitive();
-
+                    //                    cc1->cd();
+                    //                    cc1->Update();
+                    //                    histo_rotation_cell_spr[i][j][k]->Draw();
+                    //                    cc1->Update();
+                    //                    TLine *lineMeanSHift= new TLine(0,0,0,1000);
+                    //                    lineMeanSHift->SetX1(fit_gause->GetParameter(1));
+                    //                    lineMeanSHift->SetX2(fit_gause->GetParameter(1));
+                    //                    lineMeanSHift->SetY1(gPad->GetUymin());
+                    //                    lineMeanSHift->SetY2(gPad->GetUymax());
+                    //                    lineMeanSHift->SetLineColor(kRed);
+                    //                    lineMeanSHift->Draw();
+                    //                    cc1->Update();
+                    //                    cc1->WaitPrimitive();
+                    
                 }
             }
         }
@@ -223,9 +238,12 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
         
         int counter_MeanShiftYield =0;
         for(Int_t k=0; k<26; k++){
+            cc1->Clear();
+            cc1->cd();
+            cc1->Update();
             //if(k!=3) continue;
             ratio_mean[k] = (TH2F*)histo_rotation_map_mean[k]->Clone();
-            ratio_mean[k]->SetTitle(Form("Mean Value of #theta_{c}^{Measured} - #theta_{c}^{Expected} distribution @ Bar %d", k));
+            ratio_mean[k]->SetTitle(Form("SPR @ Bar %d", k));
             ratio_mean[k]->Divide(histo_rotation_map_occu[k]);
             //        cc2->cd();
             //        cc2->Update();
@@ -236,20 +254,23 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
             //        cc2->WaitPrimitive();
             
             TString num_string=Form("_%d",counter_MeanShiftYield);
-            glx_canvasAdd("r_SPR"+num_string,800,400);
+            //glx_canvasAdd("r_SPR"+num_string,800,400);
             ratio_mean[k]->SetMinimum(0);
             ratio_mean[k]->SetMaximum(15);
             ratio_mean[k]->Draw("COLZ");
-            glx_canvasGet("r_SPR"+num_string)->Update();
+            //glx_canvasGet("r_SPR"+num_string)->Update();
+            
+            cc1->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/histo3/spr_rotation_%d.png",counter_MeanShiftYield));
+            cc1->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/histo3/spr_rotation_%d.root",counter_MeanShiftYield));
+            
             ++counter_MeanShiftYield;
         }
-        
-        
     }
     
     
     
-    if(false){
+    if(true){
+        
         TF1 *fit_gause = new TF1("fit_gause","[0]*exp(-0.5*((x-[1])/[2])*(x-[1])/[2])",-20,20);
         fit_gause->SetLineColor(kBlack);
         fit_gause->SetParameters(100,9,2);
@@ -261,44 +282,57 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
         
         TCanvas *cc1 = new TCanvas("cc1","cc1",800,500);
         for(Int_t i=0; i<26; i++) {
-            for(Int_t j=0; j<22; j++){
-                for(Int_t k=0; k<22; k++){
-                    
+            for(Int_t j=0; j<42; j++){
+                for(Int_t k=0; k<42; k++){
+
+                    //cout<<"##### No Problem 1 "<<endl;
                     //if(histo_rotation_cell_shift[i][j][k]->GetEntries()<100)continue;
-                    histo_rotation_cell_shift[i][j][k]->Fit("fit_gause","M","", -20, 20);
-                    double trck_mean_fit = fit_gause->GetParameter(1);
-                    double trck_sigma_fit = fit_gause->GetParameter(2);
                     
-                    if(histo_rotation_cell_shift[i][j][k]->GetEntries()<100){
+
+                    //histo_rotation_cell_shift[i][j][k]->Fit("fit_gause","M","", -20, 20);
+                    //double trck_mean_fit = fit_gause->GetParameter(1);
+                    //double trck_sigma_fit = fit_gause->GetParameter(2);
+                    
+                    double trck_mean_fit = histo_rotation_cell_shift[i][j][k]->GetMean();
+                    double trck_sigma_fit = histo_rotation_cell_shift[i][j][k]->GetRMS();
+
+                    if(histo_rotation_cell_shift[i][j][k]->GetEntries()<5){
                         trck_mean_fit = -1000;
                         trck_sigma_fit = 0;
-                        
+
                     }
+
                     if(trck_mean_fit != -1000){
-                        histo_rotation_map_mean[i]->Fill(j-10,k-10,trck_mean_fit);
-                        histo_rotation_map_occu[i]->Fill(j-10,k-10);
+                        histo_rotation_map_mean[i]->Fill(j-20,k-20,trck_mean_fit);
+                        histo_rotation_map_occu[i]->Fill(j-20,k-20);
                     }
-                    //                cc1->cd();
-                    //                cc1->Update();
-                    //                histo_rotation_cell_shift[i][j][k]->Draw();
-                    //                cc1->Update();
-                    //                TLine *lineMeanSHift= new TLine(0,0,0,1000);
-                    //                lineMeanSHift->SetX1(fit_gause->GetParameter(1));
-                    //                lineMeanSHift->SetX2(fit_gause->GetParameter(1));
-                    //                lineMeanSHift->SetY1(gPad->GetUymin());
-                    //                lineMeanSHift->SetY2(gPad->GetUymax());
-                    //                lineMeanSHift->SetLineColor(kRed);
-                    //                lineMeanSHift->Draw();
-                    //                cc1->Update();
-                    //                cc1->WaitPrimitive();
+
                     
+                    
+                    //                    cc1->cd();
+                    //                    cc1->Update();
+                    //                    histo_rotation_cell_shift[i][j][k]->Draw();
+                    //                    cc1->Update();
+                    //                    TLine *lineMeanSHift= new TLine(0,0,0,1000);
+                    //                    lineMeanSHift->SetX1(trck_mean_fit);
+                    //                    lineMeanSHift->SetX2(trck_mean_fit);
+                    //                    lineMeanSHift->SetY1(gPad->GetUymin());
+                    //                    lineMeanSHift->SetY2(gPad->GetUymax());
+                    //                    lineMeanSHift->SetLineColor(kRed);
+                    //                    lineMeanSHift->Draw();
+                    //                    cc1->Update();
+                    //                    cc1->WaitPrimitive();
+
                 }
             }
         }
-        
+        cout<<"##### No Problem 2 "<<endl;
         
         int counter_MeanShiftYield =0;
         for(Int_t k=0; k<26; k++){
+            cc1->Clear();
+            cc1->cd();
+            cc1->Update();
             //if(k!=3) continue;
             ratio_mean[k] = (TH2F*)histo_rotation_map_mean[k]->Clone();
             ratio_mean[k]->SetTitle(Form("Mean Value of #theta_{c}^{Measured} - #theta_{c}^{Expected} distribution @ Bar %d", k));
@@ -310,22 +344,25 @@ int analyses3(TString infile="/Users/ahmed/GlueX_DIRC_Calib/ok/new/all.root"){//
             //        ratio_mean[k]->Draw("COLZ");
             //        cc2->Update();
             //        cc2->WaitPrimitive();
-            
+
             TString num_string=Form("_%d",counter_MeanShiftYield);
-            glx_canvasAdd("r_MeanShiftYield"+num_string,800,400);
-            ratio_mean[k]->SetMinimum(-5);
-            ratio_mean[k]->SetMaximum(5);
+            //glx_canvasAdd("r_MeanShiftYield"+num_string,800,400);
+            ratio_mean[k]->SetMinimum(-6);
+            ratio_mean[k]->SetMaximum(10);
             ratio_mean[k]->Draw("COLZ");
-            glx_canvasGet("r_MeanShiftYield"+num_string)->Update();
+            //glx_canvasGet("r_MeanShiftYield"+num_string)->Update();
+            
+            cc1->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/histo3/mean_shift_%d.png",counter_MeanShiftYield));
+            cc1->SaveAs(Form("/Users/ahmed/GlueX_DIRC_Calib/histo3/mean_shift_%d.root",counter_MeanShiftYield));
             ++counter_MeanShiftYield;
         }
     }
     
-    glx_canvasSave(2,0);
+    //glx_canvasSave(2,0);
     //glx_canvasDel("*");
     
     
-    
+    cout<<"##### No Problem 3 "<<endl;
     cout<<"####### @ 3.5 GeV/c fAngleK "<< fAngleK[1]<<"  fAnglePi "<<fAnglePi[1]<<endl;
     
     timer.Stop();
