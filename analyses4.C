@@ -12,6 +12,8 @@
 #include "TStopwatch.h"
 TStopwatch timer;
 
+// run  separation.C for analyses
+
 int analyses4(TString infile="outFile_v3.root"){// outFile_v3.root   out2.root
     
     timer.Start();
