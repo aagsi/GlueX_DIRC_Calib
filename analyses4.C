@@ -14,7 +14,7 @@ TStopwatch timer;
 
 // run  separation.C for analyses
 
-int analyses4(TString infile="outFile_v3.root"){// outFile_v3.root   out2.root
+int analyses4(TString infile="../out4_300000_hd_root_060745.root"){// outFile_v3.root   out2.root
     
     timer.Start();
     
@@ -283,7 +283,9 @@ int analyses4(TString infile="outFile_v3.root"){// outFile_v3.root   out2.root
 
     }
 
-    TFile file("speration.root","recreate");
+
+TString ok="seperation_"+infile;
+    TFile file(ok,"recreate");
 
     for(int i=0; i<42; i++){
         for(int j=0; j<22; j++){
