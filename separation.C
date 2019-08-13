@@ -6,7 +6,7 @@ TStopwatch timer;
 
 void separation(){
     timer.Start();
-    TString path ="histo_f5.root";
+    TString path ="ok.root";
     cout<<"path= " <<path<<endl;
     TFile *f = new TFile(path, "READ");
     gStyle->SetPalette(55);
